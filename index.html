@@ -42,25 +42,20 @@
                 <div id="folder-list"></div>
             </div>
 
-            <div class="add-unit-container">
-                <form id="add-unit-form">
-                    <select id="unit-folder-select" class="folder-select">
-                        <option value="">選擇資料夾</option>
-                    </select>
-                    <div class="add-unit-row">
-                        <input type="text" id="new-unit-input" placeholder="新增回數名稱" required autocomplete="off">
-                        <button type="submit" class="btn btn-primary" title="新增回數">
-                            <span class="material-symbols-outlined">add</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
         </aside>
+
+        <!-- Sidebar Overlay (for mobile drawer background dim) -->
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
         <!-- Main Content -->
         <main class="main-content">
             <header class="main-header">
-                <h2 id="current-unit-title">請選擇或新增回數</h2>
+                <div class="header-left">
+                    <button id="sidebar-toggle" class="sidebar-toggle-btn" title="選單">
+                        <span class="material-symbols-outlined">menu</span>
+                    </button>
+                    <h2 id="current-unit-title">請選擇或新增回數</h2>
+                </div>
                 <div class="header-actions hidden">
                     <button id="toggle-test-mode" class="btn btn-secondary">
                         <span class="material-symbols-outlined">style</span>

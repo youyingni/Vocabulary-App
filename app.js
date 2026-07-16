@@ -696,9 +696,9 @@ const wordEngEl          = document.getElementById('word-eng');
 const wordChtEl          = document.getElementById('word-cht');
 const toggleTestModeBtn  = document.getElementById('toggle-test-mode');
 const headerActions      = document.querySelector('.header-actions');
-const addUnitFormEl      = document.getElementById('add-unit-form');
-const newUnitInputEl     = document.getElementById('new-unit-input');
-const unitFolderSelectEl = document.getElementById('unit-folder-select');
+const sidebarEl          = document.querySelector('.sidebar');
+const sidebarToggleBtn   = document.getElementById('sidebar-toggle');
+const sidebarOverlayEl   = document.getElementById('sidebar-overlay');
 
 // =====================================================
 // RENDER SIDEBAR
@@ -707,15 +707,6 @@ function renderSidebar() {
     // Starred badge
     starredCountEl.textContent = starredIds.length;
     starredNavEl.classList.toggle('active', currentView.type === 'starred');
-
-    // Populate folder select
-    unitFolderSelectEl.innerHTML = '<option value="">選擇資料夾</option>';
-    folders.forEach(f => {
-        const opt = document.createElement('option');
-        opt.value = f.id;
-        opt.textContent = f.name;
-        unitFolderSelectEl.appendChild(opt);
-    });
 
     // Render folder groups
     folderListEl.innerHTML = '';
@@ -761,15 +752,18 @@ function renderSidebar() {
     });
 }
 
-// =====================================================
-// NAVIGATION
-// =====================================================
+function closeMobileSidebar() {
+    if (sidebarEl) sidebarEl.classList.remove('open');
+    if (sidebarOverlayEl) sidebarOverlayEl.classList.remove('open');
+}
+
 function selectUnit(folderId, unitId) {
     currentView = { type: 'unit', folderId, unitId };
     isTestMode = false;
     save();
     renderSidebar();
     renderMainContent();
+    closeMobileSidebar();
 }
 
 function selectStarred() {
@@ -778,6 +772,7 @@ function selectStarred() {
     save();
     renderSidebar();
     renderMainContent();
+    closeMobileSidebar();
 }
 
 // =====================================================
@@ -1218,16 +1213,16 @@ document.addEventListener('keydown', e => {
 // =====================================================
 // EVENT LISTENERS
 // =====================================================
-addUnitFormEl.addEventListener('submit', e => {
-    e.preventDefault();
-    const folderId = unitFolderSelectEl.value;
-    const name     = newUnitInputEl.value.trim();
-    if (!folderId) { alert('請先選擇要加入的資料夾！'); return; }
-    if (!name)     { alert('請輸入回數名稱！'); return; }
-    addUnit(folderId, name);
-    newUnitInputEl.value     = '';
-    unitFolderSelectEl.value = '';
-});
+if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', () => {
+        sidebarEl.classList.toggle('open');
+        sidebarOverlayEl.classList.toggle('open');
+    });
+}
+
+if (sidebarOverlayEl) {
+    sidebarOverlayEl.addEventListener('click', closeMobileSidebar);
+}
 
 addWordFormEl.addEventListener('submit', e => {
     e.preventDefault();

@@ -99,33 +99,39 @@
         </div>
 
         <div class="fc-hint-left">
+            <span class="material-symbols-outlined">arrow_forward</span>
+            <span>下一張</span>
+        </div>
+        <div class="fc-hint-right" style="color: var(--star-color);">
             <span class="material-symbols-outlined">star</span>
             <span>加星號</span>
         </div>
 
         <div class="fc-card-wrapper" id="fc-card-wrapper">
             <div class="fc-card" id="fc-card">
-                <div class="fc-eng" id="fc-eng">word</div>
-                <div class="fc-cht" id="fc-cht">definition</div>
-                <div class="fc-tap-hint">點擊卡片播放發音</div>
+                <div class="fc-front">
+                    <div class="fc-eng" id="fc-eng">word</div>
+                    <div class="fc-cht" id="fc-cht">definition</div>
+                    <div class="fc-tap-hint">點擊卡片播放發音</div>
+                </div>
             </div>
-            <div class="fc-swipe-indicator fc-swipe-left"  id="fc-ind-left">⭐</div>
-            <div class="fc-swipe-indicator fc-swipe-right" id="fc-ind-right">➡️</div>
+            <div class="fc-swipe-indicator fc-swipe-left"  id="fc-ind-left">➡️</div>
+            <div class="fc-swipe-indicator fc-swipe-right" id="fc-ind-right">⭐</div>
         </div>
 
         <div class="fc-actions">
-            <button class="fc-action-btn star" id="fc-star-btn" title="加星號（左滑）">
-                <span class="material-symbols-outlined">star</span>
+            <button class="fc-action-btn skip" id="fc-skip-btn" title="下一張（左滑）">
+                <span class="material-symbols-outlined">arrow_forward</span>
             </button>
             <button class="fc-action-btn speak-mid" id="fc-speak-btn" title="播放發音">
                 <span class="material-symbols-outlined">volume_up</span>
             </button>
-            <button class="fc-action-btn skip" id="fc-skip-btn" title="下一張（右滑）">
-                <span class="material-symbols-outlined">arrow_forward</span>
+            <button class="fc-action-btn star" id="fc-star-btn" title="加星號（右滑）">
+                <span class="material-symbols-outlined">star</span>
             </button>
         </div>
 
-        <div class="fc-keyboard-hints">點卡片/Space 播放 · ← 加星號下一張 · → 下一張 · Esc 離開</div>
+        <div class="fc-keyboard-hints">點卡片/Space 播放 · ← 下一張 · → 加星號下一張 · Esc 離開</div>
     </div>
 
 

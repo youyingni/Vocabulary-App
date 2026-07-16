@@ -788,11 +788,33 @@ function renderMainContent() {
     }
 }
 
+function setFormattedTitle(titleText) {
+    if (!currentTitleEl) return;
+    
+    // Pattern to match "01 Occupations 職業" or "02 Recreation 娛樂"
+    // English part: letters, spaces, digits, hyphens. Chinese part: Chinese characters.
+    const match = titleText.match(/^([a-zA-Z0-9\s\-]+)\s+([\u4e00-\u9fff\s\/]+)$/);
+    
+    if (match) {
+        const engPart = match[1].trim();
+        const chtPart = match[2].trim();
+        currentTitleEl.innerHTML = `
+            <div class="title-cht-sub">${chtPart}</div>
+            <div class="title-eng-main">${engPart}</div>
+        `;
+    } else {
+        // Fallback for titles like "Day 01", "⭐ 加星號的單字", "請選擇或新增回數"
+        currentTitleEl.innerHTML = `
+            <div class="title-eng-main single-line">${titleText}</div>
+        `;
+    }
+}
+
 function showEmpty() {
     wordSectionEl.classList.add('hidden');
     emptyStateEl.classList.remove('hidden');
     headerActions.classList.add('hidden');
-    currentTitleEl.textContent = '請選擇或新增回數';
+    setFormattedTitle('請選擇或新增回數');
 }
 
 function renderUnitView() {
@@ -800,7 +822,7 @@ function renderUnitView() {
     const unit   = folder?.units.find(u => u.id === currentView.unitId);
     if (!unit) { showEmpty(); return; }
 
-    currentTitleEl.textContent = unit.name;
+    setFormattedTitle(unit.name);
     wordSectionEl.classList.remove('hidden');
     emptyStateEl.classList.add('hidden');
     headerActions.classList.remove('hidden');
@@ -816,7 +838,7 @@ function renderUnitView() {
 }
 
 function renderStarredView() {
-    currentTitleEl.textContent = '⭐ 加星號的單字';
+    setFormattedTitle('⭐ 加星號的單字');
     wordSectionEl.classList.remove('hidden');
     emptyStateEl.classList.add('hidden');
     headerActions.classList.remove('hidden');
@@ -1151,11 +1173,11 @@ function onDragEnd() {
     fcCard.style.transform  = '';
 
     if (currentDX < -SWIPE_THRESHOLD) {
-        // Swipe left → star + next
-        fcStarAndNext();
-    } else if (currentDX > SWIPE_THRESHOLD) {
-        // Swipe right → next
+        // Swipe left → next
         fcNext();
+    } else if (currentDX > SWIPE_THRESHOLD) {
+        // Swipe right → star + next
+        fcStarAndNext();
     }
     fcIndLeft.style.opacity  = '0';
     fcIndRight.style.opacity = '0';
@@ -1206,8 +1228,8 @@ document.addEventListener('keydown', e => {
     if (fcOverlay.classList.contains('hidden')) return;
     if (e.key === 'Escape')     closeFlashcardMode();
     if (e.key === ' ')          { e.preventDefault(); const w = fcWords[fcIndex]; if (w) speakWord(w.eng, null, fcSpeakBtn); }
-    if (e.key === 'ArrowRight') fcNext();
-    if (e.key === 'ArrowLeft')  fcStarAndNext();
+    if (e.key === 'ArrowRight') fcStarAndNext();
+    if (e.key === 'ArrowLeft')  fcNext();
 });
 
 // =====================================================

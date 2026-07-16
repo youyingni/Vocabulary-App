@@ -1,0 +1,1612 @@
+{
+  "day02": [
+    {
+      "eng": "attire",
+      "cht": "(n.) 服裝、衣著"
+    },
+    {
+      "eng": "code",
+      "cht": "規範 慣例 密碼"
+    },
+    {
+      "eng": "concern",
+      "cht": "n.擔心；憂慮 v.使擔心；關係到，影響到"
+    },
+    {
+      "eng": "policy",
+      "cht": "政策，規定；保險單"
+    },
+    {
+      "eng": "comply",
+      "cht": "遵守，遵從"
+    },
+    {
+      "eng": "regulation",
+      "cht": "規定"
+    },
+    {
+      "eng": "exception",
+      "cht": "n.例外"
+    },
+    {
+      "eng": "adhere",
+      "cht": "遵守，堅持"
+    },
+    {
+      "eng": "severely",
+      "cht": "嚴格地、嚴重地"
+    },
+    {
+      "eng": "refrain",
+      "cht": "克制，抑制"
+    },
+    {
+      "eng": "permission",
+      "cht": "允許 許可"
+    },
+    {
+      "eng": "access",
+      "cht": "n.使用權，接近；通道"
+    },
+    {
+      "eng": "v.接近，到達",
+      "cht": ""
+    },
+    {
+      "eng": "thoroughly",
+      "cht": "徹底地 完全地 非常"
+    },
+    {
+      "eng": "revise",
+      "cht": "修訂，變更（意見、計畫等）"
+    },
+    {
+      "eng": "approach",
+      "cht": "n.接近方法，處理方法"
+    },
+    {
+      "eng": "v.接近，靠近",
+      "cht": ""
+    },
+    {
+      "eng": "approval",
+      "cht": "(n)批准;認可"
+    },
+    {
+      "eng": "form",
+      "cht": "種類、類型、形式"
+    },
+    {
+      "eng": "immediately",
+      "cht": "立即，馬上"
+    },
+    {
+      "eng": "inspection",
+      "cht": "檢查，視察"
+    },
+    {
+      "eng": "arrangement",
+      "cht": "安排，準備，佈置"
+    },
+    {
+      "eng": "procedure",
+      "cht": "手續、程序"
+    },
+    {
+      "eng": "negative",
+      "cht": "負面的 消極的"
+    },
+    {
+      "eng": "mandate",
+      "cht": "v.使...成為必須(做)的，授權給..."
+    },
+    {
+      "eng": "n.授權，命令",
+      "cht": ""
+    },
+    {
+      "eng": "effect",
+      "cht": "n.(法律等地)效力，效果，影響"
+    },
+    {
+      "eng": "v.造成(結果)",
+      "cht": ""
+    },
+    {
+      "eng": "drastically",
+      "cht": "激烈地，大幅地，徹底地"
+    },
+    {
+      "eng": "according to",
+      "cht": "根據，依照"
+    },
+    {
+      "eng": "enable",
+      "cht": "使...能夠(做某事)"
+    },
+    {
+      "eng": "standard",
+      "cht": "標準"
+    },
+    {
+      "eng": "constant",
+      "cht": "adj. 持續的；不斷的"
+    },
+    {
+      "eng": "act",
+      "cht": "n.法案，法令；行為，行動"
+    },
+    {
+      "eng": "v.擔當；行動",
+      "cht": ""
+    },
+    {
+      "eng": "compensation",
+      "cht": "補償(金)，報酬"
+    },
+    {
+      "eng": "ban",
+      "cht": "n.禁止，禁令"
+    },
+    {
+      "eng": "v.禁止",
+      "cht": ""
+    },
+    {
+      "eng": "obligation",
+      "cht": "義務、責任"
+    },
+    {
+      "eng": "authorize",
+      "cht": "v.批准...，授權...做某事"
+    },
+    {
+      "eng": "prohibit",
+      "cht": "v.禁止"
+    },
+    {
+      "eng": "abolish",
+      "cht": "廢除(制度，法律等)"
+    },
+    {
+      "eng": "enforce",
+      "cht": "執行、實施（法律）"
+    },
+    {
+      "eng": "habit",
+      "cht": "n.習慣"
+    },
+    {
+      "eng": "legislation",
+      "cht": "立法 法律 法規"
+    },
+    {
+      "eng": "restrict",
+      "cht": "限制 限定"
+    }
+  ],
+  "day03": [
+    {
+      "eng": "accustomed",
+      "cht": "習慣的"
+    },
+    {
+      "eng": "Corporation",
+      "cht": "股份(有限)公司，法人"
+    },
+    {
+      "eng": "demanding",
+      "cht": "要求很多的，吃力的"
+    },
+    {
+      "eng": "colleague",
+      "cht": "(n.)(工作上的)同事"
+    },
+    {
+      "eng": "division",
+      "cht": "部門"
+    },
+    {
+      "eng": "request",
+      "cht": "n.要求 v.要求"
+    },
+    {
+      "eng": "efficiently",
+      "cht": "有效率地"
+    },
+    {
+      "eng": "manage",
+      "cht": "經營，管理；設法做到，勉強做到"
+    },
+    {
+      "eng": "submit",
+      "cht": "提交"
+    },
+    {
+      "eng": "directly",
+      "cht": "直接地"
+    },
+    {
+      "eng": "remind",
+      "cht": "提醒；使想起"
+    },
+    {
+      "eng": "instruct",
+      "cht": "v.教導，指示"
+    },
+    {
+      "eng": "deadline",
+      "cht": "截止期限，最後期限"
+    },
+    {
+      "eng": "sample",
+      "cht": "n.樣本，樣品，試用品"
+    },
+    {
+      "eng": "v.試吃，抽樣檢查",
+      "cht": ""
+    },
+    {
+      "eng": "notify",
+      "cht": "通知；告知"
+    },
+    {
+      "eng": "perform",
+      "cht": "執行，實施(工作、任務、義務等)"
+    },
+    {
+      "eng": "monitor",
+      "cht": "監視，監控，監督"
+    },
+    {
+      "eng": "deserve",
+      "cht": "值得，應該得到"
+    },
+    {
+      "eng": "assignment",
+      "cht": "工作，任務，作業"
+    },
+    {
+      "eng": "entire",
+      "cht": "整個的"
+    },
+    {
+      "eng": "release",
+      "cht": "v.發表，公開"
+    },
+    {
+      "eng": "n.發行，上市",
+      "cht": ""
+    },
+    {
+      "eng": "extension",
+      "cht": "(n.)延長，延期；(電話的)分機"
+    },
+    {
+      "eng": "electronically",
+      "cht": "以電子方式(利用電腦、經由電腦傳輸)"
+    },
+    {
+      "eng": "attendance",
+      "cht": "出席，出勤"
+    },
+    {
+      "eng": "absolutely",
+      "cht": "adv.完全地,絕對地"
+    },
+    {
+      "eng": "delegate",
+      "cht": "(v)委任(權限等) (n)代表"
+    },
+    {
+      "eng": "attentively",
+      "cht": "專心地，聚精會神地"
+    },
+    {
+      "eng": "supervision",
+      "cht": "監督"
+    },
+    {
+      "eng": "workshop",
+      "cht": "專題討論會；研討會"
+    },
+    {
+      "eng": "draw",
+      "cht": "拉 吸引"
+    },
+    {
+      "eng": "revision",
+      "cht": "修訂"
+    },
+    {
+      "eng": "reluctantly",
+      "cht": "不情願地；勉強地"
+    },
+    {
+      "eng": "acquaint",
+      "cht": "使認識;使熟悉"
+    },
+    {
+      "eng": "convey",
+      "cht": "傳達(事情)"
+    },
+    {
+      "eng": "check",
+      "cht": "檢查，查明；確認"
+    },
+    {
+      "eng": "headquarters",
+      "cht": "總部、總公司"
+    },
+    {
+      "eng": "file",
+      "cht": "(v.)把...歸檔，正式提起或提出(文件、申請、 告訴等)"
+    },
+    {
+      "eng": "oversee",
+      "cht": "監督"
+    },
+    {
+      "eng": "involved",
+      "cht": "(adj.) 有關的，牽涉在內的"
+    },
+    {
+      "eng": "concentrate",
+      "cht": "集中，專注 (n)代表"
+    }
+  ],
+  "day04": [
+    {
+      "eng": "lax",
+      "cht": "adj.(行動等)鬆懈的，散漫的"
+    },
+    {
+      "eng": "procrastinate",
+      "cht": "拖延"
+    },
+    {
+      "eng": "combine",
+      "cht": "聯合的，結合的"
+    },
+    {
+      "eng": "accomplish",
+      "cht": "達成"
+    },
+    {
+      "eng": "voluntarily",
+      "cht": "自願地 自動自發地"
+    },
+    {
+      "eng": "undertake",
+      "cht": "從事 承擔(工作)"
+    },
+    {
+      "eng": "assume",
+      "cht": "假定，以為；承擔(責任、角色)"
+    },
+    {
+      "eng": "occasionally",
+      "cht": "adv.偶爾"
+    },
+    {
+      "eng": "employee",
+      "cht": "員工；受雇者"
+    },
+    {
+      "eng": "assist",
+      "cht": "協助，援助"
+    },
+    {
+      "eng": "satisfied",
+      "cht": "感到滿意的，滿足的"
+    },
+    {
+      "eng": "manner",
+      "cht": "方式 態度"
+    },
+    {
+      "eng": "responsible",
+      "cht": "(adj.)應該負責的，負責任的"
+    },
+    {
+      "eng": "conduct",
+      "cht": "進行(任務等)"
+    },
+    {
+      "eng": "adjust",
+      "cht": "調整，適應"
+    },
+    {
+      "eng": "personnel",
+      "cht": "(n.)(總稱)人員;員工;人事部門"
+    },
+    {
+      "eng": "agree",
+      "cht": "v. 同意"
+    },
+    {
+      "eng": "supervise",
+      "cht": "監督，指導"
+    },
+    {
+      "eng": "coworker",
+      "cht": "(n.)同事，共同工作者"
+    },
+    {
+      "eng": "direct",
+      "cht": "引導，指揮，指導"
+    },
+    {
+      "eng": "confidential",
+      "cht": "adj.機密的,秘密的"
+    },
+    {
+      "eng": "assign",
+      "cht": "分配 指派"
+    },
+    {
+      "eng": "leading",
+      "cht": "領導的，領先的，主要的"
+    },
+    {
+      "eng": "formal",
+      "cht": "正式的"
+    },
+    {
+      "eng": "remove",
+      "cht": "去除，把...免職"
+    },
+    {
+      "eng": "collect",
+      "cht": "收集，收取"
+    },
+    {
+      "eng": "coordinate",
+      "cht": "協調"
+    },
+    {
+      "eng": "hardly",
+      "cht": "幾乎不..."
+    },
+    {
+      "eng": "abstract",
+      "cht": "抽象的"
+    },
+    {
+      "eng": "directory",
+      "cht": "n.通訊錄；工商名錄；電話簿"
+    },
+    {
+      "eng": "accountable",
+      "cht": "應負責任的"
+    },
+    {
+      "eng": "skillfully",
+      "cht": "巧妙地 熟練地"
+    },
+    {
+      "eng": "exclusive",
+      "cht": "獨有的，排外的"
+    },
+    {
+      "eng": "intention",
+      "cht": "意圖，意向"
+    },
+    {
+      "eng": "transform",
+      "cht": "改變，轉變"
+    },
+    {
+      "eng": "respectful",
+      "cht": "adj.尊重的，尊敬的"
+    },
+    {
+      "eng": "duplicate",
+      "cht": "副本"
+    },
+    {
+      "eng": "contrary",
+      "cht": "(n.)相反(的情況)"
+    },
+    {
+      "eng": "disturbing",
+      "cht": "令人不安的，令人焦慮的，煩擾人的"
+    },
+    {
+      "eng": "engage",
+      "cht": "(v.)(使)參加，(使)從事"
+    },
+    {
+      "eng": "foster",
+      "cht": "v.促進，培養"
+    },
+    {
+      "eng": "Neutrality",
+      "cht": "(n.中立，中立性)"
+    },
+    {
+      "eng": "widely",
+      "cht": "廣泛地"
+    }
+  ],
+  "day05": [
+    {
+      "eng": "sophisticated",
+      "cht": "(adj.)(機器)精密的，複雜的；高雅的"
+    },
+    {
+      "eng": "timely",
+      "cht": "及時的 適時的"
+    },
+    {
+      "eng": "realistically",
+      "cht": "adv.實際上，在現實情況下"
+    },
+    {
+      "eng": "promptly",
+      "cht": "迅速地；準時地"
+    },
+    {
+      "eng": "accessible",
+      "cht": "可進入的，可利用的"
+    },
+    {
+      "eng": "implement",
+      "cht": "實施 執行"
+    },
+    {
+      "eng": "Feedback",
+      "cht": "回饋意見，反應"
+    },
+    {
+      "eng": "outstanding",
+      "cht": "(adj.)傑出的；(負債等)未償付的"
+    },
+    {
+      "eng": "inform",
+      "cht": "通知(某人)"
+    },
+    {
+      "eng": "replacement",
+      "cht": "(n.)代替；代替物，代替者"
+    },
+    {
+      "eng": "announcement",
+      "cht": "公告 宣布"
+    },
+    {
+      "eng": "department",
+      "cht": "(n.)(組織、機構的)部門"
+    },
+    {
+      "eng": "permanently",
+      "cht": "永久地"
+    },
+    {
+      "eng": "fulfill",
+      "cht": "(v.)滿足(條件等)，履行(諾言、義務等)"
+    },
+    {
+      "eng": "outline",
+      "cht": "n.概要，大綱"
+    },
+    {
+      "eng": "v.概述，略述",
+      "cht": ""
+    },
+    {
+      "eng": "explain",
+      "cht": "說明"
+    },
+    {
+      "eng": "contain",
+      "cht": "包含;容納"
+    },
+    {
+      "eng": "compile",
+      "cht": "(v.)匯編(資料等)；收集"
+    },
+    {
+      "eng": "subsequent",
+      "cht": "(a.)隨後的,後來的"
+    },
+    {
+      "eng": "overview",
+      "cht": "概要、概觀"
+    },
+    {
+      "eng": "provider",
+      "cht": "供應者，提供者"
+    },
+    {
+      "eng": "matter",
+      "cht": "問題；事情"
+    },
+    {
+      "eng": "expertise",
+      "cht": "專業知識，專門技術"
+    },
+    {
+      "eng": "demonstrate",
+      "cht": "證明；(用模型、實驗等)說明；示範操作"
+    },
+    {
+      "eng": "remainder",
+      "cht": "剩餘(的東西)"
+    },
+    {
+      "eng": "essential",
+      "cht": "必要的；不可或缺的 ,本質上的"
+    },
+    {
+      "eng": "divide",
+      "cht": "劃分，分開"
+    },
+    {
+      "eng": "major",
+      "cht": "主要的，重大的"
+    },
+    {
+      "eng": "compliance",
+      "cht": "(n.)(對於命令、法規的)遵守"
+    },
+    {
+      "eng": "clarify",
+      "cht": "闡明"
+    },
+    {
+      "eng": "face",
+      "cht": "(v.)面對(問題等)；面向...，正對...."
+    },
+    {
+      "eng": "follow",
+      "cht": "跟隨...;密切注意；(清楚地)聽懂，了解"
+    },
+    {
+      "eng": "aspect",
+      "cht": "(n.) 方面 觀點"
+    },
+    {
+      "eng": "apparently",
+      "cht": "看起來 似乎"
+    },
+    {
+      "eng": "aware",
+      "cht": "adj. 知道的；意識到的"
+    },
+    {
+      "eng": "extended",
+      "cht": "adj.(期間等)延長的，延伸的"
+    },
+    {
+      "eng": "accidentally (ad.)偶然地,意外地",
+      "cht": ""
+    },
+    {
+      "eng": "advisable",
+      "cht": "可取的;明智的"
+    },
+    {
+      "eng": "concerned",
+      "cht": "擔心的；有關的"
+    },
+    {
+      "eng": "speak",
+      "cht": "講話"
+    }
+  ],
+  "day06": [
+    {
+      "eng": "collection",
+      "cht": "(n.)收藏品，收集的東西；(款項的)收取"
+    },
+    {
+      "eng": "exhibition",
+      "cht": "展覽"
+    },
+    {
+      "eng": "celebrity",
+      "cht": "名人"
+    },
+    {
+      "eng": "live",
+      "cht": "(adj.)現場表演的，(廣播、電視)直播的"
+    },
+    {
+      "eng": "improvise",
+      "cht": "即興演奏，即席演講，即興創作"
+    },
+    {
+      "eng": "popular",
+      "cht": "受歡迎的"
+    },
+    {
+      "eng": "donation",
+      "cht": "捐贈,捐獻"
+    },
+    {
+      "eng": "alumni",
+      "cht": "校友們，畢業生們"
+    },
+    {
+      "eng": "present",
+      "cht": "v.提出，出示"
+    },
+    {
+      "eng": "adj.現在的，出席的",
+      "cht": ""
+    },
+    {
+      "eng": "admission",
+      "cht": "入場"
+    },
+    {
+      "eng": "banquet",
+      "cht": "宴會"
+    },
+    {
+      "eng": "anniversary",
+      "cht": "週年紀念日"
+    },
+    {
+      "eng": "required",
+      "cht": "必要的，必須的"
+    },
+    {
+      "eng": "succeed",
+      "cht": "成功，接著發生，繼任"
+    },
+    {
+      "eng": "rest",
+      "cht": "v.休息"
+    },
+    {
+      "eng": "n.休息，剩餘部分",
+      "cht": ""
+    },
+    {
+      "eng": "fund-raising",
+      "cht": "募款"
+    },
+    {
+      "eng": "resume",
+      "cht": "(v.) 繼續 重新開始"
+    },
+    {
+      "eng": "issue",
+      "cht": "n.(期刊的)一期；問題，爭議"
+    },
+    {
+      "eng": "subscription (定期刊物的)訂閱",
+      "cht": ""
+    },
+    {
+      "eng": "appear",
+      "cht": "出現，現身"
+    },
+    {
+      "eng": "accompany",
+      "cht": "(v.) 陪同、伴隨"
+    },
+    {
+      "eng": "edition (出版品的)版本",
+      "cht": ""
+    },
+    {
+      "eng": "specifically",
+      "cht": "明確地，具體地；特別，特別地"
+    },
+    {
+      "eng": "anonymous",
+      "cht": "(a)匿名的,不具名的"
+    },
+    {
+      "eng": "commit",
+      "cht": "奉獻，使致力於某事"
+    },
+    {
+      "eng": "informative",
+      "cht": "提供資訊的，有益的"
+    },
+    {
+      "eng": "audience",
+      "cht": "觀眾；聽眾"
+    },
+    {
+      "eng": "author",
+      "cht": "作者；作家"
+    },
+    {
+      "eng": "note",
+      "cht": "注意到；提及"
+    },
+    {
+      "eng": "antique",
+      "cht": "古董"
+    },
+    {
+      "eng": "manuscript",
+      "cht": "n.手稿,原稿"
+    },
+    {
+      "eng": "beneficial",
+      "cht": "有益的;有利的"
+    },
+    {
+      "eng": "upcoming",
+      "cht": "即將來臨的"
+    },
+    {
+      "eng": "lend",
+      "cht": "借出"
+    },
+    {
+      "eng": "current",
+      "cht": "adj.現在的，目前的；現行的，通用的"
+    },
+    {
+      "eng": "local",
+      "cht": "地方的, 當地的"
+    },
+    {
+      "eng": "variety",
+      "cht": "多樣性，變化"
+    },
+    {
+      "eng": "advocate",
+      "cht": "擁護者"
+    },
+    {
+      "eng": "contributor",
+      "cht": "投稿人、捐贈者"
+    },
+    {
+      "eng": "defy",
+      "cht": "反抗；使（說明、描寫等）不可能"
+    },
+    {
+      "eng": "fascinating",
+      "cht": "迷人的，美妙的"
+    },
+    {
+      "eng": "showing (電影、舞台劇等的)上映，上演；展示",
+      "cht": ""
+    },
+    {
+      "eng": "showing (電影、舞台劇等的)上映，上演；展示 | showing (電影、舞台劇等的)上映，上演；展示 |",
+      "cht": ""
+    }
+  ],
+  "day07": [
+    {
+      "eng": "survey",
+      "cht": "調查，意見調查"
+    },
+    {
+      "eng": "analysis",
+      "cht": "n.分析"
+    },
+    {
+      "eng": "respondent",
+      "cht": "回答者 受訪者"
+    },
+    {
+      "eng": "monopoly (商品的)獨佔，壟斷",
+      "cht": ""
+    },
+    {
+      "eng": "competition",
+      "cht": "競爭"
+    },
+    {
+      "eng": "consistently",
+      "cht": "adv.一貫地，始終如一地"
+    },
+    {
+      "eng": "demand",
+      "cht": "n.需求"
+    },
+    {
+      "eng": "v.要求",
+      "cht": ""
+    },
+    {
+      "eng": "do one's utmost",
+      "cht": "盡全力"
+    },
+    {
+      "eng": "expand",
+      "cht": "擴張；擴大"
+    },
+    {
+      "eng": "advanced",
+      "cht": "高階的，先進的"
+    },
+    {
+      "eng": "postpone",
+      "cht": "使延期，延後"
+    },
+    {
+      "eng": "additional",
+      "cht": "額外的；附加的"
+    },
+    {
+      "eng": "appreciate",
+      "cht": "(v.)感謝；賞識；欣賞"
+    },
+    {
+      "eng": "demonstration",
+      "cht": "(n.)證明；說明，示範操作"
+    },
+    {
+      "eng": "buy",
+      "cht": "買,購買"
+    },
+    {
+      "eng": "examine",
+      "cht": "檢查，審查"
+    },
+    {
+      "eng": "effective",
+      "cht": "(adj.)有效的；(法律等)生效的，已實行的"
+    },
+    {
+      "eng": "like",
+      "cht": "喜歡"
+    },
+    {
+      "eng": "especially",
+      "cht": "尤其；特別"
+    },
+    {
+      "eng": "closely",
+      "cht": "仔細地，嚴密地"
+    },
+    {
+      "eng": "reserve",
+      "cht": "(v.)預約，保留；保存"
+    },
+    {
+      "eng": "cooperate",
+      "cht": "協力，合作"
+    },
+    {
+      "eng": "very",
+      "cht": "非常；很"
+    },
+    {
+      "eng": "consecutive",
+      "cht": "連續的"
+    },
+    {
+      "eng": "expectation",
+      "cht": "預期，期待"
+    },
+    {
+      "eng": "publicize",
+      "cht": "公布、宣傳"
+    },
+    {
+      "eng": "raise",
+      "cht": "提高，增加；提出(疑問)"
+    },
+    {
+      "eng": "extremely",
+      "cht": "極度地 非常"
+    },
+    {
+      "eng": "affect",
+      "cht": "(v.)影響，對...產生不好的作用"
+    },
+    {
+      "eng": "target",
+      "cht": "n.目標"
+    },
+    {
+      "eng": "v.以...為目標",
+      "cht": ""
+    },
+    {
+      "eng": "campaign",
+      "cht": "n.活動/競選活動"
+    },
+    {
+      "eng": "probable",
+      "cht": "有可能的"
+    },
+    {
+      "eng": "focus",
+      "cht": "聚焦、集中"
+    },
+    {
+      "eng": "seasonal",
+      "cht": "季節的；季節性的"
+    },
+    {
+      "eng": "impact",
+      "cht": "影響；衝擊"
+    },
+    {
+      "eng": "comparison",
+      "cht": "比較"
+    },
+    {
+      "eng": "gap",
+      "cht": "差距"
+    },
+    {
+      "eng": "mounting",
+      "cht": "增加中的，上升中的"
+    },
+    {
+      "eng": "reflective",
+      "cht": "反映的"
+    },
+    {
+      "eng": "v.以...為目標 |",
+      "cht": ""
+    }
+  ],
+  "day08": [
+    {
+      "eng": "n.手段；方法",
+      "cht": ""
+    },
+    {
+      "eng": "advertisement",
+      "cht": "廣告"
+    },
+    {
+      "eng": "marginal",
+      "cht": "微小的 邊緣的"
+    },
+    {
+      "eng": "customer",
+      "cht": "顧客"
+    },
+    {
+      "eng": "influence",
+      "cht": "n.影響"
+    },
+    {
+      "eng": "v.影響",
+      "cht": ""
+    },
+    {
+      "eng": "instantly (adv.)",
+      "cht": "立即，馬上"
+    },
+    {
+      "eng": "creative",
+      "cht": "adj.創造性的，有創意的"
+    },
+    {
+      "eng": "aggressively",
+      "cht": "積極地"
+    },
+    {
+      "eng": "aim",
+      "cht": "v.以...為目標"
+    },
+    {
+      "eng": "n.目標，目的",
+      "cht": ""
+    },
+    {
+      "eng": "strategy",
+      "cht": "n.策略"
+    },
+    {
+      "eng": "indicate",
+      "cht": "v.顯示，指出"
+    },
+    {
+      "eng": "attract",
+      "cht": "吸引，引起(興趣等)"
+    },
+    {
+      "eng": "experience",
+      "cht": "n.經驗，體驗"
+    },
+    {
+      "eng": "v.體驗，經歷",
+      "cht": ""
+    },
+    {
+      "eng": "analyze",
+      "cht": "v.分析"
+    },
+    {
+      "eng": "introduce",
+      "cht": "(v.)介紹，發表(商品)"
+    },
+    {
+      "eng": "advise",
+      "cht": "勸告；建議"
+    },
+    {
+      "eng": "subscribe",
+      "cht": "訂閱"
+    },
+    {
+      "eng": "absence",
+      "cht": "不在 缺少 缺席 缺勤"
+    },
+    {
+      "eng": "means",
+      "cht": "n.手段；方法"
+    },
+    {
+      "eng": "prefer",
+      "cht": "(v.)(比其他的東西)更喜歡，偏好"
+    },
+    {
+      "eng": "advantage",
+      "cht": "優點；優勢"
+    },
+    {
+      "eng": "forward",
+      "cht": "adv.向前"
+    },
+    {
+      "eng": "v.轉交，轉寄(物品、信件等)",
+      "cht": ""
+    },
+    {
+      "eng": "contemporary",
+      "cht": "同時代的，當代的，現代的"
+    },
+    {
+      "eng": "discussion",
+      "cht": "討論，談論"
+    },
+    {
+      "eng": "initial",
+      "cht": "adj.最初的,開始的"
+    },
+    {
+      "eng": "steadily",
+      "cht": "平穩地 穩定地"
+    },
+    {
+      "eng": "necessarily",
+      "cht": "必然"
+    },
+    {
+      "eng": "resolve",
+      "cht": "(v.)解決(問題等)"
+    },
+    {
+      "eng": "detect",
+      "cht": "察覺 發現"
+    },
+    {
+      "eng": "intensify",
+      "cht": "(v.)強化，增強，使...變強烈"
+    },
+    {
+      "eng": "favorably",
+      "cht": "善意地，順利地"
+    },
+    {
+      "eng": "cover",
+      "cht": "包含 支付 覆蓋"
+    },
+    {
+      "eng": "less",
+      "cht": "adj.較少的，較小的"
+    },
+    {
+      "eng": "majority",
+      "cht": "大多數；大部分"
+    },
+    {
+      "eng": "adopt",
+      "cht": "採納"
+    },
+    {
+      "eng": "largely",
+      "cht": "大部分地，主要"
+    },
+    {
+      "eng": "disregard",
+      "cht": "(v.) 不理會、忽視"
+    },
+    {
+      "eng": "effort",
+      "cht": "n.努力"
+    },
+    {
+      "eng": "incentive",
+      "cht": "獎勵 獎金"
+    },
+    {
+      "eng": "need",
+      "cht": "n.需求，要求"
+    },
+    {
+      "eng": "v.需要(做...)",
+      "cht": ""
+    },
+    {
+      "eng": "mastermind",
+      "cht": "(n.)(計畫等的)策畫者"
+    },
+    {
+      "eng": "v.需要(做...) |",
+      "cht": ""
+    }
+  ],
+  "day09": [
+    {
+      "eng": "stagnant",
+      "cht": "停滯的、不景氣的"
+    },
+    {
+      "eng": "dramatically",
+      "cht": "戲劇性地"
+    },
+    {
+      "eng": "brisk",
+      "cht": "活潑的、興旺的"
+    },
+    {
+      "eng": "unstable",
+      "cht": "不穩定的，易變的"
+    },
+    {
+      "eng": "rapidly",
+      "cht": "迅速地；很快地"
+    },
+    {
+      "eng": "soar",
+      "cht": "(v.)(物價等)高升，急漲"
+    },
+    {
+      "eng": "assert",
+      "cht": "斷言,主張"
+    },
+    {
+      "eng": "boost",
+      "cht": "(v.)推動，促進(景氣)，使上升"
+    },
+    {
+      "eng": "analyst",
+      "cht": "分析師"
+    },
+    {
+      "eng": "potential",
+      "cht": "adj.潛在的"
+    },
+    {
+      "eng": "n.潛力，可能性",
+      "cht": ""
+    },
+    {
+      "eng": "pleased",
+      "cht": "高興的；滿意的"
+    },
+    {
+      "eng": "remain",
+      "cht": "(v.)保持(...的狀態)，仍然有待..."
+    },
+    {
+      "eng": "limited",
+      "cht": "有限的"
+    },
+    {
+      "eng": "costly",
+      "cht": "(adj.)昂貴的;代價高的"
+    },
+    {
+      "eng": "particular",
+      "cht": "特定的"
+    },
+    {
+      "eng": "drastic",
+      "cht": "激烈的，猛烈的，徹底的"
+    },
+    {
+      "eng": "evenly",
+      "cht": "均勻地，平均地"
+    },
+    {
+      "eng": "evidence",
+      "cht": "證據"
+    },
+    {
+      "eng": "prospect",
+      "cht": "展望 預期"
+    },
+    {
+      "eng": "Lead",
+      "cht": "(v.)領導，引導；導致(某種結果)"
+    },
+    {
+      "eng": "fall",
+      "cht": "(v.)(價格、數值)下降"
+    },
+    {
+      "eng": "period",
+      "cht": "期間，時期"
+    },
+    {
+      "eng": "indicator",
+      "cht": "指標"
+    },
+    {
+      "eng": "industry",
+      "cht": "n.工業,產業"
+    },
+    {
+      "eng": "likely",
+      "cht": "(adj.)很可能(做...)的"
+    },
+    {
+      "eng": "boom",
+      "cht": "繁榮，興盛"
+    },
+    {
+      "eng": "director",
+      "cht": "主管；董事"
+    },
+    {
+      "eng": "substitute",
+      "cht": "n.代替品"
+    },
+    {
+      "eng": "v.代替",
+      "cht": ""
+    },
+    {
+      "eng": "consequence",
+      "cht": "結果,後果"
+    },
+    {
+      "eng": "fairly",
+      "cht": "相當 頗為"
+    },
+    {
+      "eng": "economical",
+      "cht": "(adj.) 經濟的、節約的"
+    },
+    {
+      "eng": "thrive",
+      "cht": "繁榮，成功"
+    },
+    {
+      "eng": "implication",
+      "cht": "暗示 可能的結果"
+    },
+    {
+      "eng": "wane",
+      "cht": "減少、衰退"
+    },
+    {
+      "eng": "prosperity",
+      "cht": "繁榮"
+    },
+    {
+      "eng": "despression",
+      "cht": "不景氣，蕭條"
+    },
+    {
+      "eng": "dwindle",
+      "cht": "逐漸減少 逐漸變小"
+    },
+    {
+      "eng": "impede",
+      "cht": "v.妨礙，阻礙"
+    },
+    {
+      "eng": "promising",
+      "cht": "有前途的；有希望的"
+    },
+    {
+      "eng": "adversity",
+      "cht": "(n)逆境、不幸"
+    },
+    {
+      "eng": "v.代替 |",
+      "cht": ""
+    }
+  ],
+  "day10": [
+    {
+      "eng": "purchase",
+      "cht": "v.購買"
+    },
+    {
+      "eng": "n.購買(的東西)",
+      "cht": ""
+    },
+    {
+      "eng": "installment",
+      "cht": "n.分期付款"
+    },
+    {
+      "eng": "affordable",
+      "cht": "(adj.)(價格)負擔得起的"
+    },
+    {
+      "eng": "exactly",
+      "cht": "確切地，正好"
+    },
+    {
+      "eng": "auction",
+      "cht": "拍賣"
+    },
+    {
+      "eng": "authentic",
+      "cht": "真正的，正統的"
+    },
+    {
+      "eng": "charge",
+      "cht": "n.收費，費用，責任"
+    },
+    {
+      "eng": "v.索取(費用)，把...記在帳上",
+      "cht": ""
+    },
+    {
+      "eng": "notice",
+      "cht": "通知；公告"
+    },
+    {
+      "eng": "experienced",
+      "cht": "有經驗的，熟練的"
+    },
+    {
+      "eng": "instruction",
+      "cht": "說明、指示"
+    },
+    {
+      "eng": "expert",
+      "cht": "n.專家"
+    },
+    {
+      "eng": "adj.專門的，專業的",
+      "cht": ""
+    },
+    {
+      "eng": "warranty",
+      "cht": "(n)(品質等的)保證，保證書"
+    },
+    {
+      "eng": "refund",
+      "cht": "退款"
+    },
+    {
+      "eng": "subscriber",
+      "cht": "訂閱者 用戶"
+    },
+    {
+      "eng": "delivery",
+      "cht": "運送"
+    },
+    {
+      "eng": "price",
+      "cht": "價格"
+    },
+    {
+      "eng": "receipt",
+      "cht": "收據"
+    },
+    {
+      "eng": "offer",
+      "cht": "v.提供"
+    },
+    {
+      "eng": "n.提供，優惠",
+      "cht": ""
+    },
+    {
+      "eng": "carefully",
+      "cht": "小心謹慎地 仔細地"
+    },
+    {
+      "eng": "benefit",
+      "cht": "n.利益，好處"
+    },
+    {
+      "eng": "v.受益，受惠",
+      "cht": ""
+    },
+    {
+      "eng": "exclusively",
+      "cht": "獨佔地、排外地"
+    },
+    {
+      "eng": "description",
+      "cht": "(n.)(產品等的)說明，描述"
+    },
+    {
+      "eng": "relatively",
+      "cht": "相對地"
+    },
+    {
+      "eng": "spare",
+      "cht": "v.節省，吝惜"
+    },
+    {
+      "eng": "adj.備用的，剩下的",
+      "cht": ""
+    },
+    {
+      "eng": "preparation",
+      "cht": "準備"
+    },
+    {
+      "eng": "area",
+      "cht": "地區 區域"
+    },
+    {
+      "eng": "clearance",
+      "cht": "清除 清倉 准許"
+    },
+    {
+      "eng": "alter",
+      "cht": "(v)改變(性質、形象)，修改(衣服)"
+    },
+    {
+      "eng": "apply",
+      "cht": "適用，應用；申請"
+    },
+    {
+      "eng": "mutually",
+      "cht": "互相，彼此"
+    },
+    {
+      "eng": "method",
+      "cht": "方法，方式"
+    },
+    {
+      "eng": "acceptable",
+      "cht": "adj.可接受的，還可以的"
+    },
+    {
+      "eng": "desire",
+      "cht": "n.渴望，慾望"
+    },
+    {
+      "eng": "v.渴望，想要",
+      "cht": ""
+    },
+    {
+      "eng": "redeemable",
+      "cht": "(adj.)可兌換(現金、商品)的，可償還的"
+    },
+    {
+      "eng": "officially",
+      "cht": "正式地"
+    },
+    {
+      "eng": "consumption",
+      "cht": "消費(量)，消耗"
+    },
+    {
+      "eng": "qualify",
+      "cht": "使...有資格"
+    },
+    {
+      "eng": "fabric",
+      "cht": "布料"
+    },
+    {
+      "eng": "valid",
+      "cht": "有效的"
+    },
+    {
+      "eng": "vendor",
+      "cht": "小販，攤販；販賣業者"
+    },
+    {
+      "eng": "adj.備用的，剩下的 |",
+      "cht": ""
+    },
+    {
+      "eng": "v.渴望，想要 |",
+      "cht": ""
+    }
+  ]
+}

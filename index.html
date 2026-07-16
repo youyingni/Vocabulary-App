@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>單字本 - 英文單字記憶</title>
+    <meta name="description" content="背英文單字 App，支援多益、Parker 單字，卡片滑動複習">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="單字本">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="material-symbols-outlined logo-icon">auto_stories</span>
+                <h1>Vocab Master</h1>
+            </div>
+            
+            <div class="sidebar-scroll">
+                <!-- Starred Section -->
+                <div class="unit-group">
+                    <div class="group-header starred-group-header" id="starred-nav" onclick="selectStarred()">
+                        <span class="material-symbols-outlined group-icon starred-icon">star</span>
+                        <span class="group-title">加星號的單字</span>
+                        <span id="starred-count" class="star-count-badge">0</span>
+                    </div>
+                </div>
+
+                <!-- Folders -->
+                <div id="folder-list"></div>
+            </div>
+
+            <div class="add-unit-container">
+                <form id="add-unit-form">
+                    <select id="unit-folder-select" class="folder-select">
+                        <option value="">選擇資料夾</option>
+                    </select>
+                    <div class="add-unit-row">
+                        <input type="text" id="new-unit-input" placeholder="新增回數名稱" required autocomplete="off">
+                        <button type="submit" class="btn btn-primary" title="新增回數">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <h2 id="current-unit-title">請選擇或新增回數</h2>
+                <div class="header-actions hidden">
+                    <button id="toggle-test-mode" class="btn btn-secondary">
+                        <span class="material-symbols-outlined">style</span>
+                        <span class="btn-text">卡片模式</span>
+                    </button>
+                </div>
+            </header>
+
+            <div id="word-section" class="word-section hidden">
+                <div id="add-word-area" class="add-word-container card-glass">
+                    <form id="add-word-form">
+                        <input type="text" id="word-eng" placeholder="英文單字" required autocomplete="off">
+                        <input type="text" id="word-cht" placeholder="中文解釋" required autocomplete="off">
+                        <button type="submit" class="btn btn-primary">新增單字</button>
+                    </form>
+                </div>
+
+                <div class="word-list-header">
+                    <h3>單字列表 (<span id="word-count">0</span>)</h3>
+                </div>
+
+                <div id="word-list" class="word-list"></div>
+            </div>
+            
+            <div id="empty-state" class="empty-state">
+                <span class="material-symbols-outlined empty-icon">menu_book</span>
+                <p>在左側選擇或新增一個回數來開始背單字！</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Flashcard Swipe Overlay -->
+    <div id="flashcard-overlay" class="flashcard-overlay hidden">
+        <div class="fc-progress-bar"><div class="fc-progress-fill" id="fc-progress"></div></div>
+        
+        <div class="fc-topbar">
+            <span class="fc-counter" id="fc-counter">1 / 40</span>
+            <button class="fc-exit-btn" id="fc-exit" title="結束卡片模式">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <div class="fc-hint-left">
+            <span class="material-symbols-outlined">star</span>
+            <span>加星號</span>
+        </div>
+
+        <div class="fc-card-wrapper" id="fc-card-wrapper">
+            <div class="fc-card" id="fc-card">
+                <div class="fc-eng" id="fc-eng">word</div>
+                <div class="fc-cht" id="fc-cht">definition</div>
+                <div class="fc-tap-hint">點擊卡片播放發音</div>
+            </div>
+            <div class="fc-swipe-indicator fc-swipe-left"  id="fc-ind-left">⭐</div>
+            <div class="fc-swipe-indicator fc-swipe-right" id="fc-ind-right">➡️</div>
+        </div>
+
+        <div class="fc-actions">
+            <button class="fc-action-btn star" id="fc-star-btn" title="加星號（左滑）">
+                <span class="material-symbols-outlined">star</span>
+            </button>
+            <button class="fc-action-btn speak-mid" id="fc-speak-btn" title="播放發音">
+                <span class="material-symbols-outlined">volume_up</span>
+            </button>
+            <button class="fc-action-btn skip" id="fc-skip-btn" title="下一張（右滑）">
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </div>
+
+        <div class="fc-keyboard-hints">點卡片/Space 播放 · ← 加星號下一張 · → 下一張 · Esc 離開</div>
+    </div>
+
+
+    <script src="app.js"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW registered:', reg.scope))
+                    .catch(err => console.warn('SW registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

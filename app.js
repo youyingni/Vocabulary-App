@@ -1021,11 +1021,13 @@ function addWord(eng, cht) {
 // =====================================================
 let fcWords   = [];
 let fcIndex   = 0;
+let fcFlipped = false;
 
 const fcOverlay  = document.getElementById('flashcard-overlay');
 const fcCard     = document.getElementById('fc-card');
 const fcWrapper  = document.getElementById('fc-card-wrapper');
 const fcEngEl    = document.getElementById('fc-eng');
+const fcEngBack  = document.getElementById('fc-eng-back');
 const fcChtEl    = document.getElementById('fc-cht');
 const fcCounter  = document.getElementById('fc-counter');
 const fcProgress = document.getElementById('fc-progress');
@@ -1055,7 +1057,8 @@ function openFlashcardMode() {
 
     if (fcWords.length === 0) { alert('這個回數沒有單字！'); return; }
 
-    fcIndex = 0;
+    fcIndex   = 0;
+    fcFlipped = false;
     fcOverlay.classList.remove('hidden');
     showFcCard();
 }
@@ -1067,9 +1070,14 @@ function showFcCard() {
     }
     const word = fcWords[fcIndex];
     fcEngEl.textContent   = word.eng;
+    if (fcEngBack) fcEngBack.textContent = word.eng;
     fcChtEl.textContent   = word.cht;
     fcCounter.textContent = `${fcIndex + 1} / ${fcWords.length}`;
     fcProgress.style.width = `${((fcIndex + 1) / fcWords.length) * 100}%`;
+
+    // Reset flip to front side
+    fcFlipped = false;
+    fcCard.classList.remove('flipped');
 
     // Update star button state
     const isStarred = starredIds.includes(word.id);
@@ -1079,7 +1087,7 @@ function showFcCard() {
     fcIndLeft.style.opacity  = '0';
     fcIndRight.style.opacity = '0';
 
-    // Auto-play pronunciation
+    // Auto-play pronunciation when showing English front
     window.speechSynthesis.cancel();
     setTimeout(() => speakWord(word.eng, null, fcSpeakBtn), 300);
 }
@@ -1123,6 +1131,19 @@ function closeFlashcardMode() {
     renderSidebar(); // refresh star count
 }
 
+function fcFlipCard() {
+    fcFlipped = !fcFlipped;
+    fcCard.classList.toggle('flipped', fcFlipped);
+    
+    // When flipping back to English front side, play pronunciation
+    if (!fcFlipped) {
+        const word = fcWords[fcIndex];
+        if (word) {
+            window.speechSynthesis.cancel();
+            speakWord(word.eng, null, fcSpeakBtn);
+        }
+    }
+}
 
 function fcStarAndNext() {
     const word = fcWords[fcIndex];
@@ -1204,13 +1225,12 @@ fcWrapper.addEventListener('touchmove', e => {
 }, { passive: true });
 fcWrapper.addEventListener('touchend', () => onDragEnd());
 
-// Click to speak (only if not a drag)
+// Click to flip card (only if not a drag)
 fcWrapper.addEventListener('click', e => {
     const dx = Math.abs(currentDX);
     currentDX = 0; // reset after read
     if (dx > 5) return; // was a drag, not a click
-    const word = fcWords[fcIndex];
-    if (word) speakWord(word.eng, null, fcSpeakBtn);
+    fcFlipCard();
 });
 
 // Buttons
@@ -1227,7 +1247,7 @@ fcExitBtn.addEventListener('click', () => closeFlashcardMode());
 document.addEventListener('keydown', e => {
     if (fcOverlay.classList.contains('hidden')) return;
     if (e.key === 'Escape')     closeFlashcardMode();
-    if (e.key === ' ')          { e.preventDefault(); const w = fcWords[fcIndex]; if (w) speakWord(w.eng, null, fcSpeakBtn); }
+    if (e.key === ' ')          { e.preventDefault(); fcFlipCard(); }
     if (e.key === 'ArrowRight') fcStarAndNext();
     if (e.key === 'ArrowLeft')  fcNext();
 });

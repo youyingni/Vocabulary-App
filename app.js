@@ -699,6 +699,11 @@ const headerActions      = document.querySelector('.header-actions');
 const sidebarEl          = document.querySelector('.sidebar');
 const sidebarToggleBtn   = document.getElementById('sidebar-toggle');
 const sidebarOverlayEl   = document.getElementById('sidebar-overlay');
+const globalSearchInput  = document.getElementById('global-search-input');
+const clearSearchBtn     = document.getElementById('clear-search-btn');
+
+// Keep track of the last viewed unit/starred tab before a search query was typed
+let lastActiveView = currentView.type !== 'search' ? { ...currentView } : { type: 'starred', folderId: null, unitId: null };
 
 // =====================================================
 // RENDER SIDEBAR
@@ -757,8 +762,15 @@ function closeMobileSidebar() {
     if (sidebarOverlayEl) sidebarOverlayEl.classList.remove('open');
 }
 
+function clearSearchInputSilently() {
+    if (globalSearchInput) globalSearchInput.value = '';
+    if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+}
+
 function selectUnit(folderId, unitId) {
+    clearSearchInputSilently();
     currentView = { type: 'unit', folderId, unitId };
+    lastActiveView = { ...currentView };
     isTestMode = false;
     save();
     renderSidebar();
@@ -767,7 +779,9 @@ function selectUnit(folderId, unitId) {
 }
 
 function selectStarred() {
+    clearSearchInputSilently();
     currentView = { type: 'starred', folderId: null, unitId: null };
+    lastActiveView = { ...currentView };
     isTestMode = false;
     save();
     renderSidebar();
@@ -779,7 +793,9 @@ function selectStarred() {
 // RENDER MAIN
 // =====================================================
 function renderMainContent() {
-    if (currentView.type === 'starred') {
+    if (currentView.type === 'search') {
+        renderSearchView();
+    } else if (currentView.type === 'starred') {
         renderStarredView();
     } else if (currentView.type === 'unit' && currentView.unitId) {
         renderUnitView();
@@ -835,6 +851,47 @@ function renderUnitView() {
         return;
     }
     unit.words.forEach(word => wordListEl.appendChild(createWordCard(word)));
+}
+
+function renderSearchView() {
+    const query = (currentView.query || '').trim().toLowerCase();
+    setFormattedTitle(`🔍 搜尋：「${currentView.query || ''}」`);
+    wordSectionEl.classList.remove('hidden');
+    emptyStateEl.classList.add('hidden');
+    
+    // Search is read-only, hide "Add Word" box
+    addWordAreaEl.classList.add('hidden');
+    
+    const results = [];
+    if (query) {
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                unit.words.forEach(word => {
+                    const engMatch = word.eng && word.eng.toLowerCase().includes(query);
+                    const chtMatch = word.cht && word.cht.toLowerCase().includes(query);
+                    if (engMatch || chtMatch) {
+                        results.push({ ...word, _unitName: unit.name });
+                    }
+                });
+            });
+        });
+    }
+    
+    wordCountEl.textContent = results.length;
+    wordListEl.innerHTML = '';
+    
+    if (results.length === 0) {
+        if (!query) {
+            wordListEl.innerHTML = '<p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:20px;">請輸入關鍵字進行搜尋</p>';
+        } else {
+            wordListEl.innerHTML = '<p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:20px;">找不到符合的單字</p>';
+        }
+        headerActions.classList.add('hidden'); // Hide flashcard button if no results
+        return;
+    }
+    
+    headerActions.classList.remove('hidden'); // Show flashcard button
+    results.forEach(word => wordListEl.appendChild(createWordCard(word, true)));
 }
 
 function renderStarredView() {
@@ -1040,7 +1097,21 @@ const fcExitBtn  = document.getElementById('fc-exit');
 
 function openFlashcardMode() {
     // Collect words for current view
-    if (currentView.type === 'starred') {
+    if (currentView.type === 'search') {
+        const query = (currentView.query || '').trim().toLowerCase();
+        fcWords = [];
+        if (query) {
+            folders.forEach(folder => {
+                folder.units.forEach(unit => {
+                    unit.words.forEach(w => {
+                        const engMatch = w.eng && w.eng.toLowerCase().includes(query);
+                        const chtMatch = w.cht && w.cht.toLowerCase().includes(query);
+                        if (engMatch || chtMatch) fcWords.push(w);
+                    });
+                });
+            });
+        }
+    } else if (currentView.type === 'starred') {
         fcWords = [];
         folders.forEach(folder => {
             folder.units.forEach(unit => {
@@ -1055,7 +1126,7 @@ function openFlashcardMode() {
         fcWords = unit ? [...unit.words] : [];
     }
 
-    if (fcWords.length === 0) { alert('這個回數沒有單字！'); return; }
+    if (fcWords.length === 0) { alert('沒有單字可以進行卡片模式！'); return; }
 
     fcIndex   = 0;
     fcFlipped = false;
@@ -1264,6 +1335,31 @@ if (sidebarToggleBtn) {
 
 if (sidebarOverlayEl) {
     sidebarOverlayEl.addEventListener('click', closeMobileSidebar);
+}
+
+// Global Search Event Listeners
+if (globalSearchInput) {
+    globalSearchInput.addEventListener('input', e => {
+        const query = e.target.value;
+        if (query.trim()) {
+            if (clearSearchBtn) clearSearchBtn.classList.remove('hidden');
+            currentView = { type: 'search', query: query };
+        } else {
+            if (clearSearchBtn) clearSearchBtn.classList.add('hidden');
+            currentView = { ...lastActiveView };
+        }
+        save();
+        renderMainContent();
+    });
+}
+
+if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+        clearSearchInputSilently();
+        currentView = { ...lastActiveView };
+        save();
+        renderMainContent();
+    });
 }
 
 addWordFormEl.addEventListener('submit', e => {

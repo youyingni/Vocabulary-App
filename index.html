@@ -6,9 +6,6 @@
     <title>單字本 - 英文單字記憶</title>
     <meta name="description" content="背英文單字 App，支援多益、Parker 單字，卡片滑動複習">
 
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
@@ -62,11 +59,11 @@
                 <div id="folder-list"></div>
             </div>
 
-            <!-- Sidebar Footer with Sync & Account status -->
+            <!-- Sidebar Footer with Backup & Restore -->
             <div class="sidebar-footer">
-                <button class="sidebar-footer-btn" id="sync-status-btn" onclick="openSyncModal()" title="雲端同步設定">
-                    <span class="material-symbols-outlined sync-icon-animation" id="sync-indicator-icon" style="color: var(--text-secondary);">cloud_queue</span>
-                    <span id="sync-status-text">未設定雲端</span>
+                <button class="sidebar-footer-btn" id="backup-nav-btn" onclick="openBackupModal()" title="資料備份與轉移">
+                    <span class="material-symbols-outlined" style="color: #34d399;">settings_backup_restore</span>
+                    <span>資料備份與轉移</span>
                 </button>
             </div>
         </aside>
@@ -252,54 +249,36 @@
         </div>
     </div>
 
-    <!-- Supabase Cloud Sync Modal Overlay -->
-    <div id="sync-modal-overlay" class="ocr-overlay hidden">
+    <!-- Data Backup & Restore Modal Overlay -->
+    <div id="backup-modal-overlay" class="ocr-overlay hidden">
         <div class="ocr-container card-glass" style="width: 480px;">
             <div class="ocr-header">
-                <h2>☁️ 雲端備份與多端同步</h2>
-                <button class="ocr-close-btn" onclick="closeSyncModal()">
+                <h2>📦 資料備份與多端轉移</h2>
+                <button class="ocr-close-btn" onclick="closeBackupModal()">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             
             <div class="ocr-scroll-content" style="gap: 20px;">
-                <!-- Step 1: Database Settings -->
+                <!-- Step 1: Export -->
                 <div class="ocr-section">
-                    <h3>1. 設定 Supabase 雲端資料庫</h3>
-                    <p class="ocr-help-text">請填入您在 Supabase 免費申請的專案連接網址與金鑰：</p>
+                    <h3>📤 備份與匯出單字資料</h3>
+                    <p class="ocr-help-text">點擊下方按鈕，App 會自動將您這台手機上所有的「手寫筆記回數、加星號收藏」打包成一段備份文字代碼，並複製到您的剪貼簿：</p>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="url" id="sb-url" placeholder="Supabase Project URL (https://xxxx.supabase.co)" autocomplete="off">
-                        <input type="password" id="sb-key" placeholder="Supabase Anon Key (金鑰)" autocomplete="off">
-                        <button class="btn btn-secondary" onclick="saveSupabaseSettings()">儲存資料庫金鑰</button>
+                        <button class="btn btn-primary" onclick="exportBackupData()">複製備份文字代碼</button>
+                        <p class="ocr-help-text" style="color: #34d399; font-weight: 500; display: none;" id="export-success-msg">✅ 備份代碼已成功複製！您可以用 LINE 傳給自己的其他裝置。</p>
                     </div>
                 </div>
 
-                <!-- Step 2: Account Authentication -->
-                <div class="ocr-section" id="sb-auth-section">
-                    <h3>2. 登入 / 註冊帳號</h3>
-                    <p class="ocr-help-text">請設定您的帳號密碼，登入後即可在多個裝置自動同步單字記錄：</p>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="email" id="sb-email" placeholder="電子信箱 (Email)" autocomplete="off">
-                        <input type="password" id="sb-password" placeholder="密碼 (Password)" autocomplete="off">
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn btn-primary" style="flex: 1;" onclick="loginSupabase()">登入</button>
-                            <button class="btn btn-secondary" style="flex: 1;" onclick="registerSupabase()">註冊</button>
-                        </div>
-                    </div>
-                </div>
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 4px 0;">
 
-                <!-- Step 3: Logged In Options -->
-                <div class="ocr-section hidden" id="sb-profile-section">
-                    <h3>2. 個人雲端同步中心</h3>
-                    <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px;">
-                        <p style="font-size: 0.88rem;">帳號：<span id="sb-user-email" style="color: #67e8f9; font-weight: 600;">-</span></p>
-                        <p style="font-size: 0.82rem; color: var(--text-secondary);">同步狀態：<span id="sb-sync-status">未同步</span></p>
-                    </div>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-primary" onclick="triggerManualSyncPush()">💾 將本地資料備份到雲端</button>
-                        <button class="btn btn-secondary" onclick="triggerManualSyncPull()">📥 下載雲端備份（覆蓋本地）</button>
-                        <button class="btn btn-secondary" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logoutSupabase()">登出帳號</button>
+                <!-- Step 2: Import -->
+                <div class="ocr-section">
+                    <h3>📥 匯入與轉移單字資料</h3>
+                    <p class="ocr-help-text">在您的其他裝置打開此網頁，將您複製的備份文字代碼貼在下方，即可完整同步還原所有單字：</p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <textarea id="import-code-area" rows="5" placeholder="在此貼上複製的備份文字代碼..." style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); padding: 10px; font-family: monospace; font-size: 0.75rem; resize: none; width: 100%; outline: none;" autocomplete="off"></textarea>
+                        <button class="btn btn-secondary" onclick="importBackupData()" style="border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.05);">💾 貼上並還原匯入</button>
                     </div>
                 </div>
             </div>

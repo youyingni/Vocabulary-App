@@ -676,8 +676,6 @@ if (!folders) {
 // =====================================================
 // PERSISTENCE
 // =====================================================
-let syncDebounceTimer = null;
-
 function save() {
     localStorage.setItem('folders',     JSON.stringify(folders));
     localStorage.setItem('starredIds',  JSON.stringify(starredIds));
@@ -686,14 +684,6 @@ function save() {
     // Track update time locally
     const now = Date.now();
     localStorage.setItem('lastUpdatedTime', now.toString());
-    
-    // Automatically trigger debounced upload if logged into Supabase
-    if (supabaseClient && supabaseClient.auth.getSession) {
-        clearTimeout(syncDebounceTimer);
-        syncDebounceTimer = setTimeout(() => {
-            syncPush();
-        }, 2000);
-    }
 }
 
 function generateId() {
@@ -1749,348 +1739,88 @@ ${JSON.stringify(wordsToCorrect, null, 2)}`;
 
 
 // =====================================================
-// SUPABASE CLOUD SYNC & AUTHENTICATION
+// DATA BACKUP & RESTORE METHODS
 // =====================================================
-let supabaseClient      = null;
-let syncIsLocked        = false;
+const backupModalEl      = document.getElementById('backup-modal-overlay');
+const importCodeAreaEl   = document.getElementById('import-code-area');
+const exportSuccessMsgEl = document.getElementById('export-success-msg');
 
-const syncModalEl       = document.getElementById('sync-modal-overlay');
-const sbUrlEl           = document.getElementById('sb-url');
-const sbKeyEl           = document.getElementById('sb-key');
-const sbEmailEl         = document.getElementById('sb-email');
-const sbPasswordEl      = document.getElementById('sb-password');
-const sbAuthSectionEl   = document.getElementById('sb-auth-section');
-const sbProfileSectionEl= document.getElementById('sb-profile-section');
-const sbUserEmailEl     = document.getElementById('sb-user-email');
-const sbSyncStatusEl    = document.getElementById('sb-sync-status');
-const syncIndicatorIcon = document.getElementById('sync-indicator-icon');
-const syncStatusTextEl  = document.getElementById('sync-status-text');
-
-function openSyncModal() {
+function openBackupModal() {
     closeMobileSidebar();
-    
-    // Load keys
-    const savedUrl = localStorage.getItem('supabaseUrl') || '';
-    const savedKey = localStorage.getItem('supabaseKey') || '';
-    if (sbUrlEl) sbUrlEl.value = savedUrl;
-    if (sbKeyEl) sbKeyEl.value = savedKey;
-    
-    // Refresh auth forms
-    refreshAuthUI();
-    
-    if (syncModalEl) syncModalEl.classList.remove('hidden');
+    if (importCodeAreaEl) importCodeAreaEl.value = '';
+    if (exportSuccessMsgEl) exportSuccessMsgEl.style.display = 'none';
+    if (backupModalEl) backupModalEl.classList.remove('hidden');
 }
 
-function closeSyncModal() {
-    if (syncModalEl) syncModalEl.classList.add('hidden');
+function closeBackupModal() {
+    if (backupModalEl) backupModalEl.classList.add('hidden');
 }
 
-function initSupabase() {
-    const url = (localStorage.getItem('supabaseUrl') || '').trim();
-    const key = (localStorage.getItem('supabaseKey') || '').trim();
-    
-    if (!url || !key) {
-        updateSyncIndicator('cloud_queue', '未設定雲端', 'var(--text-secondary)');
-        return;
-    }
-    
+function exportBackupData() {
     try {
-        if (typeof supabase !== 'undefined') {
-            supabaseClient = supabase.createClient(url, key);
-            
-            // Listen to auth changes
-            supabaseClient.auth.onAuthStateChange((event, session) => {
-                refreshAuthUI();
-                if (session && session.user) {
-                    // Try automatic sync on login/app start
-                    syncBiDirectional();
-                }
-            });
-        } else {
-            console.warn('Supabase SDK not loaded yet.');
-        }
-    } catch (err) {
-        console.error('Failed to init Supabase:', err);
-    }
-}
-
-function saveSupabaseSettings() {
-    const url = sbUrlEl.value.trim();
-    const key = sbKeyEl.value.trim();
-    
-    if (!url || !key) {
-        alert('請填寫完整的連接網址與 Anon 金鑰！');
-        return;
-    }
-    
-    localStorage.setItem('supabaseUrl', url);
-    localStorage.setItem('supabaseKey', key);
-    
-    initSupabase();
-    alert('Supabase 資料庫設定已儲存！');
-}
-
-function refreshAuthUI() {
-    if (!supabaseClient) {
-        if (sbAuthSectionEl) sbAuthSectionEl.classList.remove('hidden');
-        if (sbProfileSectionEl) sbProfileSectionEl.classList.add('hidden');
-        updateSyncIndicator('cloud_queue', '未設定雲端', 'var(--text-secondary)');
-        return;
-    }
-    
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (session && session.user) {
-            if (sbAuthSectionEl) sbAuthSectionEl.classList.add('hidden');
-            if (sbProfileSectionEl) sbProfileSectionEl.classList.remove('hidden');
-            if (sbUserEmailEl) sbUserEmailEl.textContent = session.user.email;
-            
-            // Update sidebar indicator
-            const shortEmail = session.user.email.split('@')[0];
-            updateSyncIndicator('cloud_done', `已連線: ${shortEmail}`, '#10b981');
-        } else {
-            if (sbAuthSectionEl) sbAuthSectionEl.classList.remove('hidden');
-            if (sbProfileSectionEl) sbProfileSectionEl.classList.add('hidden');
-            updateSyncIndicator('cloud_off', '未登入帳號', '#ef4444');
-        }
-    });
-}
-
-function updateSyncIndicator(iconName, text, color) {
-    if (syncIndicatorIcon) {
-        syncIndicatorIcon.textContent = iconName;
-        syncIndicatorIcon.style.color = color;
-        if (iconName === 'sync') {
-            syncIndicatorIcon.classList.add('sync-spin');
-        } else {
-            syncIndicatorIcon.classList.remove('sync-spin');
-        }
-    }
-    if (syncStatusTextEl) {
-        syncStatusTextEl.textContent = text;
-    }
-}
-
-// ---- Authentication Methods ----
-async function loginSupabase() {
-    const email = sbEmailEl.value.trim();
-    const password = sbPasswordEl.value;
-    
-    if (!email || !password) {
-        alert('請輸入帳號與密碼！');
-        return;
-    }
-    
-    try {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        alert('登入成功！正在進行第一次資料同步...');
-    } catch (err) {
-        alert(`登入失敗: ${err.message}`);
-    }
-}
-
-async function registerSupabase() {
-    const email = sbEmailEl.value.trim();
-    const password = sbPasswordEl.value;
-    
-    if (!email || !password) {
-        alert('請輸入欲註冊的帳號與密碼！');
-        return;
-    }
-    if (password.length < 6) {
-        alert('密碼長度必須大於 6 位數！');
-        return;
-    }
-    
-    try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) throw error;
+        const backupObj = {
+            folders: folders,
+            starredIds: starredIds,
+            exportedAt: Date.now()
+        };
         
-        // Supabase returns user object but if email verification is enabled, session is null initially
-        if (data.session) {
-            alert('註冊成功並已自動登入！');
-        } else {
-            alert('註冊帳號發送成功！\n請至您的電子郵件信箱收取確認信，驗證過後即可在此登入！');
-        }
-    } catch (err) {
-        alert(`註冊失敗: ${err.message}`);
+        const jsonString = JSON.stringify(backupObj);
+        // Base64 encode safely supporting unicode characters
+        const base64Code = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode('0x' + p1);
+        }));
+        
+        navigator.clipboard.writeText(base64Code).then(() => {
+            if (exportSuccessMsgEl) {
+                exportSuccessMsgEl.style.display = 'block';
+            }
+        }).catch(err => {
+            console.error('Clipboard copy failed:', err);
+            alert('複製失敗，請手動複製以下備份代碼：\n\n' + base64Code);
+        });
+    } catch (e) {
+        alert('備份失敗：' + e.message);
     }
 }
 
-async function logoutSupabase() {
-    try {
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) throw error;
-        alert('已登出帳號！');
-        refreshAuthUI();
-    } catch (err) {
-        alert(`登出失敗: ${err.message}`);
-    }
-}
-
-// ---- Push / Pull Synchronization ----
-async function syncPush(isManual = false) {
-    if (!supabaseClient || syncIsLocked) return;
-    
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) {
-        if (isManual) alert('請先登入帳號以進行同步！');
+function importBackupData() {
+    const rawCode = importCodeAreaEl.value.trim();
+    if (!rawCode) {
+        alert('請先貼上備份文字代碼！');
         return;
     }
     
-    syncIsLocked = true;
-    updateSyncIndicator('sync', '雲端同步中...', '#67e8f9');
-    if (sbSyncStatusEl) sbSyncStatusEl.textContent = '正在上傳備份中...';
-    
-    const now = parseInt(localStorage.getItem('lastUpdatedTime') || Date.now().toString(), 10);
-    
-    try {
-        // Upsert state directly into user_sync_data table
-        const { error } = await supabaseClient
-            .from('user_sync_data')
-            .upsert({
-                id: session.user.id,
-                folders: folders,
-                starred_ids: starredIds,
-                updated_at: new Date(now).toISOString()
-            });
-            
-        if (error) throw error;
-        
-        updateSyncIndicator('cloud_done', `已連線: ${session.user.email.split('@')[0]}`, '#10b981');
-        if (sbSyncStatusEl) sbSyncStatusEl.textContent = `已同步備份 (${new Date().toLocaleTimeString()})`;
-        if (isManual) alert('雲端備份上傳成功！');
-    } catch (err) {
-        console.error('Push sync failed:', err);
-        updateSyncIndicator('cloud_off', '同步出錯', '#ef4444');
-        if (sbSyncStatusEl) sbSyncStatusEl.textContent = `同步失敗: ${err.message}`;
-        if (isManual) alert(`同步失敗: ${err.message}`);
-    } finally {
-        syncIsLocked = false;
-    }
-}
-
-async function syncPull(isManual = false) {
-    if (!supabaseClient || syncIsLocked) return;
-    
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) {
-        if (isManual) alert('請先登入帳號！');
+    if (!confirm('警告：匯入此備份會「直接覆蓋且刪除」您這台裝置上目前的進度。確定要匯入覆蓋嗎？')) {
         return;
     }
     
-    syncIsLocked = true;
-    updateSyncIndicator('sync', '載入雲端中...', '#67e8f9');
-    if (sbSyncStatusEl) sbSyncStatusEl.textContent = '正在下載雲端備份...';
-    
     try {
-        const { data, error } = await supabaseClient
-            .from('user_sync_data')
-            .select('folders, starred_ids, updated_at')
-            .eq('id', session.user.id)
-            .single();
-            
-        if (error && error.code !== 'PGRST116') {
-            // PGRST116 means row not found (fresh account)
-            throw error;
-        }
+        // Base64 decode safely supporting unicode characters
+        const jsonString = decodeURIComponent(atob(rawCode).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
         
-        if (data) {
-            folders = data.folders || [];
-            starredIds = data.starred_ids || [];
-            const cloudTime = new Date(data.updated_at).getTime();
-            localStorage.setItem('folders', JSON.stringify(folders));
-            localStorage.setItem('starredIds', JSON.stringify(starredIds));
-            localStorage.setItem('lastUpdatedTime', cloudTime.toString());
+        const backupObj = JSON.parse(jsonString);
+        
+        if (backupObj && Array.isArray(backupObj.folders)) {
+            folders = backupObj.folders;
+            starredIds = backupObj.starredIds || [];
+            
+            // Save state
+            save();
             
             // Re-render
             renderSidebar();
             renderMainContent();
             
-            updateSyncIndicator('cloud_done', `已連線: ${session.user.email.split('@')[0]}`, '#10b981');
-            if (sbSyncStatusEl) sbSyncStatusEl.textContent = `已載入雲端備份 (${new Date().toLocaleTimeString()})`;
-            if (isManual) alert('雲端下載還原成功！');
+            closeBackupModal();
+            alert('🎉 備份資料已成功匯入與還原！');
         } else {
-            if (isManual) alert('雲端目前無備份資料！');
-            if (sbSyncStatusEl) sbSyncStatusEl.textContent = '雲端尚無備份資料';
-            updateSyncIndicator('cloud_done', `已連線: ${session.user.email.split('@')[0]}`, '#10b981');
+            alert('無效的備份代碼！請確認複製的代碼完整且沒有漏字。');
         }
-    } catch (err) {
-        console.error('Pull sync failed:', err);
-        updateSyncIndicator('cloud_off', '同步出錯', '#ef4444');
-        if (sbSyncStatusEl) sbSyncStatusEl.textContent = `下載失敗: ${err.message}`;
-        if (isManual) alert(`下載失敗: ${err.message}`);
-    } finally {
-        syncIsLocked = false;
-    }
-}
-
-async function syncBiDirectional() {
-    if (!supabaseClient || syncIsLocked) return;
-    
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session || !session.user) return;
-    
-    syncIsLocked = true;
-    updateSyncIndicator('sync', '雲端比對中...', '#67e8f9');
-    
-    try {
-        const { data, error } = await supabaseClient
-            .from('user_sync_data')
-            .select('updated_at, folders, starred_ids')
-            .eq('id', session.user.id)
-            .single();
-            
-        if (error && error.code !== 'PGRST116') throw error;
-        
-        const localTime = parseInt(localStorage.getItem('lastUpdatedTime') || '0', 10);
-        
-        if (!data) {
-            // First time sync for new user: push local to cloud
-            syncIsLocked = false; // unlock so syncPush can run
-            await syncPush();
-        } else {
-            const cloudTime = new Date(data.updated_at).getTime();
-            
-            if (cloudTime > localTime) {
-                // Cloud is newer: pull cloud to local
-                folders = data.folders || [];
-                starredIds = data.starred_ids || [];
-                localStorage.setItem('folders', JSON.stringify(folders));
-                localStorage.setItem('starredIds', JSON.stringify(starredIds));
-                localStorage.setItem('lastUpdatedTime', cloudTime.toString());
-                
-                renderSidebar();
-                renderMainContent();
-                
-                updateSyncIndicator('cloud_done', `已連線: ${session.user.email.split('@')[0]}`, '#10b981');
-                if (sbSyncStatusEl) sbSyncStatusEl.textContent = `已自動下載雲端新資料`;
-            } else if (localTime > cloudTime) {
-                // Local is newer: push local to cloud
-                syncIsLocked = false; // unlock so syncPush can run
-                await syncPush();
-            } else {
-                // Identical times: nothing to do
-                updateSyncIndicator('cloud_done', `已連線: ${session.user.email.split('@')[0]}`, '#10b981');
-                if (sbSyncStatusEl) sbSyncStatusEl.textContent = `已是最新資料`;
-            }
-        }
-    } catch (err) {
-        console.error('Bi-directional sync error:', err);
-        updateSyncIndicator('cloud_off', '同步出錯', '#ef4444');
-    } finally {
-        syncIsLocked = false;
-    }
-}
-
-// ---- Manual Buttons ----
-function triggerManualSyncPush() {
-    syncPush(true);
-}
-
-function triggerManualSyncPull() {
-    if (confirm('警告：這將會下載雲端的備份單字，並「直接覆蓋且刪除」您這台裝置上目前的進度。確定要下載覆蓋嗎？')) {
-        syncPull(true);
+    } catch (e) {
+        console.error('Import failed:', e);
+        alert('匯入失敗！請確認貼上的代碼是否正確。');
     }
 }
 
@@ -2104,9 +1834,6 @@ if (window.speechSynthesis) {
         window.speechSynthesis.getVoices(); // cache
     });
 }
-
-// Initialize Supabase integrations
-initSupabase();
 
 renderSidebar();
 renderMainContent();

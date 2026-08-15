@@ -1381,11 +1381,13 @@ toggleTestModeBtn.addEventListener('click', openFlashcardMode);
 // =====================================================
 const ocrOverlayEl       = document.getElementById('ocr-import-overlay');
 const ocrApiUrlEl        = document.getElementById('ocr-api-url');
+const geminiApiKeyEl     = document.getElementById('gemini-api-key');
 const ocrFolderSelectEl  = document.getElementById('ocr-folder-select');
 const ocrUnitNameEl      = document.getElementById('ocr-unit-name-input');
 const ocrDropZoneEl      = document.getElementById('ocr-drop-zone');
 const ocrFileInputEl     = document.getElementById('ocr-file-input');
 const ocrLoadingEl       = document.getElementById('ocr-loading');
+const ocrLoadingTextEl   = document.getElementById('ocr-loading-text');
 const ocrPreviewEl       = document.getElementById('ocr-preview-section');
 const ocrResultsBodyEl   = document.getElementById('ocr-results-body');
 const ocrResultCountEl   = document.getElementById('ocr-result-count');
@@ -1396,9 +1398,12 @@ let ocrFileToUpload = null;
 function openOcrModal() {
     closeMobileSidebar();
     
-    // Load saved ngrok API url
+    // Load saved settings
     const savedUrl = localStorage.getItem('ocrApiUrl') || '';
     if (ocrApiUrlEl) ocrApiUrlEl.value = savedUrl;
+    
+    const savedKey = localStorage.getItem('geminiApiKey') || '';
+    if (geminiApiKeyEl) geminiApiKeyEl.value = savedKey;
     
     // Populate folders
     if (ocrFolderSelectEl) {
@@ -1435,6 +1440,14 @@ function saveOcrApiUrl() {
         const url = ocrApiUrlEl.value.trim();
         localStorage.setItem('ocrApiUrl', url);
         alert('網址儲存成功！');
+    }
+}
+
+function saveGeminiApiKey() {
+    if (geminiApiKeyEl) {
+        const key = geminiApiKeyEl.value.trim();
+        localStorage.setItem('geminiApiKey', key);
+        alert('Gemini 金鑰儲存成功！');
     }
 }
 
@@ -1620,6 +1633,97 @@ function importOcrToFolder() {
     selectUnit(folderId, newUnit.id);
     
     alert(`成功匯入新回數「${unitName}」，共 ${words.length} 個單字！`);
+}
+
+async function correctOcrWithGemini() {
+    const apiKey = (localStorage.getItem('geminiApiKey') || '').trim();
+    if (!apiKey) {
+        alert('請先在步驟 1 填寫並儲存你的 Gemini API 金鑰！');
+        return;
+    }
+    
+    const rows = ocrResultsBodyEl.querySelectorAll('tr');
+    const wordsToCorrect = [];
+    
+    rows.forEach(row => {
+        const eng = row.querySelector('.ocr-eng-input').value.trim();
+        const cht = row.querySelector('.ocr-cht-input').value.trim();
+        if (eng || cht) {
+            wordsToCorrect.push({ eng, cht });
+        }
+    });
+    
+    if (wordsToCorrect.length === 0) {
+        alert('目前預覽表格中沒有任何單字可以校正！');
+        return;
+    }
+    
+    // Disable buttons and show loading spinner inside modal
+    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
+    if (ocrLoadingEl) ocrLoadingEl.classList.remove('hidden');
+    if (ocrLoadingTextEl) ocrLoadingTextEl.textContent = '✨ Gemini AI 正在幫您進行拼字糾錯與翻譯優化，請稍候...';
+    
+    // Construct Prompt
+    const promptText = `你是一位專業的英文老師，請幫我修正以下由手寫筆記 OCR 辨識出來的英文單字（可能包含拼字錯誤，如: o辨識為c，或是拼字漏字母等），並將中文翻譯補齊。
+請務必遵守以下規定：
+1. 修正英文單字拼法至正確的英文。
+2. 補齊或優化中文翻譯。
+3. 中文翻譯必須加上明確的詞性標籤（例如: n. 名詞, v. 動詞, adj. 形容詞, adv. 副詞, prep. 介係詞, pron. 代名詞 等，只要標註簡寫即可如 n. v. adj.）。
+4. 請只輸出符合 JSON 格式的純文字，不要包含任何 Markdown 標記（如不要有 \`\`\`json 或是任何 code blocks，也不要有額外的解釋文字），只要給我一個包含單字物件的陣列：
+[{"eng": "修正後的英文單字", "cht": "修正且加上詞性的中文意思"}, ...]
+
+待修正的單字資料：
+${JSON.stringify(wordsToCorrect, null, 2)}`;
+
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: promptText
+                    }]
+                }]
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Gemini API 請求失敗 (HTTP ${response.status})`);
+        }
+        
+        const data = await response.json();
+        const responseText = data.candidates[0].content.parts[0].text.trim();
+        
+        // Clean up markdown block syntax if present
+        let cleanJsonStr = responseText;
+        if (cleanJsonStr.includes('```')) {
+            cleanJsonStr = cleanJsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        }
+        
+        try {
+            const correctedWords = JSON.parse(cleanJsonStr);
+            if (Array.isArray(correctedWords)) {
+                renderOcrPreview(correctedWords);
+                alert('✨ AI 糾錯與翻譯校正完成！');
+            } else {
+                throw new Error('AI 回傳結果不是有效的陣列格式');
+            }
+        } catch (jsonErr) {
+            console.error("JSON Parse Error on response:", responseText, jsonErr);
+            alert('AI 回傳資料解析失敗，請再點擊一次重試。\n\n錯誤原因: 輸出非標準 JSON');
+            if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
+        }
+    } catch (err) {
+        console.error(err);
+        alert(`Gemini AI 連線失敗，請檢查網路連線或金鑰是否正確！\n\n錯誤詳情: ${err.message}`);
+        if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
+    } finally {
+        if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
+        if (ocrLoadingTextEl) ocrLoadingTextEl.textContent = '正在上傳檔案並辨識中，請稍候... (使用 PaddleOCR 模型)';
+    }
 }
 
 // =====================================================

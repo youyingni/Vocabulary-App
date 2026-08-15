@@ -168,11 +168,17 @@
             <div class="ocr-scroll-content">
                 <!-- Settings: ngrok url -->
                 <div class="ocr-section">
-                    <h3>1. 設定本地 Python 後端網址</h3>
-                    <p class="ocr-help-text">請先開啟本地 python server 與 ngrok 轉接，並在下方填入 ngrok 給予的 https 網址：</p>
-                    <div class="ocr-settings-row">
-                        <input type="url" id="ocr-api-url" placeholder="https://xxxx.ngrok-free.app" autocomplete="off">
-                        <button class="btn btn-secondary" onclick="saveOcrApiUrl()">儲存網址</button>
+                    <h3>1. 設定本地 Python 與 Gemini API</h3>
+                    <p class="ocr-help-text">請先開啟本地 python server 與 ngrok，並在下方填入轉接網址。如有 Gemini API 金鑰可選填，AI 將自動幫您進行「一鍵校錯與翻譯」：</p>
+                    <div class="ocr-settings-row" style="flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 12px; width: 100%;">
+                            <input type="url" id="ocr-api-url" placeholder="https://xxxx.ngrok-free.app (後端網址)" style="flex: 1;" autocomplete="off">
+                            <button class="btn btn-secondary" onclick="saveOcrApiUrl()">儲存網址</button>
+                        </div>
+                        <div style="display: flex; gap: 12px; width: 100%;">
+                            <input type="password" id="gemini-api-key" placeholder="Gemini API Key (選填，用於一鍵 AI 糾錯)" style="flex: 1;" autocomplete="off">
+                            <button class="btn btn-secondary" onclick="saveGeminiApiKey()">儲存金鑰</button>
+                        </div>
                     </div>
                 </div>
 
@@ -202,7 +208,7 @@
                 <!-- Loading Spinner -->
                 <div id="ocr-loading" class="ocr-loading-container hidden">
                     <div class="spinner"></div>
-                    <p>正在上傳檔案並辨識中，請稍候... (使用 PaddleOCR 模型)</p>
+                    <p id="ocr-loading-text">正在上傳檔案並辨識中，請稍候... (使用 PaddleOCR 模型)</p>
                 </div>
 
                 <!-- Step 4: Preview and Edit -->
@@ -228,6 +234,7 @@
                     
                     <div class="ocr-action-buttons">
                         <button class="btn btn-secondary" onclick="addOcrRow()">➕ 新增一列</button>
+                        <button class="btn btn-secondary" id="btn-gemini-ocr" onclick="correctOcrWithGemini()" style="border-color: #67e8f9; color: #67e8f9; background: rgba(103,232,249,0.05);">✨ AI 一鍵校正</button>
                         <button class="btn btn-primary" id="btn-import-ocr" onclick="importOcrToFolder()">💾 儲存並匯入新回數</button>
                     </div>
                 </div>

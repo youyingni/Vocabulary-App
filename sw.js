@@ -1,8 +1,8 @@
 // =====================================================
 // Service Worker — 單字本 PWA
-// Version: 1.0.4  (bump this string to force a full cache refresh)
+// Version: 1.0.5  (bump this string to force a full cache refresh)
 // =====================================================
-const CACHE_NAME = 'vocab-app-v5';
+const CACHE_NAME = 'vocab-app-v6';
 
 // All files to cache for offline use
 const ASSETS = [

@@ -148,7 +148,7 @@ async def perform_ocr(file: UploadFile = File(...)):
         all_pairs = []
         # Run OCR on each page/image
         for img in images_to_process:
-            result = ocr.ocr(img, cls=True)
+            result = ocr.ocr(img)
             pairs = process_ocr_results(result)
             all_pairs.extend(pairs)
             

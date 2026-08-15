@@ -21,8 +21,8 @@ app.add_middleware(
 )
 
 # Initialize PaddleOCR (supports Chinese and English handwriting detection)
-# Set use_angle_cls=False to avoid typing_extensions wrapper TypeError in Python 3.12
-ocr = PaddleOCR(use_angle_cls=False, lang="ch")
+# Disable enable_mkldnn to fix new PIR executor OneDNN runtime bugs in Python 3.12
+ocr = PaddleOCR(use_angle_cls=True, lang="ch", use_gpu=False, enable_mkldnn=False)
 
 def process_ocr_results(ocr_result):
     """

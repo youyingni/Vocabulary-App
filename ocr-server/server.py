@@ -111,6 +111,7 @@ def process_ocr_results(ocr_result):
     return paired_vocab
 
 @app.post("/ocr")
+@app.post("/ocr/")
 async def perform_ocr(file: UploadFile = File(...)):
     filename = file.filename.lower()
     

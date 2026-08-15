@@ -47,6 +47,14 @@
                     </div>
                 </div>
 
+                <!-- OCR Import Section -->
+                <div class="unit-group">
+                    <div class="group-header" id="ocr-nav" onclick="openOcrModal()">
+                        <span class="material-symbols-outlined group-icon" style="color: #67e8f9;">center_focus_strong</span>
+                        <span class="group-title">📷 筆記 OCR 匯入</span>
+                    </div>
+                </div>
+
                 <!-- Folders -->
                 <div id="folder-list"></div>
             </div>
@@ -147,6 +155,85 @@
         <div class="fc-keyboard-hints">點卡片/Space 播放 · ← 下一張 · → 加星號下一張 · Esc 離開</div>
     </div>
 
+    <!-- OCR Import Modal Overlay -->
+    <div id="ocr-import-overlay" class="ocr-overlay hidden">
+        <div class="ocr-container card-glass">
+            <div class="ocr-header">
+                <h2>📷 手寫筆記 OCR 匯入</h2>
+                <button class="ocr-close-btn" id="ocr-close" onclick="closeOcrModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="ocr-scroll-content">
+                <!-- Settings: ngrok url -->
+                <div class="ocr-section">
+                    <h3>1. 設定本地 Python 後端網址</h3>
+                    <p class="ocr-help-text">請先開啟本地 python server 與 ngrok 轉接，並在下方填入 ngrok 給予的 https 網址：</p>
+                    <div class="ocr-settings-row">
+                        <input type="url" id="ocr-api-url" placeholder="https://xxxx.ngrok-free.app" autocomplete="off">
+                        <button class="btn btn-secondary" onclick="saveOcrApiUrl()">儲存網址</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload -->
+                <div class="ocr-section">
+                    <h3>2. 選擇手寫檔案 (PDF 或 圖片)</h3>
+                    <div class="ocr-upload-area" id="ocr-drop-zone">
+                        <span class="material-symbols-outlined upload-icon">cloud_upload</span>
+                        <p>將手寫單字 PDF、照片拖曳到此處，或</p>
+                        <label for="ocr-file-input" class="btn btn-primary">選擇檔案</label>
+                        <input type="file" id="ocr-file-input" accept="image/*,application/pdf" style="display: none;">
+                        <div id="selected-file-info" class="selected-file-info hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Destination -->
+                <div class="ocr-section">
+                    <h3>3. 選擇匯入資料夾與新回數名稱</h3>
+                    <div class="ocr-dest-row">
+                        <select id="ocr-folder-select" class="folder-select">
+                            <option value="">選擇要匯入的資料夾</option>
+                        </select>
+                        <input type="text" id="ocr-unit-name-input" placeholder="新回數名稱 (例如: Day 11 手寫筆記)" autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="ocr-loading" class="ocr-loading-container hidden">
+                    <div class="spinner"></div>
+                    <p>正在上傳檔案並辨識中，請稍候... (使用 PaddleOCR 模型)</p>
+                </div>
+
+                <!-- Step 4: Preview and Edit -->
+                <div id="ocr-preview-section" class="ocr-section hidden">
+                    <div class="preview-header">
+                        <h3>4. 確認與編輯辨識結果 (共 <span id="ocr-result-count">0</span> 個單字)</h3>
+                        <p class="ocr-help-text">你可以直接在表格中點擊修改有誤的英文單字或中文解釋：</p>
+                    </div>
+                    <div class="ocr-table-wrapper">
+                        <table class="ocr-table">
+                            <thead>
+                                <tr>
+                                    <th width="45%">英文單字</th>
+                                    <th width="45%">中文意思</th>
+                                    <th width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ocr-results-body">
+                                <!-- OCR output elements added dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="ocr-action-buttons">
+                        <button class="btn btn-secondary" onclick="addOcrRow()">➕ 新增一列</button>
+                        <button class="btn btn-primary" id="btn-import-ocr" onclick="importOcrToFolder()">💾 儲存並匯入新回數</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 

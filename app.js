@@ -1377,6 +1377,252 @@ addWordFormEl.addEventListener('submit', e => {
 toggleTestModeBtn.addEventListener('click', openFlashcardMode);
 
 // =====================================================
+// OCR NOTE IMPORT METHODS
+// =====================================================
+const ocrOverlayEl       = document.getElementById('ocr-import-overlay');
+const ocrApiUrlEl        = document.getElementById('ocr-api-url');
+const ocrFolderSelectEl  = document.getElementById('ocr-folder-select');
+const ocrUnitNameEl      = document.getElementById('ocr-unit-name-input');
+const ocrDropZoneEl      = document.getElementById('ocr-drop-zone');
+const ocrFileInputEl     = document.getElementById('ocr-file-input');
+const ocrLoadingEl       = document.getElementById('ocr-loading');
+const ocrPreviewEl       = document.getElementById('ocr-preview-section');
+const ocrResultsBodyEl   = document.getElementById('ocr-results-body');
+const ocrResultCountEl   = document.getElementById('ocr-result-count');
+const selectedFileInfoEl = document.getElementById('selected-file-info');
+
+let ocrFileToUpload = null;
+
+function openOcrModal() {
+    closeMobileSidebar();
+    
+    // Load saved ngrok API url
+    const savedUrl = localStorage.getItem('ocrApiUrl') || '';
+    if (ocrApiUrlEl) ocrApiUrlEl.value = savedUrl;
+    
+    // Populate folders
+    if (ocrFolderSelectEl) {
+        ocrFolderSelectEl.innerHTML = '<option value="">選擇要匯入的資料夾</option>';
+        folders.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = f.name;
+            ocrFolderSelectEl.appendChild(opt);
+        });
+    }
+    
+    // Reset file uploads
+    ocrFileToUpload = null;
+    if (selectedFileInfoEl) {
+        selectedFileInfoEl.classList.add('hidden');
+        selectedFileInfoEl.textContent = '';
+    }
+    if (ocrUnitNameEl) ocrUnitNameEl.value = '';
+    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
+    if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
+    if (ocrResultsBodyEl) ocrResultsBodyEl.innerHTML = '';
+    
+    // Show modal
+    if (ocrOverlayEl) ocrOverlayEl.classList.remove('hidden');
+}
+
+function closeOcrModal() {
+    if (ocrOverlayEl) ocrOverlayEl.classList.add('hidden');
+}
+
+function saveOcrApiUrl() {
+    if (ocrApiUrlEl) {
+        const url = ocrApiUrlEl.value.trim();
+        localStorage.setItem('ocrApiUrl', url);
+        alert('網址儲存成功！');
+    }
+}
+
+// ---- File Drag & Drop events ----
+if (ocrDropZoneEl) {
+    ocrDropZoneEl.addEventListener('dragover', e => {
+        e.preventDefault();
+        ocrDropZoneEl.classList.add('dragover');
+    });
+    
+    ocrDropZoneEl.addEventListener('dragleave', () => {
+        ocrDropZoneEl.classList.remove('dragover');
+    });
+    
+    ocrDropZoneEl.addEventListener('drop', e => {
+        e.preventDefault();
+        ocrDropZoneEl.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handleOcrFileSelection(e.dataTransfer.files[0]);
+        }
+    });
+    
+    ocrDropZoneEl.addEventListener('click', e => {
+        if (e.target.tagName !== 'LABEL') {
+            if (ocrFileInputEl) ocrFileInputEl.click();
+        }
+    });
+}
+
+if (ocrFileInputEl) {
+    ocrFileInputEl.addEventListener('change', e => {
+        if (e.target.files.length > 0) {
+            handleOcrFileSelection(e.target.files[0]);
+        }
+    });
+}
+
+function handleOcrFileSelection(file) {
+    ocrFileToUpload = file;
+    if (selectedFileInfoEl) {
+        selectedFileInfoEl.classList.remove('hidden');
+        selectedFileInfoEl.textContent = `已選擇檔案：${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    }
+    
+    // Automatically fill a suggested unit name if empty
+    if (ocrUnitNameEl && !ocrUnitNameEl.value.trim()) {
+        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        ocrUnitNameEl.value = `${baseName} OCR`;
+    }
+    
+    // Auto trigger upload once file is selected
+    triggerOcrProcessing();
+}
+
+async function triggerOcrProcessing() {
+    if (!ocrFileToUpload) {
+        alert('請先選擇 PDF 或圖片檔案！');
+        return;
+    }
+    
+    const apiUrl = (localStorage.getItem('ocrApiUrl') || '').trim();
+    if (!apiUrl) {
+        alert('請先在步驟 1 填寫並儲存你的 ngrok API 後端網址！');
+        return;
+    }
+    
+    // Clean up preview & show loading
+    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
+    if (ocrLoadingEl) ocrLoadingEl.classList.remove('hidden');
+    if (ocrResultsBodyEl) ocrResultsBodyEl.innerHTML = '';
+    
+    const formData = new FormData();
+    formData.append('file', ocrFileToUpload);
+    
+    try {
+        const response = await fetch(`${apiUrl.replace(/\/$/, '')}/ocr`, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`伺服器錯誤 (HTTP ${response.status})`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.words) {
+            renderOcrPreview(data.words);
+        } else {
+            alert('辨識失敗，請檢查本地後端服務狀態！');
+        }
+    } catch (err) {
+        console.error(err);
+        alert(`無法連線到 OCR 伺服器，請確認：\n1. 本地 python server.py 是否在執行\n2. ngrok 網址是否正確且沒有過期\n\n錯誤詳情: ${err.message}`);
+    } finally {
+        if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
+    }
+}
+
+function renderOcrPreview(words) {
+    if (!ocrResultsBodyEl) return;
+    ocrResultsBodyEl.innerHTML = '';
+    
+    words.forEach(w => {
+        addOcrRow(w.eng, w.cht);
+    });
+    
+    updateOcrCount();
+    if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
+}
+
+function addOcrRow(eng = '', cht = '') {
+    if (!ocrResultsBodyEl) return;
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" class="ocr-eng-input" value="${eng.replace(/"/g, '&quot;')}" placeholder="英文單字"></td>
+        <td><input type="text" class="ocr-cht-input" value="${cht.replace(/"/g, '&quot;')}" placeholder="中文解釋"></td>
+        <td>
+            <button class="icon-btn delete-btn" title="刪除此列" onclick="this.closest('tr').remove(); updateOcrCount();">
+                <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+            </button>
+        </td>
+    `;
+    ocrResultsBodyEl.appendChild(tr);
+    updateOcrCount();
+}
+
+function updateOcrCount() {
+    if (ocrResultsBodyEl && ocrResultCountEl) {
+        ocrResultCountEl.textContent = ocrResultsBodyEl.querySelectorAll('tr').length;
+    }
+}
+
+function importOcrToFolder() {
+    const folderId = ocrFolderSelectEl.value;
+    const unitName = ocrUnitNameEl.value.trim();
+    
+    if (!folderId) {
+        alert('請選擇要匯入的資料夾！');
+        return;
+    }
+    if (!unitName) {
+        alert('請填寫新回數名稱！');
+        return;
+    }
+    
+    const rows = ocrResultsBodyEl.querySelectorAll('tr');
+    const words = [];
+    
+    rows.forEach(row => {
+        const eng = row.querySelector('.ocr-eng-input').value.trim();
+        const cht = row.querySelector('.ocr-cht-input').value.trim();
+        if (eng) {
+            words.push({
+                id: generateId(),
+                eng: eng,
+                cht: cht
+            });
+        }
+    });
+    
+    if (words.length === 0) {
+        alert('表格中沒有任何單字，無法匯入！');
+        return;
+    }
+    
+    const folder = folders.find(f => f.id === folderId);
+    if (!folder) return;
+    
+    // Add new unit to folder
+    const newUnit = {
+        id: generateId(),
+        name: unitName,
+        words: words
+    };
+    
+    folder.units.push(newUnit);
+    folder._open = true;
+    
+    save();
+    closeOcrModal();
+    selectUnit(folderId, newUnit.id);
+    
+    alert(`成功匯入新回數「${unitName}」，共 ${words.length} 個單字！`);
+}
+
+// =====================================================
 // INIT
 // =====================================================
 // Pre-load voices

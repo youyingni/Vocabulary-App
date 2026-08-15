@@ -6,6 +6,9 @@
     <title>單字本 - 英文單字記憶</title>
     <meta name="description" content="背英文單字 App，支援多益、Parker 單字，卡片滑動複習">
 
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f172a">
@@ -59,6 +62,13 @@
                 <div id="folder-list"></div>
             </div>
 
+            <!-- Sidebar Footer with Sync & Account status -->
+            <div class="sidebar-footer">
+                <button class="sidebar-footer-btn" id="sync-status-btn" onclick="openSyncModal()" title="雲端同步設定">
+                    <span class="material-symbols-outlined sync-icon-animation" id="sync-indicator-icon" style="color: var(--text-secondary);">cloud_queue</span>
+                    <span id="sync-status-text">未設定雲端</span>
+                </button>
+            </div>
         </aside>
 
         <!-- Sidebar Overlay (for mobile drawer background dim) -->
@@ -236,6 +246,60 @@
                         <button class="btn btn-secondary" onclick="addOcrRow()">➕ 新增一列</button>
                         <button class="btn btn-secondary" id="btn-gemini-ocr" onclick="correctOcrWithGemini()" style="border-color: #67e8f9; color: #67e8f9; background: rgba(103,232,249,0.05);">✨ AI 一鍵校正</button>
                         <button class="btn btn-primary" id="btn-import-ocr" onclick="importOcrToFolder()">💾 儲存並匯入新回數</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Cloud Sync Modal Overlay -->
+    <div id="sync-modal-overlay" class="ocr-overlay hidden">
+        <div class="ocr-container card-glass" style="width: 480px;">
+            <div class="ocr-header">
+                <h2>☁️ 雲端備份與多端同步</h2>
+                <button class="ocr-close-btn" onclick="closeSyncModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <div class="ocr-scroll-content" style="gap: 20px;">
+                <!-- Step 1: Database Settings -->
+                <div class="ocr-section">
+                    <h3>1. 設定 Supabase 雲端資料庫</h3>
+                    <p class="ocr-help-text">請填入您在 Supabase 免費申請的專案連接網址與金鑰：</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="url" id="sb-url" placeholder="Supabase Project URL (https://xxxx.supabase.co)" autocomplete="off">
+                        <input type="password" id="sb-key" placeholder="Supabase Anon Key (金鑰)" autocomplete="off">
+                        <button class="btn btn-secondary" onclick="saveSupabaseSettings()">儲存資料庫金鑰</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Account Authentication -->
+                <div class="ocr-section" id="sb-auth-section">
+                    <h3>2. 登入 / 註冊帳號</h3>
+                    <p class="ocr-help-text">請設定您的帳號密碼，登入後即可在多個裝置自動同步單字記錄：</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <input type="email" id="sb-email" placeholder="電子信箱 (Email)" autocomplete="off">
+                        <input type="password" id="sb-password" placeholder="密碼 (Password)" autocomplete="off">
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-primary" style="flex: 1;" onclick="loginSupabase()">登入</button>
+                            <button class="btn btn-secondary" style="flex: 1;" onclick="registerSupabase()">註冊</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Logged In Options -->
+                <div class="ocr-section hidden" id="sb-profile-section">
+                    <h3>2. 個人雲端同步中心</h3>
+                    <div style="background: rgba(255,255,255,0.05); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px;">
+                        <p style="font-size: 0.88rem;">帳號：<span id="sb-user-email" style="color: #67e8f9; font-weight: 600;">-</span></p>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary);">同步狀態：<span id="sb-sync-status">未同步</span></p>
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <button class="btn btn-primary" onclick="triggerManualSyncPush()">💾 將本地資料備份到雲端</button>
+                        <button class="btn btn-secondary" onclick="triggerManualSyncPull()">📥 下載雲端備份（覆蓋本地）</button>
+                        <button class="btn btn-secondary" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logoutSupabase()">登出帳號</button>
                     </div>
                 </div>
             </div>

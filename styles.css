@@ -77,6 +77,55 @@ body {
     padding: 12px 0;
 }
 
+.sidebar-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-color);
+    background: rgba(15, 23, 42, 0.4);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar-footer-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.sidebar-footer-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-footer-btn span {
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.sidebar-footer-btn .material-symbols-outlined {
+    font-size: 20px;
+    transition: transform 0.3s;
+}
+
+/* Syncing animation (rotation) */
+.sync-spin {
+    animation: syncRotate 1.5s linear infinite;
+    color: #67e8f9 !important;
+}
+
+@keyframes syncRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* ===== Global Search Box ===== */
 .search-wrapper {
     position: relative;

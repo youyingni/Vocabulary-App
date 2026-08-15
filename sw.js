@@ -1,8 +1,8 @@
 // =====================================================
 // Service Worker — 單字本 PWA
-// Version: 1.0.6  (bump this string to force a full cache refresh)
+// Version: 1.0.7  (bump this string to force a full cache refresh)
 // =====================================================
-const CACHE_NAME = 'vocab-app-v7';
+const CACHE_NAME = 'vocab-app-v8';
 
 // All files to cache for offline use
 const ASSETS = [
@@ -13,6 +13,7 @@ const ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
   // Google Fonts (cached on first load)
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
   'https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined',

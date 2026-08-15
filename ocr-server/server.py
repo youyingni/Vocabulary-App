@@ -21,8 +21,8 @@ app.add_middleware(
 )
 
 # Initialize PaddleOCR (supports Chinese and English handwriting detection)
-# Use angle_cls=True to automatically rotate images if they are sideways
-ocr = PaddleOCR(use_angle_cls=True, lang="ch")
+# Set use_angle_cls=False to avoid typing_extensions wrapper TypeError in Python 3.12
+ocr = PaddleOCR(use_angle_cls=False, lang="ch")
 
 def process_ocr_results(ocr_result):
     """

@@ -599,13 +599,20 @@ const defaultFolders = [
                 ]
             }
         ]
+    },
+    {
+        id: "folder-handwritten",
+        name: "📝 手寫筆記單字",
+        icon: "edit_note",
+        cssClass: "folder-handwritten",
+        units: []
     }
 ];
 
 // =====================================================
 // STATE
 // =====================================================
-const DATA_VERSION = 3; // Bump this to force-refresh default unit content
+const DATA_VERSION = 4; // Bump this to force-refresh default unit content
 
 let folders     = JSON.parse(localStorage.getItem('folders'))     || null;
 let starredIds  = JSON.parse(localStorage.getItem('starredIds'))  || [];

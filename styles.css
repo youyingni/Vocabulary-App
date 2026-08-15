@@ -13,6 +13,7 @@
     --star-color: #f59e0b;
     --folder-parker: #a78bfa;
     --folder-toeic: #34d399;
+    --folder-handwritten: #14b8a6;
     --font-main: 'Inter', sans-serif;
 }
 
@@ -174,6 +175,8 @@ body {
 /* Folder colour coding */
 .folder-parker .group-icon { color: var(--folder-parker); }
 .folder-toeic .group-icon  { color: var(--folder-toeic); }
+.folder-handwritten .group-icon { color: var(--folder-handwritten); }
+.folder-handwritten .unit-item.active { border-left-color: var(--folder-handwritten); background: rgba(20, 184, 166, 0.12); }
 
 /* Starred section header */
 .starred-group-header { border-left: 3px solid var(--star-color); }

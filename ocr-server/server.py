@@ -1,6 +1,8 @@
 import os
-# Disable Paddle new PIR executor OneDNN runtime bugs globally via env variables
+# Disable Paddle new PIR executor and OneDNN runtime bugs globally via env variables
 os.environ["FLAGS_use_onednn"] = "0"
+os.environ["FLAGS_use_mkldnn"] = "0"
+os.environ["FLAGS_enable_pir_api"] = "0"
 
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException

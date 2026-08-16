@@ -4,6 +4,16 @@ os.environ["FLAGS_use_onednn"] = "0"
 os.environ["FLAGS_use_mkldnn"] = "0"
 os.environ["FLAGS_enable_pir_api"] = "0"
 
+import paddle
+try:
+    paddle.set_flags({
+        "FLAGS_use_onednn": False,
+        "FLAGS_use_mkldnn": False,
+        "FLAGS_enable_pir_api": False
+    })
+except Exception as e:
+    print("Failed to set paddle flags:", e)
+
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware

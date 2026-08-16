@@ -1,4 +1,7 @@
 import os
+# Disable Paddle new PIR executor OneDNN runtime bugs globally via env variables
+os.environ["FLAGS_use_onednn"] = "0"
+
 import uvicorn
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,8 +24,7 @@ app.add_middleware(
 )
 
 # Initialize PaddleOCR (supports Chinese and English handwriting detection)
-# Disable enable_mkldnn to fix new PIR executor OneDNN runtime bugs in Python 3.12
-ocr = PaddleOCR(use_angle_cls=True, lang="ch", use_gpu=False, enable_mkldnn=False)
+ocr = PaddleOCR(use_textline_orientation=True, lang="ch")
 
 def process_ocr_results(ocr_result):
     """

@@ -1687,11 +1687,18 @@ async function correctOcrWithGemini() {
 ${JSON.stringify(wordsToCorrect, null, 2)}`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        // AQ. keys = Bearer Token (new Google AI Studio format)
+        // AIzaSy keys = query parameter (classic format)
+        const isBearer = apiKey.startsWith('AQ.');
+        const apiUrl = isBearer
+            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`
+            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const apiHeaders = { 'Content-Type': 'application/json' };
+        if (isBearer) apiHeaders['Authorization'] = `Bearer ${apiKey}`;
+
+        const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: apiHeaders,
             body: JSON.stringify({
                 contents: [{
                     parts: [{

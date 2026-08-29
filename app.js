@@ -9,22 +9,22 @@ const defaultFolders = [
         cssClass: "folder-blue",
         units: [
             {
-                id: generateId(),
+                id: "static-1",
                 name: "常用片語與句型",
                 words: [
-                    { id: generateId(), eng: "get off", cht: "下車" },
-                    { id: generateId(), eng: "take off", cht: "起飛 / 脫下" },
-                    { id: generateId(), eng: "on account of", cht: "因為" },
-                    { id: generateId(), eng: "in case of", cht: "以防" },
-                    { id: generateId(), eng: "apart from", cht: "除了...之外" },
-                    { id: generateId(), eng: "beat about/around the bush", cht: "拐彎抹角" },
-                    { id: generateId(), eng: "a pile of", cht: "一堆..." },
-                    { id: generateId(), eng: "take a boat ride", cht: "乘船遊玩" },
-                    { id: generateId(), eng: "come in handy", cht: "派上用場" },
-                    { id: generateId(), eng: "be reluctant to", cht: "勉強" },
-                    { id: generateId(), eng: "the moment / as soon as (S+V)", cht: "一...就..." },
-                    { id: generateId(), eng: "be busy (Ving / with N)", cht: "忙著從事..." },
-                    { id: generateId(), eng: "across from", cht: "在...對面" }
+                    { id: "static-2", eng: "get off", cht: "下車" },
+                    { id: "static-3", eng: "take off", cht: "起飛 / 脫下" },
+                    { id: "static-4", eng: "on account of", cht: "因為" },
+                    { id: "static-5", eng: "in case of", cht: "以防" },
+                    { id: "static-6", eng: "apart from", cht: "除了...之外" },
+                    { id: "static-7", eng: "beat about/around the bush", cht: "拐彎抹角" },
+                    { id: "static-8", eng: "a pile of", cht: "一堆..." },
+                    { id: "static-9", eng: "take a boat ride", cht: "乘船遊玩" },
+                    { id: "static-10", eng: "come in handy", cht: "派上用場" },
+                    { id: "static-11", eng: "be reluctant to", cht: "勉強" },
+                    { id: "static-12", eng: "the moment / as soon as (S+V)", cht: "一...就..." },
+                    { id: "static-13", eng: "be busy (Ving / with N)", cht: "忙著從事..." },
+                    { id: "static-14", eng: "across from", cht: "在...對面" }
                 ]
             }
         ]
@@ -36,34 +36,34 @@ const defaultFolders = [
         cssClass: "folder-yellow",
         units: [
             {
-                id: generateId(),
+                id: "static-15",
                 name: "商業、辦公與職涯",
                 words: [
-                    { id: generateId(), eng: "reputation", cht: "名聲" },
-                    { id: generateId(), eng: "discount", cht: "折扣" },
-                    { id: generateId(), eng: "charge", cht: "收費/控告/批評/趕往" },
-                    { id: generateId(), eng: "warranty", cht: "保固/保險" },
-                    { id: generateId(), eng: "orientation", cht: "目標/培訓" },
-                    { id: generateId(), eng: "launch", cht: "發射/啟動/發布會" },
-                    { id: generateId(), eng: "merchandise", cht: "商品/促銷" },
-                    { id: generateId(), eng: "shareholder", cht: "股東" },
-                    { id: generateId(), eng: "intern", cht: "實習生" },
-                    { id: generateId(), eng: "incentives", cht: "激勵" },
-                    { id: generateId(), eng: "invest", cht: "投資/投入" },
-                    { id: generateId(), eng: "fund-raising", cht: "籌款" },
-                    { id: generateId(), eng: "shift", cht: "改變/去除/輪班" },
-                    { id: generateId(), eng: "merger", cht: "合併" },
-                    { id: generateId(), eng: "brochure", cht: "手冊" },
-                    { id: generateId(), eng: "representative", cht: "代表的/代理人" },
-                    { id: generateId(), eng: "represent", cht: "代表/意味/表現/提出" },
-                    { id: generateId(), eng: "agenda", cht: "議程" },
-                    { id: generateId(), eng: "direction", cht: "方向" },
-                    { id: generateId(), eng: "keynote", cht: "主題" },
-                    { id: generateId(), eng: "appointment", cht: "預約/約定/任命" },
-                    { id: generateId(), eng: "proceeds", cht: "收益" },
-                    { id: generateId(), eng: "proceed", cht: "前進/繼續" },
-                    { id: generateId(), eng: "take paid/annual leave", cht: "請年假" },
-                    { id: generateId(), eng: "comp time", cht: "補休" }
+                    { id: "static-16", eng: "reputation", cht: "名聲" },
+                    { id: "static-17", eng: "discount", cht: "折扣" },
+                    { id: "static-18", eng: "charge", cht: "收費/控告/批評/趕往" },
+                    { id: "static-19", eng: "warranty", cht: "保固/保險" },
+                    { id: "static-20", eng: "orientation", cht: "目標/培訓" },
+                    { id: "static-21", eng: "launch", cht: "發射/啟動/發布會" },
+                    { id: "static-22", eng: "merchandise", cht: "商品/促銷" },
+                    { id: "static-23", eng: "shareholder", cht: "股東" },
+                    { id: "static-24", eng: "intern", cht: "實習生" },
+                    { id: "static-25", eng: "incentives", cht: "激勵" },
+                    { id: "static-26", eng: "invest", cht: "投資/投入" },
+                    { id: "static-27", eng: "fund-raising", cht: "籌款" },
+                    { id: "static-28", eng: "shift", cht: "改變/去除/輪班" },
+                    { id: "static-29", eng: "merger", cht: "合併" },
+                    { id: "static-30", eng: "brochure", cht: "手冊" },
+                    { id: "static-31", eng: "representative", cht: "代表的/代理人" },
+                    { id: "static-32", eng: "represent", cht: "代表/意味/表現/提出" },
+                    { id: "static-33", eng: "agenda", cht: "議程" },
+                    { id: "static-34", eng: "direction", cht: "方向" },
+                    { id: "static-35", eng: "keynote", cht: "主題" },
+                    { id: "static-36", eng: "appointment", cht: "預約/約定/任命" },
+                    { id: "static-37", eng: "proceeds", cht: "收益" },
+                    { id: "static-38", eng: "proceed", cht: "前進/繼續" },
+                    { id: "static-39", eng: "take paid/annual leave", cht: "請年假" },
+                    { id: "static-40", eng: "comp time", cht: "補休" }
                 ]
             }
         ]
@@ -75,48 +75,48 @@ const defaultFolders = [
         cssClass: "folder-green",
         units: [
             {
-                id: generateId(),
+                id: "static-41",
                 name: "日常、生活與雜項",
                 words: [
-                    { id: generateId(), eng: "boiled", cht: "水煮" },
-                    { id: generateId(), eng: "fry", cht: "煎" },
-                    { id: generateId(), eng: "barbecue", cht: "燒烤" },
-                    { id: generateId(), eng: "bake", cht: "烘烤" },
-                    { id: generateId(), eng: "grill", cht: "烤肉架" },
-                    { id: generateId(), eng: "plate", cht: "大盤子" },
-                    { id: generateId(), eng: "bowl", cht: "碗" },
-                    { id: generateId(), eng: "ingredient", cht: "成分/要素" },
-                    { id: generateId(), eng: "caterer", cht: "提供餐飲服務的人" },
-                    { id: generateId(), eng: "Freshman year", cht: "大一" },
-                    { id: generateId(), eng: "Sophomore year", cht: "大二" },
-                    { id: generateId(), eng: "Junior year", cht: "大三" },
-                    { id: generateId(), eng: "Senior year", cht: "大四" },
-                    { id: generateId(), eng: "first/second/third/home base", cht: "一二三本壘" },
-                    { id: generateId(), eng: "home plate", cht: "本壘板" },
-                    { id: generateId(), eng: "hit a home run", cht: "擊出全壘打" },
-                    { id: generateId(), eng: "hit a double", cht: "擊出二壘安打" },
-                    { id: generateId(), eng: "shampoo", cht: "洗髮精" },
-                    { id: generateId(), eng: "soap", cht: "肥皂" },
-                    { id: generateId(), eng: "toothpaste", cht: "牙膏" },
-                    { id: generateId(), eng: "paper clip", cht: "迴紋針" },
-                    { id: generateId(), eng: "stapler", cht: "釘書機" },
-                    { id: generateId(), eng: "appliance", cht: "家電" },
-                    { id: generateId(), eng: "tablet", cht: "平板" },
-                    { id: generateId(), eng: "laptop", cht: "筆電" },
-                    { id: generateId(), eng: "thunderstorm", cht: "雷雨" },
-                    { id: generateId(), eng: "lightning", cht: "閃電" },
-                    { id: generateId(), eng: "scenic", cht: "風景優美的" },
-                    { id: generateId(), eng: "scenery", cht: "風景" },
-                    { id: generateId(), eng: "dock/pier", cht: "碼頭" },
-                    { id: generateId(), eng: "vet", cht: "獸醫" },
-                    { id: generateId(), eng: "highway", cht: "高速公路" },
-                    { id: generateId(), eng: "currency", cht: "貨幣" },
-                    { id: generateId(), eng: "evacuate", cht: "疏散" },
-                    { id: generateId(), eng: "hesitate", cht: "猶豫" },
-                    { id: generateId(), eng: "pharmaceutical", cht: "製藥的/藥物" },
-                    { id: generateId(), eng: "niece", cht: "姪女/外甥女" },
-                    { id: generateId(), eng: "auditorium", cht: "聽眾席" },
-                    { id: generateId(), eng: "asthma", cht: "氣喘" }
+                    { id: "static-42", eng: "boiled", cht: "水煮" },
+                    { id: "static-43", eng: "fry", cht: "煎" },
+                    { id: "static-44", eng: "barbecue", cht: "燒烤" },
+                    { id: "static-45", eng: "bake", cht: "烘烤" },
+                    { id: "static-46", eng: "grill", cht: "烤肉架" },
+                    { id: "static-47", eng: "plate", cht: "大盤子" },
+                    { id: "static-48", eng: "bowl", cht: "碗" },
+                    { id: "static-49", eng: "ingredient", cht: "成分/要素" },
+                    { id: "static-50", eng: "caterer", cht: "提供餐飲服務的人" },
+                    { id: "static-51", eng: "Freshman year", cht: "大一" },
+                    { id: "static-52", eng: "Sophomore year", cht: "大二" },
+                    { id: "static-53", eng: "Junior year", cht: "大三" },
+                    { id: "static-54", eng: "Senior year", cht: "大四" },
+                    { id: "static-55", eng: "first/second/third/home base", cht: "一二三本壘" },
+                    { id: "static-56", eng: "home plate", cht: "本壘板" },
+                    { id: "static-57", eng: "hit a home run", cht: "擊出全壘打" },
+                    { id: "static-58", eng: "hit a double", cht: "擊出二壘安打" },
+                    { id: "static-59", eng: "shampoo", cht: "洗髮精" },
+                    { id: "static-60", eng: "soap", cht: "肥皂" },
+                    { id: "static-61", eng: "toothpaste", cht: "牙膏" },
+                    { id: "static-62", eng: "paper clip", cht: "迴紋針" },
+                    { id: "static-63", eng: "stapler", cht: "釘書機" },
+                    { id: "static-64", eng: "appliance", cht: "家電" },
+                    { id: "static-65", eng: "tablet", cht: "平板" },
+                    { id: "static-66", eng: "laptop", cht: "筆電" },
+                    { id: "static-67", eng: "thunderstorm", cht: "雷雨" },
+                    { id: "static-68", eng: "lightning", cht: "閃電" },
+                    { id: "static-69", eng: "scenic", cht: "風景優美的" },
+                    { id: "static-70", eng: "scenery", cht: "風景" },
+                    { id: "static-71", eng: "dock/pier", cht: "碼頭" },
+                    { id: "static-72", eng: "vet", cht: "獸醫" },
+                    { id: "static-73", eng: "highway", cht: "高速公路" },
+                    { id: "static-74", eng: "currency", cht: "貨幣" },
+                    { id: "static-75", eng: "evacuate", cht: "疏散" },
+                    { id: "static-76", eng: "hesitate", cht: "猶豫" },
+                    { id: "static-77", eng: "pharmaceutical", cht: "製藥的/藥物" },
+                    { id: "static-78", eng: "niece", cht: "姪女/外甥女" },
+                    { id: "static-79", eng: "auditorium", cht: "聽眾席" },
+                    { id: "static-80", eng: "asthma", cht: "氣喘" }
                 ]
             }
         ]
@@ -128,22 +128,22 @@ const defaultFolders = [
         cssClass: "folder-purple",
         units: [
             {
-                id: generateId(),
+                id: "static-81",
                 name: "易混淆與相近字群",
                 words: [
-                    { id: generateId(), eng: "register", cht: "登記/註冊/表達" },
-                    { id: generateId(), eng: "registration", cht: "登記/註冊" },
-                    { id: generateId(), eng: "mimic", cht: "模仿" },
-                    { id: generateId(), eng: "comic", cht: "好笑的/漫畫" },
-                    { id: generateId(), eng: "panic", cht: "驚恐" },
-                    { id: generateId(), eng: "penalty", cht: "處罰/罰金" },
-                    { id: generateId(), eng: "penal", cht: "不利的/處罰的" },
-                    { id: generateId(), eng: "drawback", cht: "弱點/缺點" },
-                    { id: generateId(), eng: "draw back", cht: "退縮" },
-                    { id: generateId(), eng: "latest", cht: "最新的" },
-                    { id: generateId(), eng: "broad", cht: "寬廣的" },
-                    { id: generateId(), eng: "board", cht: "木板/董事會" },
-                    { id: generateId(), eng: "well-stocked / provisioned / furnished", cht: "物資充足的" }
+                    { id: "static-82", eng: "register", cht: "登記/註冊/表達" },
+                    { id: "static-83", eng: "registration", cht: "登記/註冊" },
+                    { id: "static-84", eng: "mimic", cht: "模仿" },
+                    { id: "static-85", eng: "comic", cht: "好笑的/漫畫" },
+                    { id: "static-86", eng: "panic", cht: "驚恐" },
+                    { id: "static-87", eng: "penalty", cht: "處罰/罰金" },
+                    { id: "static-88", eng: "penal", cht: "不利的/處罰的" },
+                    { id: "static-89", eng: "drawback", cht: "弱點/缺點" },
+                    { id: "static-90", eng: "draw back", cht: "退縮" },
+                    { id: "static-91", eng: "latest", cht: "最新的" },
+                    { id: "static-92", eng: "broad", cht: "寬廣的" },
+                    { id: "static-93", eng: "board", cht: "木板/董事會" },
+                    { id: "static-94", eng: "well-stocked / provisioned / furnished", cht: "物資充足的" }
                 ]
             }
         ]
@@ -841,6 +841,68 @@ folders.forEach(folder => {
 });
 if (v2Migrated) save();
 
+// V2 Deduplication Migration
+let v2Deduplicated = localStorage.getItem('v2Deduplicated_1');
+if (!v2Deduplicated) {
+    let deduplicated = false;
+    folders.forEach(folder => {
+        let uniqueUnits = {};
+        let newUnits = [];
+        folder.units.forEach(unit => {
+            if (!uniqueUnits[unit.name]) {
+                uniqueUnits[unit.name] = unit;
+                newUnits.push(unit);
+            } else {
+                // Merge progress into the kept unit
+                let keptUnit = uniqueUnits[unit.name];
+                unit.words.forEach(dupWord => {
+                    let keptWord = keptUnit.words.find(w => w.eng === dupWord.eng);
+                    if (keptWord) {
+                        if (dupWord.mastery > keptWord.mastery) keptWord.mastery = dupWord.mastery;
+                        keptWord.correctCount += dupWord.correctCount || 0;
+                        keptWord.wrongCount += dupWord.wrongCount || 0;
+                        if (dupWord.streak > keptWord.streak) keptWord.streak = dupWord.streak;
+                        if (dupWord.nextReviewAt) {
+                            if (!keptWord.nextReviewAt || new Date(dupWord.nextReviewAt) < new Date(keptWord.nextReviewAt)) {
+                                keptWord.nextReviewAt = dupWord.nextReviewAt;
+                            }
+                        }
+                    }
+                });
+                deduplicated = true;
+            }
+        });
+        folder.units = newUnits;
+        
+        // Also deduplicate words within each unit just in case
+        folder.units.forEach(unit => {
+            let uniqueWords = {};
+            let newWords = [];
+            unit.words.forEach(w => {
+                if (!uniqueWords[w.eng]) {
+                    uniqueWords[w.eng] = w;
+                    newWords.push(w);
+                } else {
+                    let keptWord = uniqueWords[w.eng];
+                    if (w.mastery > keptWord.mastery) keptWord.mastery = w.mastery;
+                    keptWord.correctCount += w.correctCount || 0;
+                    keptWord.wrongCount += w.wrongCount || 0;
+                    if (w.streak > keptWord.streak) keptWord.streak = w.streak;
+                    deduplicated = true;
+                }
+            });
+            unit.words = newWords;
+        });
+    });
+    
+    if (deduplicated) {
+        save();
+        console.log("Deduplication completed");
+    }
+    localStorage.setItem('v2Deduplicated_1', 'true');
+}
+
+
 
 // =====================================================
 // PERSISTENCE
@@ -1470,7 +1532,7 @@ function deleteUnit(folderId, unitId, event) {
 function addUnit(folderId, name) {
     const folder = folders.find(f => f.id === folderId);
     if (!folder) return;
-    const newUnit = { id: generateId(), name, words: [] };
+    const newUnit = { id: "static-95", name, words: [] };
     folder.units.push(newUnit);
     folder._open = true;
     save();
@@ -1481,7 +1543,7 @@ function addWord(eng, cht) {
     const folder = folders.find(f => f.id === currentView.folderId);
     const unit   = folder?.units.find(u => u.id === currentView.unitId);
     if (!unit) return;
-    const newWord = { id: generateId(), eng, cht };
+    const newWord = { id: "static-96", eng, cht };
     unit.words.push(newWord);
     save();
     renderMainContent();
@@ -2031,7 +2093,7 @@ if (confirmImportBtn) {
                     mergedCount++;
                 } else {
                     const newWord = {
-                        id: generateId(),
+                        id: "static-97",
                         eng: cand.eng,
                         cht: cand.cht,
                         mastery: cand.isNotFamiliar ? 0 : 0,

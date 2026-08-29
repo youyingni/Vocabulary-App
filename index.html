@@ -321,32 +321,32 @@
 
 
     <!-- Data Backup & Restore Modal Overlay -->
-    <div id="backup-modal-overlay" class="ocr-overlay hidden">
-        <div class="ocr-container card-glass" style="width: 480px;">
-            <div class="ocr-header">
+    <div id="backup-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-container card-glass" style="width: 480px;">
+            <div class="modal-header">
                 <h2>📦 資料備份與多端轉移</h2>
-                <button class="ocr-close-btn" onclick="closeBackupModal()">
+                <button class="modal-close-btn" onclick="closeBackupModal()">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             
-            <div class="ocr-scroll-content" style="gap: 20px;">
+            <div class="modal-scroll-content" style="gap: 20px;">
                 <!-- Step 1: Export -->
-                <div class="ocr-section">
+                <div class="modal-section">
                     <h3>📤 匯出備份 (JSON)</h3>
-                    <p class="ocr-help-text">將所有的單字、回數、與學習紀錄匯出為 JSON 檔案保存：</p>
+                    <p class="modal-help-text">將所有的單字、回數、與學習紀錄匯出為 JSON 檔案保存：</p>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="btn btn-primary" onclick="exportJSONBackup()">📥 下載備份檔案 (.json)</button>
-                        <p class="ocr-help-text" style="color: #34d399; font-weight: 500; display: none;" id="export-success-msg">✅ 備份已下載！</p>
+                        <p class="modal-help-text" style="color: #34d399; font-weight: 500; display: none;" id="export-success-msg">✅ 備份已下載！</p>
                     </div>
                 </div>
 
                 <hr style="border: none; border-top: 1px solid var(--border-color); margin: 4px 0;">
 
                 <!-- Step 2: Import -->
-                <div class="ocr-section">
+                <div class="modal-section">
                     <h3>📥 匯入還原 (JSON)</h3>
-                    <p class="ocr-help-text">選擇之前匯出的 JSON 檔案進行還原。您可以選擇「合併」(保留既有資料) 或「覆寫」(刪除目前所有資料)：</p>
+                    <p class="modal-help-text">選擇之前匯出的 JSON 檔案進行還原。您可以選擇「合併」(保留既有資料) 或「覆寫」(刪除目前所有資料)：</p>
                     <div style="display: flex; flex-direction: column; gap: 10px;">
                         <input type="file" id="import-json-file" accept=".json" style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); padding: 10px; font-size: 0.9rem; width: 100%; outline: none;">
                         <div style="display: flex; gap: 10px;">

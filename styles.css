@@ -877,9 +877,9 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
 }
 
 /* ===================================================
-   OCR IMPORT MODAL OVERLAY
+   MODAL OVERLAY
    =================================================== */
-.ocr-overlay {
+.modal-overlay {
     position: fixed;
     inset: 0;
     z-index: 1050;
@@ -892,9 +892,9 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     animation: overlayIn 0.25s ease;
     padding: 20px;
 }
-.ocr-overlay.hidden { display: none !important; }
+.modal-overlay.hidden { display: none !important; }
 
-.ocr-container {
+.modal-container {
     width: 720px;
     max-width: 95vw;
     max-height: 90vh;
@@ -907,7 +907,7 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
 }
 
-.ocr-header {
+.modal-header {
     padding: 20px 24px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -915,9 +915,9 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     align-items: center;
     flex-shrink: 0;
 }
-.ocr-header h2 { font-size: 1.3rem; font-weight: 700; color: #f8fafc; }
+.modal-header h2 { font-size: 1.3rem; font-weight: 700; color: #f8fafc; }
 
-.ocr-close-btn {
+.modal-close-btn {
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -927,9 +927,9 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     border-radius: 50%;
     transition: all 0.2s;
 }
-.ocr-close-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.modal-close-btn:hover { background: rgba(255,255,255,0.1); color: white; }
 
-.ocr-scroll-content {
+.modal-scroll-content {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
@@ -938,17 +938,16 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     gap: 28px;
 }
 
-.ocr-section {
+.modal-section {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
-.ocr-section h3 { font-size: 1rem; font-weight: 600; color: #67e8f9; }
-.ocr-help-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
+.modal-section h3 { font-size: 1rem; font-weight: 600; color: #67e8f9; }
+.modal-help-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; }
 
 /* ngrok setting */
-.ocr-settings-row {
+.modal-settings-row {
     display: flex;
     gap: 12px;
-}
 }

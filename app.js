@@ -3,6 +3,152 @@
 // =====================================================
 const defaultFolders = [
     {
+        id: "folder-toeic-phrases",
+        name: "TOEIC 常用片語與句型",
+        icon: "school",
+        cssClass: "folder-blue",
+        units: [
+            {
+                id: generateId(),
+                name: "常用片語與句型",
+                words: [
+                    { id: generateId(), eng: "get off", cht: "下車" },
+                    { id: generateId(), eng: "take off", cht: "起飛 / 脫下" },
+                    { id: generateId(), eng: "on account of", cht: "因為" },
+                    { id: generateId(), eng: "in case of", cht: "以防" },
+                    { id: generateId(), eng: "apart from", cht: "除了...之外" },
+                    { id: generateId(), eng: "beat about/around the bush", cht: "拐彎抹角" },
+                    { id: generateId(), eng: "a pile of", cht: "一堆..." },
+                    { id: generateId(), eng: "take a boat ride", cht: "乘船遊玩" },
+                    { id: generateId(), eng: "come in handy", cht: "派上用場" },
+                    { id: generateId(), eng: "be reluctant to", cht: "勉強" },
+                    { id: generateId(), eng: "the moment / as soon as (S+V)", cht: "一...就..." },
+                    { id: generateId(), eng: "be busy (Ving / with N)", cht: "忙著從事..." },
+                    { id: generateId(), eng: "across from", cht: "在...對面" }
+                ]
+            }
+        ]
+    },
+    {
+        id: "folder-toeic-business",
+        name: "TOEIC 商業、辦公與職涯",
+        icon: "work",
+        cssClass: "folder-yellow",
+        units: [
+            {
+                id: generateId(),
+                name: "商業、辦公與職涯",
+                words: [
+                    { id: generateId(), eng: "reputation", cht: "名聲" },
+                    { id: generateId(), eng: "discount", cht: "折扣" },
+                    { id: generateId(), eng: "charge", cht: "收費/控告/批評/趕往" },
+                    { id: generateId(), eng: "warranty", cht: "保固/保險" },
+                    { id: generateId(), eng: "orientation", cht: "目標/培訓" },
+                    { id: generateId(), eng: "launch", cht: "發射/啟動/發布會" },
+                    { id: generateId(), eng: "merchandise", cht: "商品/促銷" },
+                    { id: generateId(), eng: "shareholder", cht: "股東" },
+                    { id: generateId(), eng: "intern", cht: "實習生" },
+                    { id: generateId(), eng: "incentives", cht: "激勵" },
+                    { id: generateId(), eng: "invest", cht: "投資/投入" },
+                    { id: generateId(), eng: "fund-raising", cht: "籌款" },
+                    { id: generateId(), eng: "shift", cht: "改變/去除/輪班" },
+                    { id: generateId(), eng: "merger", cht: "合併" },
+                    { id: generateId(), eng: "brochure", cht: "手冊" },
+                    { id: generateId(), eng: "representative", cht: "代表的/代理人" },
+                    { id: generateId(), eng: "represent", cht: "代表/意味/表現/提出" },
+                    { id: generateId(), eng: "agenda", cht: "議程" },
+                    { id: generateId(), eng: "direction", cht: "方向" },
+                    { id: generateId(), eng: "keynote", cht: "主題" },
+                    { id: generateId(), eng: "appointment", cht: "預約/約定/任命" },
+                    { id: generateId(), eng: "proceeds", cht: "收益" },
+                    { id: generateId(), eng: "proceed", cht: "前進/繼續" },
+                    { id: generateId(), eng: "take paid/annual leave", cht: "請年假" },
+                    { id: generateId(), eng: "comp time", cht: "補休" }
+                ]
+            }
+        ]
+    },
+    {
+        id: "folder-toeic-daily",
+        name: "TOEIC 日常、生活與雜項",
+        icon: "coffee",
+        cssClass: "folder-green",
+        units: [
+            {
+                id: generateId(),
+                name: "日常、生活與雜項",
+                words: [
+                    { id: generateId(), eng: "boiled", cht: "水煮" },
+                    { id: generateId(), eng: "fry", cht: "煎" },
+                    { id: generateId(), eng: "barbecue", cht: "燒烤" },
+                    { id: generateId(), eng: "bake", cht: "烘烤" },
+                    { id: generateId(), eng: "grill", cht: "烤肉架" },
+                    { id: generateId(), eng: "plate", cht: "大盤子" },
+                    { id: generateId(), eng: "bowl", cht: "碗" },
+                    { id: generateId(), eng: "ingredient", cht: "成分/要素" },
+                    { id: generateId(), eng: "caterer", cht: "提供餐飲服務的人" },
+                    { id: generateId(), eng: "Freshman year", cht: "大一" },
+                    { id: generateId(), eng: "Sophomore year", cht: "大二" },
+                    { id: generateId(), eng: "Junior year", cht: "大三" },
+                    { id: generateId(), eng: "Senior year", cht: "大四" },
+                    { id: generateId(), eng: "first/second/third/home base", cht: "一二三本壘" },
+                    { id: generateId(), eng: "home plate", cht: "本壘板" },
+                    { id: generateId(), eng: "hit a home run", cht: "擊出全壘打" },
+                    { id: generateId(), eng: "hit a double", cht: "擊出二壘安打" },
+                    { id: generateId(), eng: "shampoo", cht: "洗髮精" },
+                    { id: generateId(), eng: "soap", cht: "肥皂" },
+                    { id: generateId(), eng: "toothpaste", cht: "牙膏" },
+                    { id: generateId(), eng: "paper clip", cht: "迴紋針" },
+                    { id: generateId(), eng: "stapler", cht: "釘書機" },
+                    { id: generateId(), eng: "appliance", cht: "家電" },
+                    { id: generateId(), eng: "tablet", cht: "平板" },
+                    { id: generateId(), eng: "laptop", cht: "筆電" },
+                    { id: generateId(), eng: "thunderstorm", cht: "雷雨" },
+                    { id: generateId(), eng: "lightning", cht: "閃電" },
+                    { id: generateId(), eng: "scenic", cht: "風景優美的" },
+                    { id: generateId(), eng: "scenery", cht: "風景" },
+                    { id: generateId(), eng: "dock/pier", cht: "碼頭" },
+                    { id: generateId(), eng: "vet", cht: "獸醫" },
+                    { id: generateId(), eng: "highway", cht: "高速公路" },
+                    { id: generateId(), eng: "currency", cht: "貨幣" },
+                    { id: generateId(), eng: "evacuate", cht: "疏散" },
+                    { id: generateId(), eng: "hesitate", cht: "猶豫" },
+                    { id: generateId(), eng: "pharmaceutical", cht: "製藥的/藥物" },
+                    { id: generateId(), eng: "niece", cht: "姪女/外甥女" },
+                    { id: generateId(), eng: "auditorium", cht: "聽眾席" },
+                    { id: generateId(), eng: "asthma", cht: "氣喘" }
+                ]
+            }
+        ]
+    },
+    {
+        id: "folder-toeic-similar",
+        name: "TOEIC 易混淆與相近字群",
+        icon: "compare_arrows",
+        cssClass: "folder-purple",
+        units: [
+            {
+                id: generateId(),
+                name: "易混淆與相近字群",
+                words: [
+                    { id: generateId(), eng: "register", cht: "登記/註冊/表達" },
+                    { id: generateId(), eng: "registration", cht: "登記/註冊" },
+                    { id: generateId(), eng: "mimic", cht: "模仿" },
+                    { id: generateId(), eng: "comic", cht: "好笑的/漫畫" },
+                    { id: generateId(), eng: "panic", cht: "驚恐" },
+                    { id: generateId(), eng: "penalty", cht: "處罰/罰金" },
+                    { id: generateId(), eng: "penal", cht: "不利的/處罰的" },
+                    { id: generateId(), eng: "drawback", cht: "弱點/缺點" },
+                    { id: generateId(), eng: "draw back", cht: "退縮" },
+                    { id: generateId(), eng: "latest", cht: "最新的" },
+                    { id: generateId(), eng: "broad", cht: "寬廣的" },
+                    { id: generateId(), eng: "board", cht: "木板/董事會" },
+                    { id: generateId(), eng: "well-stocked / provisioned / furnished", cht: "物資充足的" }
+                ]
+            }
+        ]
+    },
+    {
         id: "folder-parker",
         name: "Parker",
         icon: "menu_book",
@@ -612,7 +758,7 @@ const defaultFolders = [
 // =====================================================
 // STATE
 // =====================================================
-const DATA_VERSION = 4; // Bump this to force-refresh default unit content
+const DATA_VERSION = 6; // Bump this to force-refresh default unit content
 
 let folders     = JSON.parse(localStorage.getItem('folders'))     || null;
 let starredIds  = JSON.parse(localStorage.getItem('starredIds'))  || [];
@@ -673,6 +819,29 @@ if (!folders) {
     if (changed) save();
 }
 
+// V2 Migration: Ensure all words have required fields
+let v2Migrated = false;
+folders.forEach(folder => {
+    folder.units.forEach(unit => {
+        unit.words.forEach(word => {
+            if (word.mastery === undefined) { word.mastery = 0; v2Migrated = true; }
+            if (word.correctCount === undefined) word.correctCount = 0;
+            if (word.wrongCount === undefined) word.wrongCount = 0;
+            if (word.streak === undefined) word.streak = 0;
+            if (word.lastReviewedAt === undefined) word.lastReviewedAt = null;
+            if (word.lastWrongAt === undefined) word.lastWrongAt = null;
+            if (word.nextReviewAt === undefined) word.nextReviewAt = null;
+            if (word.priority === undefined) word.priority = 'normal';
+            if (word.confusionGroup === undefined) word.confusionGroup = null;
+            if (!word.notes) word.notes = [];
+            if (!word.examples) word.examples = [];
+            if (word.sourceCount === undefined) word.sourceCount = 1;
+        });
+    });
+});
+if (v2Migrated) save();
+
+
 // =====================================================
 // PERSISTENCE
 // =====================================================
@@ -697,7 +866,7 @@ const folderListEl       = document.getElementById('folder-list');
 const starredCountEl     = document.getElementById('starred-count');
 const starredNavEl       = document.getElementById('starred-nav');
 const wordSectionEl      = document.getElementById('word-section');
-const emptyStateEl       = document.getElementById('empty-state');
+const dashboardSectionEl = document.getElementById('dashboard-section');
 const currentTitleEl     = document.getElementById('current-unit-title');
 const wordListEl         = document.getElementById('word-list');
 const wordCountEl        = document.getElementById('word-count');
@@ -713,6 +882,41 @@ const sidebarOverlayEl   = document.getElementById('sidebar-overlay');
 const globalSearchInput  = document.getElementById('global-search-input');
 const clearSearchBtn     = document.getElementById('clear-search-btn');
 
+const importSectionEl         = document.getElementById('import-section');
+const importFolderSelect      = document.getElementById('import-folder-select');
+const importTextarea          = document.getElementById('import-textarea');
+const analyzeImportBtn        = document.getElementById('analyze-import-btn');
+const importPreviewContainer  = document.getElementById('import-preview-container');
+const importPreviewList       = document.getElementById('import-preview-list');
+const importPreviewCount      = document.getElementById('import-preview-count');
+const importUnrecognizedContainer = document.getElementById('import-unrecognized-container');
+const importUnrecognizedText  = document.getElementById('import-unrecognized-text');
+const confirmImportBtn        = document.getElementById('confirm-import-btn');
+const importSelectAllBtn      = document.getElementById('import-select-all-btn');
+const importDeselectAllBtn    = document.getElementById('import-deselect-all-btn');
+
+const confusionSectionEl = document.getElementById('confusion-section');
+const startConfusionBtn = document.getElementById('start-confusion-btn');
+const cqOverlay = document.getElementById('confusion-quiz-overlay');
+const cqProgress = document.getElementById('cq-progress');
+const cqExitBtn = document.getElementById('cq-exit');
+const cqCounter = document.getElementById('cq-counter');
+const cqQuestion = document.getElementById('cq-question');
+const cqOptions = document.getElementById('cq-options');
+
+const dashDueEl = document.getElementById('dash-due');
+const dashWrongEl = document.getElementById('dash-wrong');
+const dashNewEl = document.getElementById('dash-new');
+const dashMasteredEl = document.getElementById('dash-mastered');
+const startTodayBtn = document.getElementById('start-today-btn');
+
+const statsSectionEl = document.getElementById('stats-section');
+const statTotalEl = document.getElementById('stat-total');
+const statM0El = document.getElementById('stat-m0');
+const statM12El = document.getElementById('stat-m12');
+const statM34El = document.getElementById('stat-m34');
+const statM5El = document.getElementById('stat-m5');
+
 // Keep track of the last viewed unit/starred tab before a search query was typed
 let lastActiveView = currentView.type !== 'search' ? { ...currentView } : { type: 'starred', folderId: null, unitId: null };
 
@@ -723,6 +927,18 @@ function renderSidebar() {
     // Starred badge
     starredCountEl.textContent = starredIds.length;
     starredNavEl.classList.toggle('active', currentView.type === 'starred');
+
+    const wrongNavEl = document.getElementById('wrong-nav');
+    if (wrongNavEl) wrongNavEl.classList.toggle('active', currentView.type === 'wrong');
+
+    const importNavEl = document.getElementById('import-nav');
+    if (importNavEl) importNavEl.classList.toggle('active', currentView.type === 'import');
+
+    const confusionNavEl = document.getElementById('confusion-nav');
+    if (confusionNavEl) confusionNavEl.classList.toggle('active', currentView.type === 'confusion');
+
+    const statsNavEl = document.getElementById('stats-nav');
+    if (statsNavEl) statsNavEl.classList.toggle('active', currentView.type === 'stats');
 
     // Render folder groups
     folderListEl.innerHTML = '';
@@ -800,18 +1016,75 @@ function selectStarred() {
     closeMobileSidebar();
 }
 
-// =====================================================
-// RENDER MAIN
-// =====================================================
+function selectWrongWords() {
+    clearSearchInputSilently();
+    currentView = { type: 'wrong', folderId: null, unitId: null };
+    lastActiveView = { ...currentView };
+    isTestMode = false;
+    save();
+    renderSidebar();
+    renderMainContent();
+    closeMobileSidebar();
+}
+
+function selectImport() {
+    clearSearchInputSilently();
+    currentView = { type: 'import', folderId: null, unitId: null };
+    lastActiveView = { ...currentView };
+    isTestMode = false;
+    save();
+    renderSidebar();
+    renderMainContent();
+    closeMobileSidebar();
+}
+
+function selectConfusion() {
+    clearSearchInputSilently();
+    currentView = { type: 'confusion', folderId: null, unitId: null };
+    lastActiveView = { ...currentView };
+    isTestMode = false;
+    save();
+    renderSidebar();
+    renderMainContent();
+    closeMobileSidebar();
+}
+
+function selectStats() {
+    clearSearchInputSilently();
+    currentView = { type: 'stats', folderId: null, unitId: null };
+    lastActiveView = { ...currentView };
+    isTestMode = false;
+    save();
+    renderSidebar();
+    renderMainContent();
+    closeMobileSidebar();
+}
+
 function renderMainContent() {
+    wordSectionEl.classList.add('hidden');
+    if (dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
+    if (importSectionEl) importSectionEl.classList.add('hidden');
+    if (confusionSectionEl) confusionSectionEl.classList.add('hidden');
+    if (statsSectionEl) statsSectionEl.classList.add('hidden');
+
     if (currentView.type === 'search') {
         renderSearchView();
     } else if (currentView.type === 'starred') {
         renderStarredView();
+    } else if (currentView.type === 'wrong') {
+        renderWrongWordsView();
+    } else if (currentView.type === 'import') {
+        renderImportView();
+    } else if (currentView.type === 'confusion') {
+        renderConfusionView();
+    } else if (currentView.type === 'stats') {
+        renderStatsView();
     } else if (currentView.type === 'unit' && currentView.unitId) {
+        wordSectionEl.classList.remove('hidden');
         renderUnitView();
     } else {
-        showEmpty();
+        if (dashboardSectionEl) dashboardSectionEl.classList.remove('hidden');
+        showDashboard();
     }
 }
 
@@ -837,21 +1110,54 @@ function setFormattedTitle(titleText) {
     }
 }
 
-function showEmpty() {
-    wordSectionEl.classList.add('hidden');
-    emptyStateEl.classList.remove('hidden');
+function showDashboard() {
     headerActions.classList.add('hidden');
-    setFormattedTitle('請選擇或新增回數');
+    setFormattedTitle('🌅 今日學習總覽');
+    
+    let dueCount = 0;
+    let wrongCount = 0;
+    let newCount = 0;
+    let masteredCount = 0;
+    
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    folders.forEach(folder => {
+        folder.units.forEach(unit => {
+            unit.words.forEach(word => {
+                // Due
+                if (word.nextReviewAt) {
+                    const reviewDate = new Date(word.nextReviewAt);
+                    if (reviewDate <= today) dueCount++;
+                } else if (word.mastery > 0 && word.mastery < 5) {
+                    // Fallback if no nextReviewAt but not mastered and not new
+                    dueCount++;
+                }
+                
+                // Wrong
+                if (word.wrongCount > 0) wrongCount++;
+                
+                // New
+                if ((!word.mastery || word.mastery === 0) && !word.lastReviewedAt) newCount++;
+                
+                // Mastered
+                if (word.mastery >= 5) masteredCount++;
+            });
+        });
+    });
+    
+    if (dashDueEl) dashDueEl.textContent = dueCount;
+    if (dashWrongEl) dashWrongEl.textContent = wrongCount;
+    if (dashNewEl) dashNewEl.textContent = newCount;
+    if (dashMasteredEl) dashMasteredEl.textContent = masteredCount;
 }
 
 function renderUnitView() {
     const folder = folders.find(f => f.id === currentView.folderId);
     const unit   = folder?.units.find(u => u.id === currentView.unitId);
-    if (!unit) { showEmpty(); return; }
+    if (!unit) { showDashboard(); return; }
 
     setFormattedTitle(unit.name);
-    wordSectionEl.classList.remove('hidden');
-    emptyStateEl.classList.add('hidden');
     headerActions.classList.remove('hidden');
     addWordAreaEl.classList.remove('hidden');
     wordCountEl.textContent = unit.words.length;
@@ -868,7 +1174,6 @@ function renderSearchView() {
     const query = (currentView.query || '').trim().toLowerCase();
     setFormattedTitle(`🔍 搜尋：「${currentView.query || ''}」`);
     wordSectionEl.classList.remove('hidden');
-    emptyStateEl.classList.add('hidden');
     
     // Search is read-only, hide "Add Word" box
     addWordAreaEl.classList.add('hidden');
@@ -908,7 +1213,6 @@ function renderSearchView() {
 function renderStarredView() {
     setFormattedTitle('⭐ 加星號的單字');
     wordSectionEl.classList.remove('hidden');
-    emptyStateEl.classList.add('hidden');
     headerActions.classList.remove('hidden');
     addWordAreaEl.classList.add('hidden');
 
@@ -933,6 +1237,101 @@ function renderStarredView() {
     }
 
     starredWords.forEach(word => wordListEl.appendChild(createWordCard(word, true)));
+}
+
+function renderWrongWordsView() {
+    setFormattedTitle('❌ 錯題複習');
+    wordSectionEl.classList.remove('hidden');
+    headerActions.classList.remove('hidden');
+    addWordAreaEl.classList.add('hidden');
+
+    const wrongWords = [];
+    folders.forEach(folder => {
+        folder.units.forEach(unit => {
+            unit.words.forEach(word => {
+                if (word.wrongCount && word.wrongCount > 0) {
+                    wrongWords.push({ ...word, _unitName: unit.name });
+                }
+            });
+        });
+    });
+
+    wrongWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
+
+    wordCountEl.textContent = wrongWords.length;
+    wordListEl.innerHTML = '';
+
+    if (wrongWords.length === 0) {
+        wordListEl.innerHTML = '<p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:20px;">太棒了！目前沒有任何錯題紀錄。</p>';
+        headerActions.classList.add('hidden');
+        return;
+    }
+
+    wrongWords.forEach(word => wordListEl.appendChild(createWordCard(word, true)));
+}
+
+function renderImportView() {
+    setFormattedTitle('📥 批次筆記匯入');
+    wordSectionEl.classList.add('hidden');
+    emptyStateEl.classList.add('hidden');
+    headerActions.classList.add('hidden');
+    importSectionEl.classList.remove('hidden');
+
+    // Populate folder dropdown
+    importFolderSelect.innerHTML = '<option value="">選擇要匯入的資料夾與回數...</option>';
+    folders.forEach(folder => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = folder.name;
+        folder.units.forEach(unit => {
+            const opt = document.createElement('option');
+            opt.value = `${folder.id}|${unit.id}`;
+            opt.textContent = unit.name;
+            optgroup.appendChild(opt);
+        });
+        importFolderSelect.appendChild(optgroup);
+    });
+    
+    // Reset preview state
+    importPreviewContainer.classList.add('hidden');
+    importTextarea.value = '';
+}
+
+function renderConfusionView() {
+    setFormattedTitle('🔀 易混淆挑戰');
+    headerActions.classList.add('hidden');
+    confusionSectionEl.classList.remove('hidden');
+}
+
+function renderStatsView() {
+    setFormattedTitle('📊 學習統計');
+    headerActions.classList.add('hidden');
+    statsSectionEl.classList.remove('hidden');
+    
+    let total = 0, m0 = 0, m12 = 0, m34 = 0, m5 = 0;
+    
+    folders.forEach(folder => {
+        folder.units.forEach(unit => {
+            unit.words.forEach(word => {
+                total++;
+                const m = word.mastery || 0;
+                if (m === 0) m0++;
+                else if (m === 1 || m === 2) m12++;
+                else if (m === 3 || m === 4) m34++;
+                else if (m >= 5) m5++;
+            });
+        });
+    });
+    
+    if (statTotalEl) statTotalEl.textContent = total;
+    if (statM0El) statM0El.textContent = m0;
+    if (statM12El) statM12El.textContent = m12;
+    if (statM34El) statM34El.textContent = m34;
+    if (statM5El) statM5El.textContent = m5;
+}
+
+window.startStatsReview = function(level) {
+    currentView = { type: 'stats_review', level };
+    openFlashcardMode();
 }
 
 // =====================================================
@@ -995,13 +1394,16 @@ function speakWord(text, event, btn) {
 // =====================================================
 function createWordCard(word, showBadge = false) {
     const isStarred = starredIds.includes(word.id);
+    const mastery = word.correctCount || 0;
+    const isMastered = mastery >= 3;
     const card = document.createElement('div');
     card.className = `word-card ${isStarred ? 'starred' : ''}`;
+    if (isMastered) card.classList.add('mastered');
     card.dataset.wordId = word.id;
 
     const safeEng = word.eng.replace(/'/g, "\\'");
     card.innerHTML = `
-        <div class="word-eng">${word.eng}</div>
+        <div class="word-eng">${word.eng} ${isMastered ? '<span title="已熟練" style="font-size: 0.85em;">🔥</span>' : ''}</div>
         <div class="word-cht">${word.cht}</div>
         ${showBadge ? `<div class="word-unit-badge">${word._unitName || ''}</div>` : ''}
         <div class="card-actions">
@@ -1029,6 +1431,7 @@ function toggleStar(wordId, event) {
     if (idx === -1) {
         starredIds.push(wordId);
     } else {
+        if (!confirm('確定要移除此單字的星號嗎？')) return;
         starredIds.splice(idx, 1);
     }
     save();
@@ -1090,6 +1493,16 @@ function addWord(eng, cht) {
 let fcWords   = [];
 let fcIndex   = 0;
 let fcFlipped = false;
+let fcSessionId = null;
+let fcSessionMasteryIncreases = new Set();
+
+function getNextReviewDate(mastery) {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const daysToAdd = { 0: 0, 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 }[Math.min(mastery || 0, 5)];
+    d.setDate(d.getDate() + daysToAdd);
+    return d.toISOString();
+}
 
 const fcOverlay  = document.getElementById('flashcard-overlay');
 const fcCard     = document.getElementById('fc-card');
@@ -1101,14 +1514,36 @@ const fcCounter  = document.getElementById('fc-counter');
 const fcProgress = document.getElementById('fc-progress');
 const fcIndLeft  = document.getElementById('fc-ind-left');
 const fcIndRight = document.getElementById('fc-ind-right');
-const fcSpeakBtn = document.getElementById('fc-speak-btn');
-const fcStarBtn  = document.getElementById('fc-star-btn');
-const fcSkipBtn  = document.getElementById('fc-skip-btn');
-const fcExitBtn  = document.getElementById('fc-exit');
+const fcSpeakBtn    = document.getElementById('fc-speak-btn');
+const fcRememberBtn = document.getElementById('fc-remember-btn');
+const fcForgetBtn   = document.getElementById('fc-forget-btn');
+const fcExitBtn     = document.getElementById('fc-exit');
 
 function openFlashcardMode() {
     // Collect words for current view
-    if (currentView.type === 'search') {
+    if (currentView.type === 'today') {
+        // Today's review logic:
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        let candidates = [];
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                unit.words.forEach(w => {
+                    if (w.mastery >= 5) return; // Skip mastered
+                    
+                    let score = 0;
+                    if (w.wrongCount > 0) score += 100; // Prioritize wrong
+                    if (w.nextReviewAt && new Date(w.nextReviewAt) <= today) score += 50; // Due
+                    if (!w.lastReviewedAt) score += 10; // New
+                    
+                    if (score > 0) candidates.push({ word: w, score });
+                });
+            });
+        });
+        candidates.sort((a, b) => b.score - a.score);
+        fcWords = candidates.slice(0, 20).map(c => c.word); // Max 20
+        
+    } else if (currentView.type === 'search') {
         const query = (currentView.query || '').trim().toLowerCase();
         fcWords = [];
         if (query) {
@@ -1131,6 +1566,39 @@ function openFlashcardMode() {
                 });
             });
         });
+    } else if (currentView.type === 'wrong') {
+        fcWords = [];
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                unit.words.forEach(w => {
+                    if (w.wrongCount && w.wrongCount > 0) fcWords.push(w);
+                });
+            });
+        });
+        fcWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
+    } else if (currentView.type === 'stats_review') {
+        const level = currentView.level;
+        let candidates = [];
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                unit.words.forEach(w => {
+                    const m = w.mastery || 0;
+                    if (level === -1) {
+                        candidates.push(w);
+                    } else if (level === 0 && m === 0) {
+                        candidates.push(w);
+                    } else if (level === 1 && (m === 1 || m === 2)) {
+                        candidates.push(w);
+                    } else if (level === 3 && (m === 3 || m === 4)) {
+                        candidates.push(w);
+                    } else if (level === 5 && m >= 5) {
+                        candidates.push(w);
+                    }
+                });
+            });
+        });
+        candidates.sort(() => Math.random() - 0.5);
+        fcWords = candidates.slice(0, 40);
     } else if (currentView.type === 'unit') {
         const folder = folders.find(f => f.id === currentView.folderId);
         const unit   = folder?.units.find(u => u.id === currentView.unitId);
@@ -1139,6 +1607,8 @@ function openFlashcardMode() {
 
     if (fcWords.length === 0) { alert('沒有單字可以進行卡片模式！'); return; }
 
+    fcSessionId = generateId();
+    fcSessionMasteryIncreases = new Set();
     fcIndex   = 0;
     fcFlipped = false;
     fcOverlay.classList.remove('hidden');
@@ -1151,9 +1621,23 @@ function showFcCard() {
         return;
     }
     const word = fcWords[fcIndex];
-    fcEngEl.textContent   = word.eng;
-    if (fcEngBack) fcEngBack.textContent = word.eng;
-    fcChtEl.textContent   = word.cht;
+    const directionEl = document.getElementById('fc-direction-select');
+    let direction = directionEl ? directionEl.value : 'random';
+    if (direction === 'random') {
+        direction = Math.random() > 0.5 ? 'en2ch' : 'ch2en';
+    }
+    word._currentDirection = direction;
+
+    if (direction === 'en2ch') {
+        fcEngEl.textContent   = word.eng;
+        if (fcEngBack) fcEngBack.textContent = word.eng;
+        fcChtEl.textContent   = word.cht;
+    } else {
+        fcEngEl.textContent   = word.cht;
+        if (fcEngBack) fcEngBack.textContent = word.cht;
+        fcChtEl.textContent   = word.eng;
+    }
+    
     fcCounter.textContent = `${fcIndex + 1} / ${fcWords.length}`;
     fcProgress.style.width = `${((fcIndex + 1) / fcWords.length) * 100}%`;
 
@@ -1161,17 +1645,15 @@ function showFcCard() {
     fcFlipped = false;
     fcCard.classList.remove('flipped');
 
-    // Update star button state
-    const isStarred = starredIds.includes(word.id);
-    fcStarBtn.classList.toggle('active', isStarred);
-
     // Reset indicators
     fcIndLeft.style.opacity  = '0';
     fcIndRight.style.opacity = '0';
 
-    // Auto-play pronunciation when showing English front
+    // Auto-play pronunciation when showing English
     window.speechSynthesis.cancel();
-    setTimeout(() => speakWord(word.eng, null, fcSpeakBtn), 300);
+    if (direction === 'en2ch') {
+        setTimeout(() => speakWord(word.eng, null, fcSpeakBtn), 300);
+    }
 }
 
 function showFcDone() {
@@ -1217,29 +1699,60 @@ function fcFlipCard() {
     fcFlipped = !fcFlipped;
     fcCard.classList.toggle('flipped', fcFlipped);
     
-    // When flipping back to English front side, play pronunciation
-    if (!fcFlipped) {
-        const word = fcWords[fcIndex];
-        if (word) {
-            window.speechSynthesis.cancel();
+    // When flipping to the side that has English, play pronunciation
+    const word = fcWords[fcIndex];
+    if (word) {
+        window.speechSynthesis.cancel();
+        if ((word._currentDirection === 'en2ch' && !fcFlipped) || 
+            (word._currentDirection === 'ch2en' && fcFlipped)) {
             speakWord(word.eng, null, fcSpeakBtn);
         }
     }
 }
 
-function fcStarAndNext() {
+function fcRemember() {
     const word = fcWords[fcIndex];
-    if (word && !starredIds.includes(word.id)) {
-        starredIds.push(word.id);
+    if (word) {
+        if (!fcSessionMasteryIncreases.has(word.id)) {
+            word.mastery = Math.min((word.mastery || 0) + 1, 5);
+            fcSessionMasteryIncreases.add(word.id);
+        }
+        word.correctCount = (word.correctCount || 0) + 1;
+        word.streak = (word.streak || 0) + 1;
+        word.lastReviewedAt = new Date().toISOString();
+        word.nextReviewAt = getNextReviewDate(word.mastery);
         save();
     }
-    fcStarBtn.classList.add('active');
-    fcNext();
+    if (fcRememberBtn) fcRememberBtn.classList.add('active');
+    setTimeout(() => {
+        if (fcRememberBtn) fcRememberBtn.classList.remove('active');
+        fcIndex++;
+        showFcCard();
+    }, 150);
 }
 
-function fcNext() {
-    fcIndex++;
-    showFcCard();
+function fcForget() {
+    const word = fcWords[fcIndex];
+    if (word) {
+        word.mastery = Math.max((word.mastery || 0) - 1, 0);
+        word.wrongCount = (word.wrongCount || 0) + 1;
+        word.streak = 0;
+        word.lastReviewedAt = new Date().toISOString();
+        word.lastWrongAt = new Date().toISOString();
+        
+        let tomorrow = new Date();
+        tomorrow.setHours(0, 0, 0, 0);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        word.nextReviewAt = tomorrow.toISOString();
+        
+        save();
+    }
+    if (fcForgetBtn) fcForgetBtn.classList.add('active');
+    setTimeout(() => {
+        if (fcForgetBtn) fcForgetBtn.classList.remove('active');
+        fcIndex++;
+        showFcCard();
+    }, 150);
 }
 
 // ---- Drag / Swipe ----
@@ -1276,11 +1789,11 @@ function onDragEnd() {
     fcCard.style.transform  = '';
 
     if (currentDX < -SWIPE_THRESHOLD) {
-        // Swipe left → next
-        fcNext();
+        // Swipe left → forget
+        fcForget();
     } else if (currentDX > SWIPE_THRESHOLD) {
-        // Swipe right → star + next
-        fcStarAndNext();
+        // Swipe right → remember
+        fcRemember();
     }
     fcIndLeft.style.opacity  = '0';
     fcIndRight.style.opacity = '0';
@@ -1321,8 +1834,8 @@ fcSpeakBtn.addEventListener('click', e => {
     const word = fcWords[fcIndex];
     if (word) speakWord(word.eng, null, fcSpeakBtn);
 });
-fcStarBtn.addEventListener('click', () => fcStarAndNext());
-fcSkipBtn.addEventListener('click', () => fcNext());
+if (fcRememberBtn) fcRememberBtn.addEventListener('click', () => fcRemember());
+if (fcForgetBtn) fcForgetBtn.addEventListener('click', () => fcForget());
 fcExitBtn.addEventListener('click', () => closeFlashcardMode());
 
 // Keyboard
@@ -1330,8 +1843,8 @@ document.addEventListener('keydown', e => {
     if (fcOverlay.classList.contains('hidden')) return;
     if (e.key === 'Escape')     closeFlashcardMode();
     if (e.key === ' ')          { e.preventDefault(); fcFlipCard(); }
-    if (e.key === 'ArrowRight') fcStarAndNext();
-    if (e.key === 'ArrowLeft')  fcNext();
+    if (e.key === 'ArrowRight') fcRemember();
+    if (e.key === 'ArrowLeft')  fcForget();
 });
 
 // =====================================================
@@ -1388,373 +1901,314 @@ addWordFormEl.addEventListener('submit', e => {
 toggleTestModeBtn.addEventListener('click', openFlashcardMode);
 
 // =====================================================
-// OCR NOTE IMPORT METHODS
+// IMPORT METHODS
 // =====================================================
-const ocrOverlayEl       = document.getElementById('ocr-import-overlay');
-const ocrApiUrlEl        = document.getElementById('ocr-api-url');
-const geminiApiKeyEl     = document.getElementById('gemini-api-key');
-const ocrFolderSelectEl  = document.getElementById('ocr-folder-select');
-const ocrUnitNameEl      = document.getElementById('ocr-unit-name-input');
-const ocrDropZoneEl      = document.getElementById('ocr-drop-zone');
-const ocrFileInputEl     = document.getElementById('ocr-file-input');
-const ocrLoadingEl       = document.getElementById('ocr-loading');
-const ocrLoadingTextEl   = document.getElementById('ocr-loading-text');
-const ocrPreviewEl       = document.getElementById('ocr-preview-section');
-const ocrResultsBodyEl   = document.getElementById('ocr-results-body');
-const ocrResultCountEl   = document.getElementById('ocr-result-count');
-const selectedFileInfoEl = document.getElementById('selected-file-info');
+let currentImportCandidates = [];
 
-let ocrFileToUpload = null;
-
-function openOcrModal() {
-    closeMobileSidebar();
-    
-    // Load saved settings
-    const savedUrl = localStorage.getItem('ocrApiUrl') || '';
-    if (ocrApiUrlEl) ocrApiUrlEl.value = savedUrl;
-    
-    const savedKey = localStorage.getItem('geminiApiKey') || '';
-    if (geminiApiKeyEl) geminiApiKeyEl.value = savedKey;
-    
-    // Populate folders
-    if (ocrFolderSelectEl) {
-        ocrFolderSelectEl.innerHTML = '<option value="">選擇要匯入的資料夾</option>';
-        folders.forEach(f => {
-            const opt = document.createElement('option');
-            opt.value = f.id;
-            opt.textContent = f.name;
-            ocrFolderSelectEl.appendChild(opt);
-        });
-    }
-    
-    // Reset file uploads
-    ocrFileToUpload = null;
-    if (selectedFileInfoEl) {
-        selectedFileInfoEl.classList.add('hidden');
-        selectedFileInfoEl.textContent = '';
-    }
-    if (ocrUnitNameEl) ocrUnitNameEl.value = '';
-    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
-    if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
-    if (ocrResultsBodyEl) ocrResultsBodyEl.innerHTML = '';
-    
-    // Show modal
-    if (ocrOverlayEl) ocrOverlayEl.classList.remove('hidden');
-}
-
-function closeOcrModal() {
-    if (ocrOverlayEl) ocrOverlayEl.classList.add('hidden');
-}
-
-function saveOcrApiUrl() {
-    if (ocrApiUrlEl) {
-        const url = ocrApiUrlEl.value.trim();
-        localStorage.setItem('ocrApiUrl', url);
-        alert('網址儲存成功！');
-    }
-}
-
-function saveGeminiApiKey() {
-    if (geminiApiKeyEl) {
-        const key = geminiApiKeyEl.value.trim();
-        localStorage.setItem('geminiApiKey', key);
-        alert('Gemini 金鑰儲存成功！');
-    }
-}
-
-// ---- File Drag & Drop events ----
-if (ocrDropZoneEl) {
-    ocrDropZoneEl.addEventListener('dragover', e => {
-        e.preventDefault();
-        ocrDropZoneEl.classList.add('dragover');
-    });
-    
-    ocrDropZoneEl.addEventListener('dragleave', () => {
-        ocrDropZoneEl.classList.remove('dragover');
-    });
-    
-    ocrDropZoneEl.addEventListener('drop', e => {
-        e.preventDefault();
-        ocrDropZoneEl.classList.remove('dragover');
-        if (e.dataTransfer.files.length > 0) {
-            handleOcrFileSelection(e.dataTransfer.files[0]);
-        }
-    });
-    
-    ocrDropZoneEl.addEventListener('click', e => {
-        if (e.target.tagName !== 'LABEL') {
-            if (ocrFileInputEl) ocrFileInputEl.click();
-        }
-    });
-}
-
-if (ocrFileInputEl) {
-    ocrFileInputEl.addEventListener('change', e => {
-        if (e.target.files.length > 0) {
-            handleOcrFileSelection(e.target.files[0]);
-        }
-    });
-}
-
-function handleOcrFileSelection(file) {
-    ocrFileToUpload = file;
-    if (selectedFileInfoEl) {
-        selectedFileInfoEl.classList.remove('hidden');
-        selectedFileInfoEl.textContent = `已選擇檔案：${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-    }
-    
-    // Automatically fill a suggested unit name if empty
-    if (ocrUnitNameEl && !ocrUnitNameEl.value.trim()) {
-        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-        ocrUnitNameEl.value = `${baseName} OCR`;
-    }
-    
-    // Auto trigger upload once file is selected
-    triggerOcrProcessing();
-}
-
-async function triggerOcrProcessing() {
-    if (!ocrFileToUpload) {
-        alert('請先選擇 PDF 或圖片檔案！');
-        return;
-    }
-    
-    const apiUrl = (localStorage.getItem('ocrApiUrl') || '').trim();
-    if (!apiUrl) {
-        alert('請先在步驟 1 填寫並儲存你的 ngrok API 後端網址！');
-        return;
-    }
-    
-    // Clean up preview & show loading
-    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
-    if (ocrLoadingEl) ocrLoadingEl.classList.remove('hidden');
-    if (ocrResultsBodyEl) ocrResultsBodyEl.innerHTML = '';
-    
-    const formData = new FormData();
-    formData.append('file', ocrFileToUpload);
-    
-    try {
-        const response = await fetch(`${apiUrl.replace(/\/$/, '')}/ocr`, {
-            method: 'POST',
-            body: formData
-        });
+if (analyzeImportBtn) {
+    analyzeImportBtn.addEventListener('click', () => {
+        const text = importTextarea.value.trim();
+        if (!text) return alert('請貼上筆記內容！');
         
-        if (!response.ok) {
-            throw new Error(`伺服器錯誤 (HTTP ${response.status})`);
+        currentImportCandidates = [];
+        let unrecognizedLines = [];
+        
+        const lines = text.split('\n');
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+            
+            let isImportant = false;
+            let isNotFamiliar = false;
+            let isPhrase = false;
+            let isConfusion = false;
+            
+            let content = line;
+            if (content.startsWith('★')) { isImportant = true; content = content.substring(1).trim(); }
+            else if (content.startsWith('?')) { isNotFamiliar = true; content = content.substring(1).trim(); }
+            else if (content.startsWith('↔')) { isConfusion = true; content = content.substring(1).trim(); }
+            else if (content.startsWith('P ')) { isPhrase = true; content = content.substring(2).trim(); }
+            
+            let match = content.match(/^([a-zA-Z0-9\s\-\']+)(?:\s*=\s*|\s+)([\u4e00-\u9fff].*)$/);
+            
+            if (match) {
+                currentImportCandidates.push({
+                    eng: match[1].trim(),
+                    cht: match[2].trim(),
+                    isImportant,
+                    isNotFamiliar,
+                    isPhrase,
+                    isConfusion: false
+                });
+            } else if (isConfusion && content.includes('/')) {
+                const parts = content.split('/').map(s => s.trim());
+                const confusionGroup = parts.join('-');
+                parts.forEach(part => {
+                    currentImportCandidates.push({
+                        eng: part,
+                        cht: '易混淆字 (請補中文)',
+                        isImportant,
+                        isNotFamiliar,
+                        isPhrase,
+                        isConfusion: true,
+                        confusionGroup
+                    });
+                });
+            } else {
+                unrecognizedLines.push(line);
+            }
         }
         
-        const data = await response.json();
+        importPreviewList.innerHTML = '';
+        importPreviewCount.textContent = currentImportCandidates.length;
+        importPreviewContainer.classList.remove('hidden');
         
-        if (data.success && data.words) {
-            renderOcrPreview(data.words);
+        if (currentImportCandidates.length === 0) {
+            importPreviewList.innerHTML = '<div style="color:var(--text-secondary); text-align:center;">找不到可匯入的單字。</div>';
+            confirmImportBtn.disabled = true;
         } else {
-            alert('辨識失敗，請檢查本地後端服務狀態！');
-        }
-    } catch (err) {
-        console.error(err);
-        alert(`無法連線到 OCR 伺服器，請確認：\n1. 本地 python server.py 是否在執行\n2. ngrok 網址是否正確且沒有過期\n\n錯誤詳情: ${err.message}`);
-    } finally {
-        if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
-    }
-}
-
-function renderOcrPreview(words) {
-    if (!ocrResultsBodyEl) return;
-    ocrResultsBodyEl.innerHTML = '';
-    
-    words.forEach(w => {
-        addOcrRow(w.eng, w.cht);
-    });
-    
-    updateOcrCount();
-    if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
-}
-
-function addOcrRow(eng = '', cht = '') {
-    if (!ocrResultsBodyEl) return;
-    
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="text" class="ocr-eng-input" value="${eng.replace(/"/g, '&quot;')}" placeholder="英文單字"></td>
-        <td><input type="text" class="ocr-cht-input" value="${cht.replace(/"/g, '&quot;')}" placeholder="中文解釋"></td>
-        <td>
-            <button class="icon-btn delete-btn" title="刪除此列" onclick="this.closest('tr').remove(); updateOcrCount();">
-                <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
-            </button>
-        </td>
-    `;
-    ocrResultsBodyEl.appendChild(tr);
-    updateOcrCount();
-}
-
-function updateOcrCount() {
-    if (ocrResultsBodyEl && ocrResultCountEl) {
-        ocrResultCountEl.textContent = ocrResultsBodyEl.querySelectorAll('tr').length;
-    }
-}
-
-function importOcrToFolder() {
-    const folderId = ocrFolderSelectEl.value;
-    const unitName = ocrUnitNameEl.value.trim();
-    
-    if (!folderId) {
-        alert('請選擇要匯入的資料夾！');
-        return;
-    }
-    if (!unitName) {
-        alert('請填寫新回數名稱！');
-        return;
-    }
-    
-    const rows = ocrResultsBodyEl.querySelectorAll('tr');
-    const words = [];
-    
-    rows.forEach(row => {
-        const eng = row.querySelector('.ocr-eng-input').value.trim();
-        const cht = row.querySelector('.ocr-cht-input').value.trim();
-        if (eng) {
-            words.push({
-                id: generateId(),
-                eng: eng,
-                cht: cht
+            confirmImportBtn.disabled = false;
+            currentImportCandidates.forEach((cand, idx) => {
+                const row = document.createElement('div');
+                row.style.cssText = 'display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);';
+                row.innerHTML = `
+                    <input type="checkbox" id="import-cb-${idx}" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-color);">${cand.eng} ${cand.isImportant ? '<span style="font-size:0.8rem; color:var(--star-color);">★</span>' : ''} ${cand.isNotFamiliar ? '<span style="font-size:0.8rem; color:var(--danger-color);">?</span>' : ''}</div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">${cand.cht}</div>
+                    </div>
+                `;
+                importPreviewList.appendChild(row);
             });
         }
-    });
-    
-    if (words.length === 0) {
-        alert('表格中沒有任何單字，無法匯入！');
-        return;
-    }
-    
-    const folder = folders.find(f => f.id === folderId);
-    if (!folder) return;
-    
-    // Add new unit to folder
-    const newUnit = {
-        id: generateId(),
-        name: unitName,
-        words: words
-    };
-    
-    folder.units.push(newUnit);
-    folder._open = true;
-    
-    save();
-    closeOcrModal();
-    selectUnit(folderId, newUnit.id);
-    
-    alert(`成功匯入新回數「${unitName}」，共 ${words.length} 個單字！`);
-}
-
-async function correctOcrWithGemini() {
-    const apiKey = (localStorage.getItem('geminiApiKey') || '').trim();
-    if (!apiKey) {
-        alert('請先在步驟 1 填寫並儲存你的 Gemini API 金鑰！');
-        return;
-    }
-    
-    const rows = ocrResultsBodyEl.querySelectorAll('tr');
-    const wordsToCorrect = [];
-    
-    rows.forEach(row => {
-        const eng = row.querySelector('.ocr-eng-input').value.trim();
-        const cht = row.querySelector('.ocr-cht-input').value.trim();
-        if (eng || cht) {
-            wordsToCorrect.push({ eng, cht });
+        
+        if (unrecognizedLines.length > 0) {
+            importUnrecognizedContainer.classList.remove('hidden');
+            importUnrecognizedText.textContent = unrecognizedLines.join('\n');
+        } else {
+            importUnrecognizedContainer.classList.add('hidden');
         }
     });
-    
-    if (wordsToCorrect.length === 0) {
-        alert('目前預覽表格中沒有任何單字可以校正！');
-        return;
-    }
-    
-    // Disable buttons and show loading spinner inside modal
-    if (ocrPreviewEl) ocrPreviewEl.classList.add('hidden');
-    if (ocrLoadingEl) ocrLoadingEl.classList.remove('hidden');
-    if (ocrLoadingTextEl) ocrLoadingTextEl.textContent = '✨ Gemini AI 正在幫您進行拼字糾錯與翻譯優化，請稍候...';
-    
-    // Construct Prompt
-    const promptText = `你是一位專業的英文老師，請幫我修正以下由手寫筆記 OCR 辨識出來的英文單字（可能包含拼字錯誤，如: o辨識為c，或是拼字漏字母等），並將中文翻譯補齊。
-請務必遵守以下規定：
-1. 修正英文單字拼法至正確的英文。
-2. 補齊或優化中文翻譯。
-3. 中文翻譯必須加上明確的詞性標籤（例如: n. 名詞, v. 動詞, adj. 形容詞, adv. 副詞, prep. 介係詞, pron. 代名詞 等，只要標註簡寫即可如 n. v. adj.）。
-4. 請只輸出符合 JSON 格式的純文字，不要包含任何 Markdown 標記（如不要有 \`\`\`json 或是任何 code blocks，也不要有額外的解釋文字），只要給我一個包含單字物件的陣列：
-[{"eng": "修正後的英文單字", "cht": "修正且加上詞性的中文意思"}, ...]
+}
 
-待修正的單字資料：
-${JSON.stringify(wordsToCorrect, null, 2)}`;
-
-    try {
-        // AQ. keys = Bearer Token (new Google AI Studio format)
-        // AIzaSy keys = query parameter (classic format)
-        const isBearer = apiKey.startsWith('AQ.');
-        const apiUrl = isBearer
-            ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`
-            : `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        const apiHeaders = { 'Content-Type': 'application/json' };
-        if (isBearer) apiHeaders['Authorization'] = `Bearer ${apiKey}`;
-
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: apiHeaders,
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: promptText
-                    }]
-                }]
-            })
+if (confirmImportBtn) {
+    confirmImportBtn.addEventListener('click', () => {
+        const val = importFolderSelect.value;
+        if (!val) return alert('請先選擇要匯入的目標資料夾與回數！');
+        
+        const [targetFolderId, targetUnitId] = val.split('|');
+        const folder = folders.find(f => f.id === targetFolderId);
+        const unit = folder?.units.find(u => u.id === targetUnitId);
+        if (!unit) return alert('找不到目標回數');
+        
+        let addedCount = 0;
+        let mergedCount = 0;
+        
+        currentImportCandidates.forEach((cand, idx) => {
+            const cb = document.getElementById(`import-cb-${idx}`);
+            if (cb && cb.checked) {
+                let existingWord = null;
+                for (const f of folders) {
+                    for (const u of f.units) {
+                        const found = u.words.find(w => w.eng.toLowerCase() === cand.eng.toLowerCase());
+                        if (found) {
+                            existingWord = found;
+                            break;
+                        }
+                    }
+                    if (existingWord) break;
+                }
+                
+                if (existingWord) {
+                    if (cand.cht && existingWord.cht !== cand.cht) {
+                        if (!existingWord.notes) existingWord.notes = [];
+                        existingWord.notes.push(`新解釋: ${cand.cht}`);
+                    }
+                    if (cand.isImportant) existingWord.priority = 'high';
+                    if (cand.isNotFamiliar) existingWord.mastery = 0;
+                    if (cand.confusionGroup) existingWord.confusionGroup = cand.confusionGroup;
+                    existingWord.sourceCount = (existingWord.sourceCount || 1) + 1;
+                    mergedCount++;
+                } else {
+                    const newWord = {
+                        id: generateId(),
+                        eng: cand.eng,
+                        cht: cand.cht,
+                        mastery: cand.isNotFamiliar ? 0 : 0,
+                        correctCount: 0,
+                        wrongCount: 0,
+                        streak: 0,
+                        lastReviewedAt: null,
+                        lastWrongAt: null,
+                        nextReviewAt: null,
+                        priority: cand.isImportant ? 'high' : 'normal',
+                        confusionGroup: cand.confusionGroup || null,
+                        notes: [],
+                        examples: [],
+                        sourceCount: 1
+                    };
+                    unit.words.push(newWord);
+                    addedCount++;
+                }
+            }
         });
         
-        if (!response.ok) {
-            throw new Error(`Gemini API 請求失敗 (HTTP ${response.status})`);
-        }
-        
-        const data = await response.json();
-        const responseText = data.candidates[0].content.parts[0].text.trim();
-        
-        // Clean up markdown block syntax if present
-        let cleanJsonStr = responseText;
-        if (cleanJsonStr.includes('```')) {
-            cleanJsonStr = cleanJsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        }
-        
-        try {
-            const correctedWords = JSON.parse(cleanJsonStr);
-            if (Array.isArray(correctedWords)) {
-                renderOcrPreview(correctedWords);
-                alert('✨ AI 糾錯與翻譯校正完成！');
-            } else {
-                throw new Error('AI 回傳結果不是有效的陣列格式');
-            }
-        } catch (jsonErr) {
-            console.error("JSON Parse Error on response:", responseText, jsonErr);
-            alert('AI 回傳資料解析失敗，請再點擊一次重試。\n\n錯誤原因: 輸出非標準 JSON');
-            if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
-        }
-    } catch (err) {
-        console.error(err);
-        alert(`Gemini AI 連線失敗，請檢查網路連線或金鑰是否正確！\n\n錯誤詳情: ${err.message}`);
-        if (ocrPreviewEl) ocrPreviewEl.classList.remove('hidden');
-    } finally {
-        if (ocrLoadingEl) ocrLoadingEl.classList.add('hidden');
-        if (ocrLoadingTextEl) ocrLoadingTextEl.textContent = '正在上傳檔案並辨識中，請稍候... (使用 PaddleOCR 模型)';
-    }
+        save();
+        alert(`匯入完成！新增 ${addedCount} 個單字，合併 ${mergedCount} 個既有單字。`);
+        selectUnit(targetFolderId, targetUnitId);
+    });
 }
 
+if (importSelectAllBtn) {
+    importSelectAllBtn.addEventListener('click', () => {
+        importPreviewList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+    });
+}
+if (importDeselectAllBtn) {
+    importDeselectAllBtn.addEventListener('click', () => {
+        importPreviewList.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    });
+}
+
+// =====================================================
+// CONFUSION QUIZ METHODS
+// =====================================================
+let cqQuestions = [];
+let cqIndex = 0;
+
+if (startConfusionBtn) {
+    startConfusionBtn.addEventListener('click', () => {
+        let cGroups = {};
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                unit.words.forEach(w => {
+                    if (w.confusionGroup) {
+                        if (!cGroups[w.confusionGroup]) cGroups[w.confusionGroup] = [];
+                        if (!cGroups[w.confusionGroup].find(e => e.eng === w.eng)) {
+                            cGroups[w.confusionGroup].push(w);
+                        }
+                    }
+                });
+            });
+        });
+        
+        cqQuestions = [];
+        Object.keys(cGroups).forEach(gKey => {
+            const groupWords = cGroups[gKey];
+            if (groupWords.length < 2) return;
+            groupWords.forEach(correctWord => {
+                const options = [...groupWords];
+                options.sort(() => Math.random() - 0.5);
+                cqQuestions.push({ correctWord, options });
+            });
+        });
+        
+        cqQuestions.sort(() => Math.random() - 0.5);
+        
+        if (cqQuestions.length === 0) {
+            return alert('找不到足夠的易混淆群組。請先新增至少兩筆帶有相同易混淆群組標籤(↔)的單字。');
+        }
+        
+        cqIndex = 0;
+        cqOverlay.classList.remove('hidden');
+        renderCqQuestion();
+    });
+}
+
+function renderCqQuestion() {
+    if (cqIndex >= cqQuestions.length) {
+        cqOverlay.classList.add('hidden');
+        alert('🎉 挑戰完成！');
+        return;
+    }
+    const q = cqQuestions[cqIndex];
+    cqCounter.textContent = `${cqIndex + 1} / ${cqQuestions.length}`;
+    cqProgress.style.width = `${((cqIndex + 1) / cqQuestions.length) * 100}%`;
+    
+    cqQuestion.textContent = q.correctWord.cht;
+    
+    cqOptions.innerHTML = '';
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-secondary';
+        btn.style.cssText = 'width: 100%; text-align: left; padding: 16px; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer;';
+        btn.innerHTML = `<span>${opt.eng}</span> <span class="material-symbols-outlined" style="opacity:0;">check_circle</span>`;
+        
+        btn.onclick = () => {
+            const isCorrect = opt.eng === q.correctWord.eng;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            icon.style.opacity = '1';
+            
+            // disable all options
+            Array.from(cqOptions.children).forEach(c => c.style.pointerEvents = 'none');
+            
+            if (isCorrect) {
+                btn.style.background = 'rgba(16, 185, 129, 0.2)';
+                btn.style.borderColor = 'var(--success-color)';
+                icon.textContent = 'check_circle';
+                icon.style.color = 'var(--success-color)';
+                
+                q.correctWord.mastery = Math.min((q.correctWord.mastery || 0) + 1, 5);
+                q.correctWord.correctCount = (q.correctWord.correctCount || 0) + 1;
+                save();
+                
+                setTimeout(() => {
+                    cqIndex++;
+                    renderCqQuestion();
+                }, 800);
+            } else {
+                btn.style.background = 'rgba(239, 68, 68, 0.2)';
+                btn.style.borderColor = 'var(--danger-color)';
+                icon.textContent = 'cancel';
+                icon.style.color = 'var(--danger-color)';
+                
+                q.correctWord.mastery = Math.max((q.correctWord.mastery || 0) - 1, 0);
+                q.correctWord.wrongCount = (q.correctWord.wrongCount || 0) + 1;
+                save();
+                
+                Array.from(cqOptions.children).forEach(child => {
+                    if (child.textContent.includes(q.correctWord.eng)) {
+                        child.style.borderColor = 'var(--success-color)';
+                        child.style.background = 'rgba(16, 185, 129, 0.1)';
+                        child.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                        child.querySelector('.material-symbols-outlined').style.opacity = '1';
+                        child.querySelector('.material-symbols-outlined').style.color = 'var(--success-color)';
+                    }
+                });
+                
+                setTimeout(() => {
+                    cqIndex++;
+                    renderCqQuestion();
+                }, 2000);
+            }
+        };
+        cqOptions.appendChild(btn);
+    });
+}
+
+if (cqExitBtn) {
+    cqExitBtn.addEventListener('click', () => {
+        cqOverlay.classList.add('hidden');
+    });
+}
+
+if (startTodayBtn) {
+    startTodayBtn.addEventListener('click', () => {
+        currentView = { type: 'today', folderId: null, unitId: null };
+        openFlashcardMode();
+    });
+}
 
 // =====================================================
 // DATA BACKUP & RESTORE METHODS
 // =====================================================
 const backupModalEl      = document.getElementById('backup-modal-overlay');
-const importCodeAreaEl   = document.getElementById('import-code-area');
+const importJsonFileEl   = document.getElementById('import-json-file');
 const exportSuccessMsgEl = document.getElementById('export-success-msg');
 
 function openBackupModal() {
     closeMobileSidebar();
-    if (importCodeAreaEl) importCodeAreaEl.value = '';
+    if (importJsonFileEl) importJsonFileEl.value = '';
     if (exportSuccessMsgEl) exportSuccessMsgEl.style.display = 'none';
     if (backupModalEl) backupModalEl.classList.remove('hidden');
 }
@@ -1763,72 +2217,117 @@ function closeBackupModal() {
     if (backupModalEl) backupModalEl.classList.add('hidden');
 }
 
-function exportBackupData() {
+function exportJSONBackup() {
     try {
         const backupObj = {
+            version: 'V2',
             folders: folders,
             starredIds: starredIds,
-            exportedAt: Date.now()
+            exportedAt: new Date().toISOString()
         };
         
-        const jsonString = JSON.stringify(backupObj);
-        // Base64 encode safely supporting unicode characters
-        const base64Code = btoa(encodeURIComponent(jsonString).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-            return String.fromCharCode('0x' + p1);
-        }));
+        const jsonString = JSON.stringify(backupObj, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
         
-        navigator.clipboard.writeText(base64Code).then(() => {
-            if (exportSuccessMsgEl) {
-                exportSuccessMsgEl.style.display = 'block';
-            }
-        }).catch(err => {
-            console.error('Clipboard copy failed:', err);
-            alert('複製失敗，請手動複製以下備份代碼：\n\n' + base64Code);
-        });
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vocab_backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        if (exportSuccessMsgEl) {
+            exportSuccessMsgEl.style.display = 'block';
+            setTimeout(() => exportSuccessMsgEl.style.display = 'none', 3000);
+        }
     } catch (e) {
-        alert('備份失敗：' + e.message);
+        alert('匯出備份失敗：' + e.message);
     }
 }
 
-function importBackupData() {
-    const rawCode = importCodeAreaEl.value.trim();
-    if (!rawCode) {
-        alert('請先貼上備份文字代碼！');
+function importJSONBackup(mode) {
+    const fileInput = document.getElementById('import-json-file');
+    const file = fileInput.files[0];
+    if (!file) {
+        alert('請先選擇要匯入的 JSON 檔案！');
         return;
     }
     
-    if (!confirm('警告：匯入此備份會「直接覆蓋且刪除」您這台裝置上目前的進度。確定要匯入覆蓋嗎？')) {
-        return;
+    if (mode === 'overwrite') {
+        if (!confirm('⚠️ 警告：這將會刪除您目前所有的單字與紀錄，並完全替換為檔案中的資料！確定要繼續嗎？')) return;
+    } else {
+        if (!confirm('🔄 確定要將檔案中的資料合併至目前的單字庫嗎？')) return;
     }
     
-    try {
-        // Base64 decode safely supporting unicode characters
-        const jsonString = decodeURIComponent(atob(rawCode).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-        
-        const backupObj = JSON.parse(jsonString);
-        
-        if (backupObj && Array.isArray(backupObj.folders)) {
-            folders = backupObj.folders;
-            starredIds = backupObj.starredIds || [];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const backupObj = JSON.parse(e.target.result);
+            if (!backupObj || !Array.isArray(backupObj.folders)) {
+                throw new Error('無效的備份檔案格式。');
+            }
             
-            // Save state
+            if (mode === 'overwrite') {
+                folders = backupObj.folders;
+                starredIds = backupObj.starredIds || [];
+            } else if (mode === 'merge') {
+                let newStarred = new Set(starredIds);
+                (backupObj.starredIds || []).forEach(id => newStarred.add(id));
+                starredIds = Array.from(newStarred);
+                
+                backupObj.folders.forEach(bkFolder => {
+                    let exFolder = folders.find(f => f.id === bkFolder.id);
+                    if (!exFolder) {
+                        folders.push(bkFolder);
+                    } else {
+                        bkFolder.units.forEach(bkUnit => {
+                            let exUnit = exFolder.units.find(u => u.id === bkUnit.id);
+                            if (!exUnit) {
+                                exFolder.units.push(bkUnit);
+                            } else {
+                                bkUnit.words.forEach(bkWord => {
+                                    let exWord = exUnit.words.find(w => w.id === bkWord.id || w.eng.toLowerCase() === bkWord.eng.toLowerCase());
+                                    if (!exWord) {
+                                        exUnit.words.push(bkWord);
+                                    } else {
+                                        // Merge details
+                                        if ((bkWord.mastery || 0) > (exWord.mastery || 0)) exWord.mastery = bkWord.mastery;
+                                        if (bkWord.priority === 'high') exWord.priority = 'high';
+                                        if (bkWord.confusionGroup) exWord.confusionGroup = bkWord.confusionGroup;
+                                        if (bkWord.notes && bkWord.notes.length > 0) {
+                                            if (!exWord.notes) exWord.notes = [];
+                                            bkWord.notes.forEach(n => {
+                                                if (!exWord.notes.includes(n)) exWord.notes.push(n);
+                                            });
+                                        }
+                                        if (bkWord.nextReviewAt) {
+                                            if (!exWord.nextReviewAt || new Date(bkWord.nextReviewAt) < new Date(exWord.nextReviewAt)) {
+                                                exWord.nextReviewAt = bkWord.nextReviewAt;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            
             save();
-            
-            // Re-render
             renderSidebar();
             renderMainContent();
-            
             closeBackupModal();
             alert('🎉 備份資料已成功匯入與還原！');
-        } else {
-            alert('無效的備份代碼！請確認複製的代碼完整且沒有漏字。');
+            fileInput.value = '';
+            
+        } catch (err) {
+            console.error('Import Error:', err);
+            alert('匯入失敗：' + err.message);
         }
-    } catch (e) {
-        console.error('Import failed:', e);
-        alert('匯入失敗！請確認貼上的代碼是否正確。');
-    }
+    };
+    reader.readAsText(file);
 }
 
 // =====================================================

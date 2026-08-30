@@ -756,166 +756,130 @@ const defaultFolders = [
 ];
 
 // =====================================================
-// STATE
+// STATE (V2 Architecture)
 // =====================================================
-const DATA_VERSION = 6; // Bump this to force-refresh default unit content
+const DATA_VERSION = 8; // Bump this to force-refresh default unit content
 
-let folders     = JSON.parse(localStorage.getItem('folders'))     || null;
-let starredIds  = JSON.parse(localStorage.getItem('starredIds'))  || [];
+// V2 Data Schema
+let vocabApp_v2 = JSON.parse(localStorage.getItem('vocabApp_v2')) || null;
+let starredIds = JSON.parse(localStorage.getItem('starredIds')) || [];
 let currentView = JSON.parse(localStorage.getItem('currentView')) || { type: 'unit', folderId: null, unitId: null };
-let isTestMode  = false;
+let isTestMode = false;
 
-// Collect all default word IDs for quick lookup
-const defaultWordIds = new Set();
-defaultFolders.forEach(f => f.units.forEach(u => u.words.forEach(w => defaultWordIds.add(w.id))));
+// We still maintain `folders` in memory as a computed view to keep UI intact during Phase 0
+let folders = []; 
 
-// First-run: seed default folders
-if (!folders) {
-    folders = JSON.parse(JSON.stringify(defaultFolders));
-    localStorage.setItem('dataVersion', DATA_VERSION);
-    save();
-} else {
-    const storedVersion = parseInt(localStorage.getItem('dataVersion') || '0', 10);
-    let changed = false;
+const CATEGORY_META = {
+    "folder-toeic-career": { name: "TOEIC 商業、辦公與職涯", icon: "work", cssClass: "folder-yellow" },
+    "folder-toeic-daily": { name: "TOEIC 日常、生活與雜項", icon: "coffee", cssClass: "folder-green" },
+    "folder-toeic-similar": { name: "TOEIC 易混淆與相近字群", icon: "compare_arrows", cssClass: "folder-purple" },
+    "folder-parker": { name: "Parker", icon: "menu_book", cssClass: "folder-parker" },
+    "folder-toeic": { name: "新制多益 New TOEIC", icon: "import_contacts", cssClass: "folder-toeic" },
+    "folder-handwritten": { name: "📝 手寫筆記單字", icon: "edit_note", cssClass: "folder-handwritten" }
+};
 
-    defaultFolders.forEach(defFolder => {
-        let folder = folders.find(f => f.id === defFolder.id);
-        if (!folder) {
-            folders.push(JSON.parse(JSON.stringify(defFolder)));
-            changed = true;
-        } else {
-            // Sync icon/cssClass from default in case they changed
-            folder.icon     = defFolder.icon;
-            folder.cssClass = defFolder.cssClass;
-
-            defFolder.units.forEach(defUnit => {
-                let unit = folder.units.find(u => u.id === defUnit.id);
-                if (!unit) {
-                    folder.units.push(JSON.parse(JSON.stringify(defUnit)));
-                    changed = true;
-                } else {
-                    if (storedVersion < DATA_VERSION) {
-                        // Version bump: replace all default words with fresh content
-                        // but keep user-added words (those NOT in the default set)
-                        const userWords = unit.words.filter(w => !defaultWordIds.has(w.id));
-                        unit.words = [...JSON.parse(JSON.stringify(defUnit.words)), ...userWords];
-                        unit.name  = defUnit.name; // sync name too
-                        changed = true;
-                    } else {
-                        // Normal run: only add truly missing default words
-                        defUnit.words.forEach(defWord => {
-                            if (!unit.words.find(w => w.id === defWord.id)) {
-                                unit.words.push(JSON.parse(JSON.stringify(defWord)));
-                                changed = true;
-                            }
-                        });
-                    }
-                }
-            });
-        }
-    });
-
-    localStorage.setItem('dataVersion', DATA_VERSION);
-    if (changed) save();
-}
-
-// V2 Migration: Ensure all words have required fields
-let v2Migrated = false;
-folders.forEach(folder => {
-    folder.units.forEach(unit => {
-        unit.words.forEach(word => {
-            if (word.mastery === undefined) { word.mastery = 0; v2Migrated = true; }
-            if (word.correctCount === undefined) word.correctCount = 0;
-            if (word.wrongCount === undefined) word.wrongCount = 0;
-            if (word.streak === undefined) word.streak = 0;
-            if (word.lastReviewedAt === undefined) word.lastReviewedAt = null;
-            if (word.lastWrongAt === undefined) word.lastWrongAt = null;
-            if (word.nextReviewAt === undefined) word.nextReviewAt = null;
-            if (word.priority === undefined) word.priority = 'normal';
-            if (word.confusionGroup === undefined) word.confusionGroup = null;
-            if (!word.notes) word.notes = [];
-            if (!word.examples) word.examples = [];
-            if (word.sourceCount === undefined) word.sourceCount = 1;
-        });
-    });
-});
-if (v2Migrated) save();
-
-// V2 Deduplication Migration
-let v2Deduplicated = localStorage.getItem('v2Deduplicated_1');
-if (!v2Deduplicated) {
-    let deduplicated = false;
-    folders.forEach(folder => {
-        let uniqueUnits = {};
-        let newUnits = [];
+// 1. MIGRATION & INITIALIZATION
+if (!vocabApp_v2) {
+    console.log("Initializing vocabApp_v2...");
+    vocabApp_v2 = {
+        schemaVersion: 2,
+        words: [],
+        settings: {},
+        metadata: { createdAt: new Date().toISOString(), lastExportedAt: null }
+    };
+    
+    let oldFolders = JSON.parse(localStorage.getItem('folders')) || JSON.parse(JSON.stringify(defaultFolders));
+    
+    // Migrate old data to V2 Flat format
+    oldFolders.forEach(folder => {
         folder.units.forEach(unit => {
-            if (!uniqueUnits[unit.name]) {
-                uniqueUnits[unit.name] = unit;
-                newUnits.push(unit);
-            } else {
-                // Merge progress into the kept unit
-                let keptUnit = uniqueUnits[unit.name];
-                unit.words.forEach(dupWord => {
-                    let keptWord = keptUnit.words.find(w => w.eng === dupWord.eng);
-                    if (keptWord) {
-                        if (dupWord.mastery > keptWord.mastery) keptWord.mastery = dupWord.mastery;
-                        keptWord.correctCount += dupWord.correctCount || 0;
-                        keptWord.wrongCount += dupWord.wrongCount || 0;
-                        if (dupWord.streak > keptWord.streak) keptWord.streak = dupWord.streak;
-                        if (dupWord.nextReviewAt) {
-                            if (!keptWord.nextReviewAt || new Date(dupWord.nextReviewAt) < new Date(keptWord.nextReviewAt)) {
-                                keptWord.nextReviewAt = dupWord.nextReviewAt;
-                            }
-                        }
-                    }
-                });
-                deduplicated = true;
-            }
-        });
-        folder.units = newUnits;
-        
-        // Also deduplicate words within each unit just in case
-        folder.units.forEach(unit => {
-            let uniqueWords = {};
-            let newWords = [];
-            unit.words.forEach(w => {
-                if (!uniqueWords[w.eng]) {
-                    uniqueWords[w.eng] = w;
-                    newWords.push(w);
-                } else {
-                    let keptWord = uniqueWords[w.eng];
-                    if (w.mastery > keptWord.mastery) keptWord.mastery = w.mastery;
-                    keptWord.correctCount += w.correctCount || 0;
-                    keptWord.wrongCount += w.wrongCount || 0;
-                    if (w.streak > keptWord.streak) keptWord.streak = w.streak;
-                    deduplicated = true;
-                }
+            unit.words.forEach(word => {
+                let v2Word = {
+                    id: word.id || 'v2-' + Math.random().toString(36).substr(2, 9),
+                    word: word.eng,
+                    normalizedWord: (word.eng || "").trim().toLowerCase(),
+                    type: "word",
+                    meaning: word.cht,
+                    alternativeMeanings: [],
+                    category: folder.id,
+                    tags: [unit.name], // Use unit name as a tag to group them later
+                    mastery: word.mastery || 0,
+                    streak: word.streak || 0,
+                    correctCount: word.correctCount || 0,
+                    wrongCount: word.wrongCount || 0,
+                    lastReviewedAt: word.lastReviewedAt || null,
+                    lastWrongAt: word.lastWrongAt || null,
+                    nextReviewAt: word.nextReviewAt || null,
+                    priority: word.priority || "normal",
+                    ignored: false,
+                    confusionGroup: word.confusionGroup || null,
+                    notes: word.notes || [],
+                    examples: word.examples || [],
+                    encounters: [],
+                    sourceCount: word.sourceCount || 1,
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                vocabApp_v2.words.push(v2Word);
             });
-            unit.words = newWords;
         });
     });
     
-    if (deduplicated) {
-        save();
-        console.log("Deduplication completed");
-    }
-    localStorage.setItem('v2Deduplicated_1', 'true');
+    localStorage.setItem('dataVersion', DATA_VERSION);
+    save();
 }
 
+// 2. BUILD COMPUTED VIEW `folders` FOR BACKWARD COMPATIBLE UI
+function rebuildFoldersView() {
+    let folderMap = {};
+    vocabApp_v2.words.forEach(w => {
+        if (!folderMap[w.category]) {
+            let meta = CATEGORY_META[w.category] || { name: w.category, icon: "folder", cssClass: "" };
+            folderMap[w.category] = {
+                id: w.category,
+                name: meta.name,
+                icon: meta.icon,
+                cssClass: meta.cssClass,
+                units: []
+            };
+        }
+        let folder = folderMap[w.category];
+        
+        let unitName = (w.tags && w.tags.length > 0) ? w.tags[0] : "Default Unit";
+        // Create unit id based on unitName for consistency
+        let unitId = "unit-" + unitName.replace(/\s+/g, '-');
+        
+        let unit = folder.units.find(u => u.name === unitName);
+        if (!unit) {
+            unit = { id: unitId, name: unitName, words: [] };
+            folder.units.push(unit);
+        }
+        
+        // Push a proxy-like object or mapped object so UI bindings work?
+        // Wait, UI uses `word.eng` and `word.cht`! We must map v2 keys back to v1 keys for the UI to read them, 
+        // OR we just use getters/setters so updates write back to v2.
+        // Easiest is to add properties to the v2 object directly so UI can read `.eng` and it returns `.word`.
+        Object.defineProperty(w, 'eng', { get: function() { return this.word; }, set: function(val) { this.word = val; }});
+        Object.defineProperty(w, 'cht', { get: function() { return this.meaning; }, set: function(val) { this.meaning = val; }});
+        
+        unit.words.push(w);
+    });
+    
+    // Convert map to sorted array (try to preserve original order if possible, here just values)
+    folders = Object.values(folderMap);
+}
 
+rebuildFoldersView();
 
 // =====================================================
 // PERSISTENCE
 // =====================================================
 function save() {
-    localStorage.setItem('folders',     JSON.stringify(folders));
+    localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
     localStorage.setItem('starredIds',  JSON.stringify(starredIds));
     localStorage.setItem('currentView', JSON.stringify(currentView));
-    
-    // Track update time locally
-    const now = Date.now();
-    localStorage.setItem('lastUpdatedTime', now.toString());
 }
+
 
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -2282,10 +2246,13 @@ function closeBackupModal() {
 function exportJSONBackup() {
     try {
         const backupObj = {
-            version: 'V2',
-            folders: folders,
-            starredIds: starredIds,
-            exportedAt: new Date().toISOString()
+            schemaVersion: vocabApp_v2.schemaVersion,
+            words: vocabApp_v2.words,
+            settings: vocabApp_v2.settings,
+            metadata: {
+                ...vocabApp_v2.metadata,
+                lastExportedAt: new Date().toISOString()
+            }
         };
         
         const jsonString = JSON.stringify(backupObj, null, 2);
@@ -2294,7 +2261,7 @@ function exportJSONBackup() {
         
         const a = document.createElement('a');
         a.href = url;
-        a.download = `vocab_backup_${new Date().toISOString().split('T')[0]}.json`;
+        a.download = `vocab_backup_v2_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -2304,10 +2271,12 @@ function exportJSONBackup() {
             exportSuccessMsgEl.style.display = 'block';
             setTimeout(() => exportSuccessMsgEl.style.display = 'none', 3000);
         }
+        
+        vocabApp_v2.metadata.lastExportedAt = new Date().toISOString();
+        save();
     } catch (e) {
-        alert('匯出備份失敗：' + e.message);
+        alert('匯出失敗：' + e.message);
     }
-}
 
 function importJSONBackup(mode) {
     const fileInput = document.getElementById('import-json-file');
@@ -2316,77 +2285,89 @@ function importJSONBackup(mode) {
         alert('請先選擇要匯入的 JSON 檔案！');
         return;
     }
-    
-    if (mode === 'overwrite') {
-        if (!confirm('⚠️ 警告：這將會刪除您目前所有的單字與紀錄，並完全替換為檔案中的資料！確定要繼續嗎？')) return;
-    } else {
-        if (!confirm('🔄 確定要將檔案中的資料合併至目前的單字庫嗎？')) return;
-    }
-    
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = function(e) {
         try {
-            const backupObj = JSON.parse(e.target.result);
-            if (!backupObj || !Array.isArray(backupObj.folders)) {
-                throw new Error('無效的備份檔案格式。');
-            }
+            const importedData = JSON.parse(e.target.result);
             
-            if (mode === 'overwrite') {
-                folders = backupObj.folders;
-                starredIds = backupObj.starredIds || [];
-            } else if (mode === 'merge') {
-                let newStarred = new Set(starredIds);
-                (backupObj.starredIds || []).forEach(id => newStarred.add(id));
-                starredIds = Array.from(newStarred);
-                
-                backupObj.folders.forEach(bkFolder => {
-                    let exFolder = folders.find(f => f.id === bkFolder.id);
-                    if (!exFolder) {
-                        folders.push(bkFolder);
-                    } else {
-                        bkFolder.units.forEach(bkUnit => {
-                            let exUnit = exFolder.units.find(u => u.id === bkUnit.id);
-                            if (!exUnit) {
-                                exFolder.units.push(bkUnit);
-                            } else {
-                                bkUnit.words.forEach(bkWord => {
-                                    let exWord = exUnit.words.find(w => w.id === bkWord.id || w.eng.toLowerCase() === bkWord.eng.toLowerCase());
-                                    if (!exWord) {
-                                        exUnit.words.push(bkWord);
-                                    } else {
-                                        // Merge details
-                                        if ((bkWord.mastery || 0) > (exWord.mastery || 0)) exWord.mastery = bkWord.mastery;
-                                        if (bkWord.priority === 'high') exWord.priority = 'high';
-                                        if (bkWord.confusionGroup) exWord.confusionGroup = bkWord.confusionGroup;
-                                        if (bkWord.notes && bkWord.notes.length > 0) {
-                                            if (!exWord.notes) exWord.notes = [];
-                                            bkWord.notes.forEach(n => {
-                                                if (!exWord.notes.includes(n)) exWord.notes.push(n);
-                                            });
-                                        }
-                                        if (bkWord.nextReviewAt) {
-                                            if (!exWord.nextReviewAt || new Date(bkWord.nextReviewAt) < new Date(exWord.nextReviewAt)) {
-                                                exWord.nextReviewAt = bkWord.nextReviewAt;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
+            // Allow importing V2 schema format
+            if (importedData.schemaVersion === 2 && importedData.words) {
+                if (mode === 'overwrite') {
+                    if (!confirm('您選擇了「完全覆蓋」，這將會清除您目前所有的單字與進度，並替換為備份檔的內容。確定要繼續嗎？')) return;
+                    vocabApp_v2.words = importedData.words;
+                    vocabApp_v2.settings = importedData.settings || {};
+                } else if (mode === 'merge') {
+                    // Merge logic: find by id or normalizedWord
+                    let currentWords = vocabApp_v2.words;
+                    importedData.words.forEach(importedWord => {
+                        let existingWord = currentWords.find(w => w.id === importedWord.id || w.normalizedWord === importedWord.normalizedWord);
+                        if (!existingWord) {
+                            currentWords.push(importedWord);
+                        } else {
+                            // Merge progress (keep highest mastery)
+                            existingWord.mastery = Math.max(existingWord.mastery || 0, importedWord.mastery || 0);
+                            existingWord.correctCount = (existingWord.correctCount || 0) + (importedWord.correctCount || 0);
+                            existingWord.wrongCount = (existingWord.wrongCount || 0) + (importedWord.wrongCount || 0);
+                        }
+                    });
+                }
+            } else if (importedData.folders && importedData.version === 'V2') {
+                // Backward compatibility for old V1/V2 folders format
+                if (mode === 'overwrite') {
+                    if (!confirm('您選擇了「完全覆蓋」，這將會清除目前所有的單字與進度！確定要繼續嗎？')) return;
+                    // Reset words
+                    vocabApp_v2.words = [];
+                    importedData.folders.forEach(folder => {
+                        folder.units.forEach(unit => {
+                            unit.words.forEach(word => {
+                                let v2Word = {
+                                    id: word.id || 'v2-' + Math.random().toString(36).substr(2, 9),
+                                    word: word.eng,
+                                    normalizedWord: (word.eng || "").trim().toLowerCase(),
+                                    type: "word",
+                                    meaning: word.cht,
+                                    alternativeMeanings: [],
+                                    category: folder.id,
+                                    tags: [unit.name],
+                                    mastery: word.mastery || 0,
+                                    streak: word.streak || 0,
+                                    correctCount: word.correctCount || 0,
+                                    wrongCount: word.wrongCount || 0,
+                                    lastReviewedAt: word.lastReviewedAt || null,
+                                    lastWrongAt: word.lastWrongAt || null,
+                                    nextReviewAt: word.nextReviewAt || null,
+                                    priority: word.priority || "normal",
+                                    ignored: false,
+                                    confusionGroup: word.confusionGroup || null,
+                                    notes: word.notes || [],
+                                    examples: word.examples || [],
+                                    encounters: [],
+                                    sourceCount: word.sourceCount || 1,
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString()
+                                };
+                                vocabApp_v2.words.push(v2Word);
+                            });
                         });
-                    }
-                });
+                    });
+                } else if (mode === 'merge') {
+                    alert('舊版備份檔的合併功能已停用，請使用「完全覆蓋」或升級備份檔格式。');
+                    return;
+                }
+            } else {
+                alert('備份檔案格式不正確或已損毀。');
+                return;
             }
             
             save();
-            renderSidebar();
-            renderMainContent();
+            rebuildFoldersView();
+            renderFolderList();
             closeBackupModal();
-            alert('🎉 備份資料已成功匯入與還原！');
-            fileInput.value = '';
+            alert('資料匯入成功！');
             
         } catch (err) {
-            console.error('Import Error:', err);
-            alert('匯入失敗：' + err.message);
+            alert('解析 JSON 檔案失敗，檔案可能損毀：' + err.message);
         }
     };
     reader.readAsText(file);
@@ -2408,3 +2389,4 @@ renderMainContent();
 
 
 
+}

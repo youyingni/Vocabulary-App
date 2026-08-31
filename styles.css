@@ -997,3 +997,58 @@ input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(59,1
     margin-top: 6px;
     letter-spacing: 2px;
 }
+
+/* Session Stats UI */
+.session-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 24px 0;
+    width: 100%;
+    max-width: 300px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.stat-item span {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.stat-item.correct span { color: var(--success-color); }
+.stat-item.wrong span { color: var(--danger-color); }
+.stat-item.mastered span { color: var(--star-color); }
+
+.session-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.fc-done-btn.primary {
+    background: var(--accent-color);
+    color: #0f172a;
+}
+.fc-done-btn.primary:hover {
+    background: #2dd4bf;
+}
+
+.fc-done-btn.secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+}
+.fc-done-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+}

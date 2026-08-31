@@ -1565,6 +1565,16 @@ function undoLastAction() {
         
         alert('已成功復原上一題的進度！');
         
+        // Revert session stats
+        if (fcSession) {
+            fcSession.correctWordIds.delete(previousWordState.id);
+            fcSession.wrongWordIds.delete(previousWordState.id);
+            if (previousWordState.mastery === 3) {
+                fcSession.newlyMasteredIds.delete(previousWordState.id);
+            }
+            // we don't revert answeredWordIds or masteryIncreasedWordIds to prevent abuse
+        }
+        
         // Refresh UI
         rebuildFoldersView();
         renderMainContent();
@@ -1574,8 +1584,16 @@ function undoLastAction() {
 let fcWords   = [];
 let fcIndex   = 0;
 let fcFlipped = false;
-let fcSessionId = null;
-let fcSessionMasteryIncreases = new Set();
+let fcSession = {
+    id: null,
+    startedAt: null,
+    wordIds: [],
+    answeredWordIds: new Set(),
+    masteryIncreasedWordIds: new Set(),
+    correctWordIds: new Set(),
+    wrongWordIds: new Set(),
+    newlyMasteredIds: new Set()
+};
 
 function getNextReviewDate(mastery) {
     const d = new Date();
@@ -1600,96 +1618,104 @@ const fcRememberBtn = document.getElementById('fc-remember-btn');
 const fcForgetBtn   = document.getElementById('fc-forget-btn');
 const fcExitBtn     = document.getElementById('fc-exit');
 
-function openFlashcardMode() {
-    // Collect words for current view
-    if (currentView.type === 'today') {
-        // Today's review logic:
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        let candidates = [];
-        folders.forEach(folder => {
-            folder.units.forEach(unit => {
-                unit.words.forEach(w => {
-                    if (w.mastery >= 5) return; // Skip mastered
-                    
-                    let score = 0;
-                    if (w.wrongCount > 0) score += 100; // Prioritize wrong
-                    if (w.nextReviewAt && new Date(w.nextReviewAt) <= today) score += 50; // Due
-                    if (!w.lastReviewedAt) score += 10; // New
-                    
-                    if (score > 0) candidates.push({ word: w, score });
-                });
-            });
-        });
-        candidates.sort((a, b) => b.score - a.score);
-        fcWords = candidates.slice(0, 20).map(c => c.word); // Max 20
-        
-    } else if (currentView.type === 'search') {
-        const query = (currentView.query || '').trim().toLowerCase();
-        fcWords = [];
-        if (query) {
+function openFlashcardMode(isReviewWrong = false) {
+    if (!isReviewWrong) {
+        // Collect words for current view
+        if (currentView.type === 'today') {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            let candidates = [];
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
-                        const engMatch = w.eng && w.eng.toLowerCase().includes(query);
-                        const chtMatch = w.cht && w.cht.toLowerCase().includes(query);
-                        if (engMatch || chtMatch) fcWords.push(w);
+                        if (w.mastery >= 5) return; // Skip mastered
+                        let score = 0;
+                        if (w.wrongCount > 0) score += 100; // Prioritize wrong
+                        if (w.nextReviewAt && new Date(w.nextReviewAt) <= today) score += 50; // Due
+                        if (!w.lastReviewedAt) score += 10; // New
+                        if (score > 0) candidates.push({ word: w, score });
                     });
                 });
             });
+            candidates.sort((a, b) => b.score - a.score);
+            fcWords = candidates.slice(0, 20).map(c => c.word); // Max 20
+        } else if (currentView.type === 'search') {
+            const query = (currentView.query || '').trim().toLowerCase();
+            fcWords = [];
+            if (query) {
+                folders.forEach(folder => {
+                    folder.units.forEach(unit => {
+                        unit.words.forEach(w => {
+                            const engMatch = w.eng && w.eng.toLowerCase().includes(query);
+                            const chtMatch = w.cht && w.cht.toLowerCase().includes(query);
+                            if (engMatch || chtMatch) fcWords.push(w);
+                        });
+                    });
+                });
+            }
+        } else if (currentView.type === 'starred') {
+            fcWords = [];
+            folders.forEach(folder => {
+                folder.units.forEach(unit => {
+                    unit.words.forEach(w => {
+                        if (starredIds.includes(w.id)) fcWords.push(w);
+                    });
+                });
+            });
+        } else if (currentView.type === 'wrong') {
+            fcWords = [];
+            folders.forEach(folder => {
+                folder.units.forEach(unit => {
+                    unit.words.forEach(w => {
+                        if (w.wrongCount && w.wrongCount > 0) fcWords.push(w);
+                    });
+                });
+            });
+            fcWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
+        } else if (currentView.type === 'stats_review') {
+            const level = currentView.level;
+            let candidates = [];
+            folders.forEach(folder => {
+                folder.units.forEach(unit => {
+                    unit.words.forEach(w => {
+                        const m = w.mastery || 0;
+                        if (level === -1) {
+                            candidates.push(w);
+                        } else if (level === 0 && m === 0) {
+                            candidates.push(w);
+                        } else if (level === 1 && (m === 1 || m === 2)) {
+                            candidates.push(w);
+                        } else if (level === 3 && (m === 3 || m === 4)) {
+                            candidates.push(w);
+                        } else if (level === 5 && m >= 5) {
+                            candidates.push(w);
+                        }
+                    });
+                });
+            });
+            candidates.sort(() => Math.random() - 0.5);
+            fcWords = candidates.slice(0, 40);
+        } else if (currentView.type === 'unit') {
+            const folder = folders.find(f => f.id === currentView.folderId);
+            const unit   = folder?.units.find(u => u.id === currentView.unitId);
+            fcWords = unit ? [...unit.words] : [];
         }
-    } else if (currentView.type === 'starred') {
-        fcWords = [];
-        folders.forEach(folder => {
-            folder.units.forEach(unit => {
-                unit.words.forEach(w => {
-                    if (starredIds.includes(w.id)) fcWords.push(w);
-                });
-            });
-        });
-    } else if (currentView.type === 'wrong') {
-        fcWords = [];
-        folders.forEach(folder => {
-            folder.units.forEach(unit => {
-                unit.words.forEach(w => {
-                    if (w.wrongCount && w.wrongCount > 0) fcWords.push(w);
-                });
-            });
-        });
-        fcWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
-    } else if (currentView.type === 'stats_review') {
-        const level = currentView.level;
-        let candidates = [];
-        folders.forEach(folder => {
-            folder.units.forEach(unit => {
-                unit.words.forEach(w => {
-                    const m = w.mastery || 0;
-                    if (level === -1) {
-                        candidates.push(w);
-                    } else if (level === 0 && m === 0) {
-                        candidates.push(w);
-                    } else if (level === 1 && (m === 1 || m === 2)) {
-                        candidates.push(w);
-                    } else if (level === 3 && (m === 3 || m === 4)) {
-                        candidates.push(w);
-                    } else if (level === 5 && m >= 5) {
-                        candidates.push(w);
-                    }
-                });
-            });
-        });
-        candidates.sort(() => Math.random() - 0.5);
-        fcWords = candidates.slice(0, 40);
-    } else if (currentView.type === 'unit') {
-        const folder = folders.find(f => f.id === currentView.folderId);
-        const unit   = folder?.units.find(u => u.id === currentView.unitId);
-        fcWords = unit ? [...unit.words] : [];
+    } else {
+        // If isReviewWrong is true, fcWords is already populated with the wrong words
     }
 
-    if (fcWords.length === 0) { alert('沒有單字可以進行卡片模式！'); return; }
+    if (fcWords.length === 0) { alert('沒有單字可以進行測驗！'); return; }
 
-    fcSessionId = generateId();
-    fcSessionMasteryIncreases = new Set();
+    fcSession = {
+        id: 'session-' + Math.random().toString(36).substr(2, 9),
+        startedAt: new Date().toISOString(),
+        wordIds: fcWords.map(w => w.id),
+        answeredWordIds: new Set(),
+        masteryIncreasedWordIds: new Set(),
+        correctWordIds: new Set(),
+        wrongWordIds: new Set(),
+        newlyMasteredIds: new Set()
+    };
     fcIndex   = 0;
     fcFlipped = false;
     fcOverlay.classList.remove('hidden');
@@ -1750,17 +1776,34 @@ function showFcDone() {
     done.className = 'fc-done';
     done.innerHTML = `
         <div class="fc-done-icon">🎉</div>
-        <h2>全部複習完畢！</h2>
-        <p>共 ${fcWords.length} 個單字，加星號 ${starredIds.filter(id => fcWords.find(w => w.id === id)).length} 個</p>
-        <button class="fc-done-btn" id="fc-restart">再練一次</button>
+        <h2>本次完成 ${fcSession.answeredWordIds.size} 個</h2>
+        <div class="session-stats">
+           <div class="stat-item correct">✅ 記得 <span>${fcSession.correctWordIds.size}</span></div>
+           <div class="stat-item wrong">❌ 忘記 <span>${fcSession.wrongWordIds.size}</span></div>
+           <div class="stat-item mastered">🔥 新熟練 <span>${fcSession.newlyMasteredIds.size}</span></div>
+        </div>
+        <div class="session-actions">
+           ${fcSession.wrongWordIds.size > 0 ? `<button class="fc-done-btn primary" id="fc-review-wrong">再練剛才答錯的 ${fcSession.wrongWordIds.size} 個</button>` : ''}
+           <button class="fc-done-btn secondary" id="fc-go-home">返回首頁</button>
+        </div>
     `;
     fcOverlay.appendChild(done);
-    document.getElementById('fc-restart').onclick = () => {
-        done.remove();
-        fcCard.parentElement.style.display = '';
-        fcOverlay.querySelector('.fc-actions').style.display = '';
-        openFlashcardMode();
+    
+    const reviewWrongBtn = document.getElementById('fc-review-wrong');
+    if (reviewWrongBtn) {
+        reviewWrongBtn.onclick = () => {
+            done.remove();
+            fcCard.parentElement.style.display = '';
+            fcOverlay.querySelector('.fc-actions').style.display = '';
+            // Filter fcWords to only those that were wrong
+            fcWords = fcWords.filter(w => fcSession.wrongWordIds.has(w.id));
+            openFlashcardMode(true); // true = isReviewWrong
+        };
+    }
+    document.getElementById('fc-go-home').onclick = () => {
+        closeFlashcardMode();
     };
+
 }
 
 function closeFlashcardMode() {
@@ -1806,10 +1849,18 @@ function fcRemember() {
         };
         showUndoToast('記得');
 
-        if (!fcSessionMasteryIncreases.has(word.id)) {
-            word.mastery = Math.min((word.mastery || 0) + 1, 5);
-            fcSessionMasteryIncreases.add(word.id);
+        
+        let prevMastery = word.mastery || 0;
+        if (!fcSession.masteryIncreasedWordIds.has(word.id)) {
+            word.mastery = Math.min(prevMastery + 1, 5);
+            fcSession.masteryIncreasedWordIds.add(word.id);
+            if (prevMastery === 3 && word.mastery === 4) {
+                fcSession.newlyMasteredIds.add(word.id);
+            }
         }
+        fcSession.answeredWordIds.add(word.id);
+        fcSession.correctWordIds.add(word.id);
+
         word.correctCount = (word.correctCount || 0) + 1;
         word.streak = (word.streak || 0) + 1;
         word.lastReviewedAt = new Date().toISOString();

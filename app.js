@@ -1420,8 +1420,14 @@ function speakWord(text, event, btn) {
 // =====================================================
 function createWordCard(word, showBadge = false) {
     const isStarred = starredIds.includes(word.id);
-    const mastery = word.correctCount || 0;
-    const isMastered = mastery >= 3;
+    const mastery = word.mastery || 0;
+    const isMastered = mastery >= 4;
+    
+    // Generate stars
+    let starsHtml = '';
+    for (let i = 1; i <= 5; i++) {
+        starsHtml += (i <= mastery) ? '★' : '☆';
+    }
     const card = document.createElement('div');
     card.className = `word-card ${isStarred ? 'starred' : ''}`;
     if (isMastered) card.classList.add('mastered');
@@ -1431,6 +1437,7 @@ function createWordCard(word, showBadge = false) {
     card.innerHTML = `
         <div class="word-eng">${word.eng} ${isMastered ? '<span title="已熟練" style="font-size: 0.85em;">🔥</span>' : ''}</div>
         <div class="word-cht">${word.cht}</div>
+        <div class="word-mastery-stars" title="熟練度: ${mastery}/5">${starsHtml} <span style="font-size: 0.7em; opacity: 0.7; margin-left: 4px;">(${mastery}/5)</span></div>
         ${showBadge ? `<div class="word-unit-badge">${word._unitName || ''}</div>` : ''}
         <div class="card-actions">
             <button class="icon-btn speak-btn" title="播放發音（US→GB）" onclick="speakWord('${safeEng}', event, this)">
@@ -1516,6 +1523,54 @@ function addWord(eng, cht) {
 // =====================================================
 // FLASHCARD SWIPE MODE
 // =====================================================
+
+// =====================================================
+// UNDO STATE
+// =====================================================
+let previousWordState = null;
+let undoTimeout = null;
+
+function showUndoToast(actionName) {
+    const toast = document.getElementById('undo-toast');
+    if (!toast) return;
+    document.getElementById('undo-action-name').textContent = actionName;
+    toast.classList.add('show');
+    if (undoTimeout) clearTimeout(undoTimeout);
+    undoTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+        previousWordState = null;
+    }, 4000);
+}
+
+function undoLastAction() {
+    if (!previousWordState) return;
+    
+    // Find the word in vocabApp_v2
+    let word = vocabApp_v2.words.find(w => w.id === previousWordState.id);
+    if (word) {
+        // Restore state
+        word.mastery = previousWordState.mastery;
+        word.streak = previousWordState.streak;
+        word.correctCount = previousWordState.correctCount;
+        word.wrongCount = previousWordState.wrongCount;
+        word.lastWrongAt = previousWordState.lastWrongAt;
+        word.lastReviewedAt = previousWordState.lastReviewedAt;
+        word.nextReviewAt = previousWordState.nextReviewAt;
+        
+        save();
+        
+        // Hide toast
+        const toast = document.getElementById('undo-toast');
+        if (toast) toast.classList.remove('show');
+        
+        alert('已成功復原上一題的進度！');
+        
+        // Refresh UI
+        rebuildFoldersView();
+        renderMainContent();
+    }
+}
+
 let fcWords   = [];
 let fcIndex   = 0;
 let fcFlipped = false;
@@ -1739,6 +1794,18 @@ function fcFlipCard() {
 function fcRemember() {
     const word = fcWords[fcIndex];
     if (word) {
+        previousWordState = {
+            id: word.id,
+            mastery: word.mastery,
+            streak: word.streak,
+            correctCount: word.correctCount,
+            wrongCount: word.wrongCount,
+            lastWrongAt: word.lastWrongAt,
+            lastReviewedAt: word.lastReviewedAt,
+            nextReviewAt: word.nextReviewAt
+        };
+        showUndoToast('記得');
+
         if (!fcSessionMasteryIncreases.has(word.id)) {
             word.mastery = Math.min((word.mastery || 0) + 1, 5);
             fcSessionMasteryIncreases.add(word.id);
@@ -1760,6 +1827,18 @@ function fcRemember() {
 function fcForget() {
     const word = fcWords[fcIndex];
     if (word) {
+        previousWordState = {
+            id: word.id,
+            mastery: word.mastery,
+            streak: word.streak,
+            correctCount: word.correctCount,
+            wrongCount: word.wrongCount,
+            lastWrongAt: word.lastWrongAt,
+            lastReviewedAt: word.lastReviewedAt,
+            nextReviewAt: word.nextReviewAt
+        };
+        showUndoToast('忘記');
+
         word.mastery = Math.max((word.mastery || 0) - 1, 0);
         word.wrongCount = (word.wrongCount || 0) + 1;
         word.streak = 0;

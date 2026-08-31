@@ -1997,6 +1997,15 @@ fcExitBtn.addEventListener('click', () => closeFlashcardMode());
 // Keyboard
 document.addEventListener('keydown', e => {
     if (fcOverlay.classList.contains('hidden')) return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
+    // Make sure we only process if a card is currently showing (not done screen)
+    const isDoneScreen = fcOverlay.querySelector('.fc-done');
+    if (isDoneScreen) {
+        if (e.key === 'Escape') closeFlashcardMode();
+        return;
+    }
+    
     if (e.key === 'Escape')     closeFlashcardMode();
     if (e.key === ' ')          { e.preventDefault(); fcFlipCard(); }
     if (e.key === 'ArrowRight') fcRemember();

@@ -2258,11 +2258,35 @@ if (startConfusionBtn) {
         });
         
         cqQuestions = [];
+        let allWords = [];
+        folders.forEach(folder => {
+            folder.units.forEach(unit => {
+                allWords.push(...unit.words);
+            });
+        });
+
         Object.keys(cGroups).forEach(gKey => {
             const groupWords = cGroups[gKey];
             if (groupWords.length < 2) return;
             groupWords.forEach(correctWord => {
                 const options = [...groupWords];
+                // Pad to exactly 4 options
+                let attempts = 0;
+                while (options.length < 4 && attempts < 100) {
+                    const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
+                    if (!options.find(o => o.id === randomWord.id)) {
+                        options.push(randomWord);
+                    }
+                    attempts++;
+                }
+                // If there are somehow more than 4 (e.g. group has 5), slice it (keep correct one)
+                if (options.length > 4) {
+                    const others = options.filter(o => o.id !== correctWord.id).sort(() => Math.random() - 0.5);
+                    const selected = others.slice(0, 3);
+                    selected.push(correctWord);
+                    options.splice(0, options.length, ...selected);
+                }
+                
                 options.sort(() => Math.random() - 0.5);
                 cqQuestions.push({ correctWord, options });
             });

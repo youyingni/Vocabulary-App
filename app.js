@@ -1996,20 +1996,41 @@ fcExitBtn.addEventListener('click', () => closeFlashcardMode());
 
 // Keyboard
 document.addEventListener('keydown', e => {
-    if (fcOverlay.classList.contains('hidden')) return;
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     
-    // Make sure we only process if a card is currently showing (not done screen)
-    const isDoneScreen = fcOverlay.querySelector('.fc-done');
-    if (isDoneScreen) {
-        if (e.key === 'Escape') closeFlashcardMode();
+    // Flashcard Mode
+    if (!fcOverlay.classList.contains('hidden')) {
+        const isDoneScreen = fcOverlay.querySelector('.fc-done');
+        if (isDoneScreen) {
+            if (e.key === 'Escape') closeFlashcardMode();
+            return;
+        }
+        
+        if (e.key === 'Escape')     closeFlashcardMode();
+        if (e.key === ' ')          { e.preventDefault(); fcFlipCard(); }
+        if (e.key === 'ArrowRight') fcRemember();
+        if (e.key === 'ArrowLeft')  fcForget();
         return;
     }
-    
-    if (e.key === 'Escape')     closeFlashcardMode();
-    if (e.key === ' ')          { e.preventDefault(); fcFlipCard(); }
-    if (e.key === 'ArrowRight') fcRemember();
-    if (e.key === 'ArrowLeft')  fcForget();
+
+    // Confusion Quiz Mode
+    if (typeof cqOverlay !== 'undefined' && !cqOverlay.classList.contains('hidden')) {
+        if (e.key === 'Escape') {
+            cqOverlay.classList.add('hidden');
+            if (typeof rebuildFoldersView === 'function') rebuildFoldersView();
+            if (typeof renderMainContent === 'function') renderMainContent();
+            return;
+        }
+        if (['1', '2', '3', '4'].includes(e.key)) {
+            e.preventDefault();
+            const index = parseInt(e.key) - 1;
+            const buttons = cqOptions.querySelectorAll('button');
+            if (buttons && buttons[index] && buttons[index].style.pointerEvents !== 'none') {
+                buttons[index].click();
+            }
+        }
+        return;
+    }
 });
 
 // =====================================================
@@ -2572,7 +2593,8 @@ function importJSONBackup(mode) {
             
             save();
             rebuildFoldersView();
-            renderFolderList();
+            renderSidebar();
+            renderMainContent();
             closeBackupModal();
             alert('資料匯入成功！');
             

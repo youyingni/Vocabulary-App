@@ -2166,61 +2166,108 @@ if (confirmImportBtn) {
         const unit = folder?.units.find(u => u.id === targetUnitId);
         if (!unit) return alert('找不到目標回數');
         
+        const unitName = unit.name;
+        
         let addedCount = 0;
         let mergedCount = 0;
         
         currentImportCandidates.forEach((cand, idx) => {
             const cb = document.getElementById(`import-cb-${idx}`);
             if (cb && cb.checked) {
-                let existingWord = null;
-                for (const f of folders) {
-                    for (const u of f.units) {
-                        const found = u.words.find(w => w.eng.toLowerCase() === cand.eng.toLowerCase());
-                        if (found) {
-                            existingWord = found;
-                            break;
-                        }
-                    }
-                    if (existingWord) break;
-                }
+                // Find existing word globally in vocabApp_v2.words
+                let existingWord = vocabApp_v2.words.find(w => w.normalizedWord === cand.eng.toLowerCase().trim());
                 
                 if (existingWord) {
-                    if (cand.cht && existingWord.cht !== cand.cht) {
+                    if (cand.cht && existingWord.meaning !== cand.cht && !existingWord.meaning.includes(cand.cht)) {
                         if (!existingWord.notes) existingWord.notes = [];
-                        existingWord.notes.push(`新解釋: ${cand.cht}`);
+                        if (!existingWord.notes.includes(`新解釋: ${cand.cht}`)) {
+                            existingWord.notes.push(`新解釋: ${cand.cht}`);
+                        }
                     }
-                    if (cand.isImportant) existingWord.priority = 'high';
-                    if (cand.isNotFamiliar) existingWord.mastery = 0;
-                    if (cand.confusionGroup) existingWord.confusionGroup = cand.confusionGroup;
+                    if (cand.isImportant) {
+                        existingWord.priority = 'high';
+                        if (!starredIds.includes(existingWord.id)) starredIds.push(existingWord.id);
+                    }
+                    if (cand.isNotFamiliar) {
+                        existingWord.mastery = 0;
+                        existingWord.streak = 0;
+                        existingWord.lastReviewedAt = new Date().toISOString();
+                        existingWord.lastWrongAt = new Date().toISOString();
+                        
+                        let tomorrow = new Date();
+                        tomorrow.setHours(0, 0, 0, 0);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        existingWord.nextReviewAt = tomorrow.toISOString();
+                    }
+                    if (cand.confusionGroup) {
+                        existingWord.confusionGroup = cand.confusionGroup;
+                    }
+                    // Tag it to the new unit if not already there
+                    if (existingWord.category !== targetFolderId) {
+                        // Word already exists in another category. Just append tag.
+                        if (!existingWord.tags) existingWord.tags = [];
+                        if (!existingWord.tags.includes(unitName)) {
+                            existingWord.tags.push(unitName);
+                        }
+                    } else {
+                        if (!existingWord.tags) existingWord.tags = [];
+                        if (!existingWord.tags.includes(unitName)) {
+                            existingWord.tags.push(unitName);
+                        }
+                    }
+                    
                     existingWord.sourceCount = (existingWord.sourceCount || 1) + 1;
                     mergedCount++;
                 } else {
+                    const newId = 'v2-' + Math.random().toString(36).substr(2, 9);
                     const newWord = {
-                        id: "static-97",
-                        eng: cand.eng,
-                        cht: cand.cht,
-                        mastery: cand.isNotFamiliar ? 0 : 0,
+                        id: newId,
+                        word: cand.eng,
+                        normalizedWord: cand.eng.toLowerCase().trim(),
+                        type: cand.isPhrase ? "phrase" : "word",
+                        meaning: cand.cht,
+                        alternativeMeanings: [],
+                        category: targetFolderId,
+                        tags: [unitName],
+                        mastery: 0,
                         correctCount: 0,
-                        wrongCount: 0,
+                        wrongCount: cand.isNotFamiliar ? 1 : 0,
                         streak: 0,
                         lastReviewedAt: null,
                         lastWrongAt: null,
                         nextReviewAt: null,
                         priority: cand.isImportant ? 'high' : 'normal',
+                        ignored: false,
                         confusionGroup: cand.confusionGroup || null,
                         notes: [],
                         examples: [],
-                        sourceCount: 1
+                        encounters: [],
+                        sourceCount: 1,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
                     };
-                    unit.words.push(newWord);
+                    vocabApp_v2.words.push(newWord);
+                    if (cand.isImportant) {
+                        starredIds.push(newId);
+                    }
                     addedCount++;
                 }
             }
         });
         
         save();
+        rebuildFoldersView();
+        renderSidebar();
+        renderMainContent();
+        
         alert(`匯入完成！新增 ${addedCount} 個單字，合併 ${mergedCount} 個既有單字。`);
-        selectUnit(targetFolderId, targetUnitId);
+        // Navigate to the unit where words were imported
+        currentView = { type: 'unit', folderId: targetFolderId, unitId: targetUnitId };
+        
+        // Hide import UI
+        importPreviewContainer.classList.add('hidden');
+        importTextarea.value = '';
+        renderMainContent();
     });
 }
 

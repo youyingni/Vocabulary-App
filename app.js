@@ -829,6 +829,446 @@ if (!vocabApp_v2) {
     save();
 }
 
+
+// Migration: Group all TOEIC handwritten notes into folder-handwritten
+if (typeof vocabApp_v2 !== 'undefined' && vocabApp_v2 && vocabApp_v2.words) {
+    let migratedCount = 0;
+    const mapping = {
+        "folder-toeic-phrases": ["片語"],
+        "folder-toeic-business": ["單字"],
+        "folder-toeic-life": ["單字"],
+        "folder-toeic-confusion": ["易混淆", "單字"],
+        "folder-toeic-career": ["單字"],
+        "folder-toeic-daily": ["單字"],
+        "folder-toeic-similar": ["易混淆", "單字"]
+    };
+    vocabApp_v2.words.forEach(w => {
+        if (mapping[w.category]) {
+            // For migrated legacy words, if they contain a space, they are probably a phrase
+            let isPhrase = (w.word || w.eng || "").includes(' ');
+            let targetTags = mapping[w.category].slice(); // copy
+            
+            if (targetTags.includes("單字") && isPhrase) {
+                targetTags[targetTags.indexOf("單字")] = "片語";
+            }
+            
+            // Note: If user imported 1125 words into folder-toeic-phrases, they will all be "片語".
+            // Let's be smart: dynamically check space instead of blindly trusting mapping for 'folder-toeic-phrases'
+            if (w.category === "folder-toeic-phrases") {
+                targetTags = [isPhrase ? "片語" : "單字"];
+            }
+            
+            w.tags = targetTags;
+            w.category = "folder-handwritten";
+            migratedCount++;
+        } else if (w.category === "folder-handwritten") {
+            // Re-map already migrated tags if they are the old ones
+            if (w.tags && w.tags.length === 1 && w.tags[0].startsWith("TOEIC ")) {
+                let isPhrase = (w.word || w.eng || "").includes(' ');
+                let newTags = [isPhrase ? "片語" : "單字"];
+                if (w.tags[0].includes("易混淆")) {
+                    newTags.push("易混淆");
+                }
+                w.tags = newTags;
+                migratedCount++;
+            }
+        }
+    });
+
+    // Automatically inject all words provided by the user
+    const groupedWords = [
+        {
+            tag: "TOEIC 常用片語與句型",
+            words: [
+                { eng: "break a contract", cht: "違約", type: "phrase" },
+                { eng: "look up", cht: "查找", type: "phrase" },
+                { eng: "stop by", cht: "前往", type: "phrase" },
+                { eng: "drop off", cht: "入睡 / 減少 / 下降 / 下車", type: "phrase" },
+                { eng: "drop 人/物 off", cht: "開車把人/物載到", type: "phrase" },
+                { eng: "pick 人 up", cht: "去某地接某人", type: "phrase" },
+                { eng: "make up my mind", cht: "下定決心", type: "phrase" },
+                { eng: "take care of", cht: "處理", type: "phrase" },
+                { eng: "in the event of", cht: "如果...發生", type: "phrase" },
+                { eng: "line up", cht: "準備", type: "phrase" },
+                { eng: "takeoff", cht: "起飛", type: "word" },
+                { eng: "on behalf of", cht: "代表", type: "phrase" },
+                { eng: "walk away with", cht: "贏得", type: "phrase" },
+                { eng: "full of", cht: "充滿...的", type: "phrase" },
+                { eng: "get off", cht: "下車", type: "phrase" },
+                { eng: "take off", cht: "起飛 / 脫下", type: "phrase" },
+                { eng: "on account of", cht: "因為", type: "phrase" },
+                { eng: "in case of", cht: "以防", type: "phrase" },
+                { eng: "apart from", cht: "除了....之外", type: "phrase" },
+                { eng: "beat about/around the bush", cht: "拐彎抹角", type: "phrase" },
+                { eng: "a pile of", cht: "一堆.....", type: "phrase" },
+                { eng: "take a boat ride", cht: "乘船遊玩", type: "phrase" },
+                { eng: "come in handy", cht: "派上用場", type: "phrase" },
+                { eng: "be reluctant to", cht: "勉強", type: "phrase" },
+                { eng: "the moment / as soon as (S+V)", cht: "一...就...", type: "phrase" },
+                { eng: "be busy (Ving / with N)", cht: "忙著從事...", type: "phrase" },
+                { eng: "across from", cht: "在...對面", type: "phrase" }
+            ]
+        },
+        {
+            tag: "TOEIC 商業、辦公與職涯",
+            words: [
+                {eng: "reputation", cht: "名聲", type: "word"},
+                {eng: "discount", cht: "折扣", type: "word"},
+                {eng: "charge", cht: "收費/控告/批評/趕往", type: "word"},
+                {eng: "warranty", cht: "保固/保險", type: "word"},
+                {eng: "orientation", cht: "目標/培訓", type: "word"},
+                {eng: "launch", cht: "發射/啟動/發布會", type: "word"},
+                {eng: "merchandise", cht: "商品/促銷", type: "word"},
+                {eng: "shareholder", cht: "股東", type: "word"},
+                {eng: "intern", cht: "實習生/扣壓", type: "word"},
+                {eng: "incentives", cht: "激勵", type: "word"},
+                {eng: "invest", cht: "投資/投入", type: "word"},
+                {eng: "fund-raising", cht: "籌款", type: "word"},
+                {eng: "shift", cht: "改變/去除/輪班", type: "word"},
+                {eng: "merger", cht: "合併", type: "word"},
+                {eng: "brochure", cht: "手冊", type: "word"},
+                {eng: "representative", cht: "代表的/代理人", type: "word"},
+                {eng: "represent", cht: "代表/意味/表現/提出", type: "word"},
+                {eng: "agenda", cht: "議程", type: "word"},
+                {eng: "direction", cht: "方向", type: "word"},
+                {eng: "keynote", cht: "主題", type: "word"},
+                {eng: "appointment", cht: "預約/約定/任命", type: "word"},
+                {eng: "proceeds", cht: "收益", type: "word"},
+                {eng: "proceed", cht: "前進/繼續", type: "word"},
+                {eng: "take paid/annual leave", cht: "請年假", type: "phrase"},
+                {eng: "comp time", cht: "補休", type: "phrase"},
+                {eng: "course", cht: "課程/過程/場地/療程/流動", type: "word"},
+                {eng: "interpret", cht: "翻譯/理解", type: "word"},
+                {eng: "alongside", cht: "在...旁邊", type: "word"},
+                {eng: "attache", cht: "固定/連接", type: "word"},
+                {eng: "shelf", cht: "架子", type: "word"},
+                {eng: "repair", cht: "修理/補救", type: "word"},
+                {eng: "gallery", cht: "美術館", type: "word"},
+                {eng: "stuff", cht: "東西", type: "word"},
+                {eng: "pace", cht: "步調/速度/來回踱步", type: "word"},
+                {eng: "retirement", cht: "退休", type: "word"},
+                {eng: "fair", cht: "集市/展覽會", type: "word"},
+                {eng: "fax", cht: "傳真", type: "word"},
+                {eng: "radio", cht: "收音機", type: "word"},
+                {eng: "fit", cht: "適合", type: "word"},
+                {eng: "reach", cht: "到達/伸手/交流", type: "word"},
+                {eng: "stack", cht: "堆疊/車禍/許多", type: "word"},
+                {eng: "accompany", cht: "陪伴/伴奏", type: "word"},
+                {eng: "ceremony", cht: "典禮/禮儀", type: "word"},
+                {eng: "initial", cht: "最初的/首字母", type: "word"},
+                {eng: "commensurate", cht: "相等的", type: "word"},
+                {eng: "cable", cht: "電纜/電線", type: "word"},
+                {eng: "parade", cht: "遊行/炫耀", type: "word"},
+                {eng: "campaign", cht: "活動(政.商.軍)", type: "word"},
+                {eng: "reply", cht: "回應/回復", type: "word"},
+                {eng: "undergo", cht: "經歷", type: "word"},
+                {eng: "renovate", cht: "整修/翻新", type: "word"},
+                {eng: "interior", cht: "內部的/內地", type: "word"},
+                {eng: "apron", cht: "圍裙/停機坪/舞台", type: "word"},
+                {eng: "park", cht: "停放/擱置/體育場", type: "word"},
+                {eng: "expire", cht: "到期/逝世", type: "word"},
+                {eng: "fixture", cht: "固定裝置/體育賽事", type: "word"}
+            ]
+        },
+        {
+            tag: "TOEIC 日常、生活與雜項",
+            words: [
+                {eng: "boiled", cht: "水煮", type: "word"},
+                {eng: "fry", cht: "煎", type: "word"},
+                {eng: "barbecue", cht: "燒烤", type: "word"},
+                {eng: "bake", cht: "烘烤", type: "word"},
+                {eng: "grill", cht: "烤肉架", type: "word"},
+                {eng: "plate", cht: "大盤子", type: "word"},
+                {eng: "bowl", cht: "碗", type: "word"},
+                {eng: "ingredient", cht: "成分/要素", type: "word"},
+                {eng: "caterer", cht: "提供餐飲服務的人", type: "word"},
+                {eng: "Freshman year", cht: "大一", type: "phrase"},
+                {eng: "Sophomore year", cht: "大二", type: "phrase"},
+                {eng: "Junior year", cht: "大三", type: "phrase"},
+                {eng: "Senior year", cht: "大四", type: "phrase"},
+                {eng: "first/second/third/home base", cht: "一二三本壘", type: "phrase"},
+                {eng: "home plate", cht: "本壘板", type: "phrase"},
+                {eng: "hit a home run", cht: "擊出全壘打", type: "phrase"},
+                {eng: "hit a double", cht: "擊出二壘安打", type: "phrase"},
+                {eng: "shampoo", cht: "洗髮精", type: "word"},
+                {eng: "soap", cht: "肥皂", type: "word"},
+                {eng: "toothpaste", cht: "牙膏", type: "word"},
+                {eng: "paper clip", cht: "迴紋針", type: "phrase"},
+                {eng: "stapler", cht: "釘書機", type: "word"},
+                {eng: "appliance", cht: "家電", type: "word"},
+                {eng: "tablet", cht: "平板", type: "word"},
+                {eng: "laptop", cht: "筆電", type: "word"},
+                {eng: "thunderstorm", cht: "雷雨", type: "word"},
+                {eng: "lightning", cht: "閃電", type: "word"},
+                {eng: "scenic", cht: "風景優美的", type: "word"},
+                {eng: "scenery", cht: "風景", type: "word"},
+                {eng: "dock/pier", cht: "碼頭", type: "word"},
+                {eng: "vet", cht: "獸醫", type: "word"},
+                {eng: "highway", cht: "高速公路", type: "word"},
+                {eng: "currency", cht: "貨幣", type: "word"},
+                {eng: "evacuate", cht: "疏散", type: "word"},
+                {eng: "hesitate", cht: "猶豫", type: "word"},
+                {eng: "pharmaceutical", cht: "製藥的/藥物", type: "word"},
+                {eng: "niece", cht: "姪女/外甥女", type: "word"},
+                {eng: "auditorium", cht: "聽眾席", type: "word"},
+                {eng: "asthma", cht: "氣喘", type: "word"},
+                {eng: "lounge", cht: "客廳", type: "word"},
+                {eng: "sculpture", cht: "雕塑", type: "word"},
+                {eng: "feather", cht: "羽毛", type: "word"},
+                {eng: "further", cht: "更遠的/改進", type: "word"},
+                {eng: "elevator", cht: "電梯", type: "word"},
+                {eng: "escalator", cht: "手扶梯", type: "word"},
+                {eng: "take/on paid leave", cht: "請假", type: "phrase"},
+                {eng: "annual leave", cht: "年假", type: "phrase"},
+                {eng: "long week", cht: "連假", type: "phrase"},
+                {eng: "four-day bridge week", cht: "四天連假", type: "phrase"},
+                {eng: "ceiling", cht: "天花板/上限", type: "word"},
+                {eng: "floor", cht: "地板/樓層/底部/場所/打倒", type: "word"},
+                {eng: "session", cht: "會議/開庭/學年/一段時間/一場", type: "word"},
+                {eng: "jam session", cht: "演奏會", type: "phrase"},
+                {eng: "bull session", cht: "聊天", type: "phrase"},
+                {eng: "photo session", cht: "宣傳時間", type: "phrase"}
+            ]
+        },
+        {
+            tag: "TOEIC 易混淆與相近字群",
+            words: [
+                {eng: "register", cht: "登記/註冊/表達", type: "word"},
+                {eng: "registration", cht: "登記/註冊", type: "word"},
+                {eng: "mimic", cht: "模仿", type: "word"},
+                {eng: "comic", cht: "好笑的/漫畫", type: "word"},
+                {eng: "panic", cht: "驚恐", type: "word"},
+                {eng: "penalty", cht: "處罰/罰金", type: "word"},
+                {eng: "penal", cht: "不利的/處罰的", type: "word"},
+                {eng: "drawback", cht: "弱點/缺點", type: "word"},
+                {eng: "draw back", cht: "退縮", type: "phrase"},
+                {eng: "latest", cht: "最新的", type: "word"},
+                {eng: "broad", cht: "寬廣的", type: "word"},
+                {eng: "board", cht: "木板/董事會", type: "word"},
+                {eng: "well-stocked / provisioned / furnished", cht: "物資充足的", type: "phrase"}
+            ]
+        }
+,
+        {
+            tag: "TOEIC 單字大彙總",
+            words: [
+                { eng: "ancient", cht: "古老的", type: "word" },
+                { eng: "effort", cht: "努力", type: "word" },
+                { eng: "properly", cht: "正常", type: "word" },
+                { eng: "brakes", cht: "煞車", type: "word" },
+                { eng: "dressing", cht: "醬", type: "word" },
+                { eng: "address", cht: "住址", type: "word" },
+                { eng: "rooftop", cht: "屋頂", type: "word" },
+                { eng: "solar panel", cht: "太陽能電池板", type: "phrase" },
+                { eng: "unsuitable", cht: "不適合的", type: "word" },
+                { eng: "existing", cht: "目前的", type: "word" },
+                { eng: "equipment", cht: "設備", type: "word" },
+                { eng: "unit", cht: "裝置/配件/單位", type: "word" },
+                { eng: "fan", cht: "電風扇/煽動", type: "word" },
+                { eng: "termination", cht: "終止/結束", type: "word" },
+                { eng: "ownership", cht: "所有權", type: "word" },
+                { eng: "penalty", cht: "處罰", type: "word" },
+                { eng: "roommate", cht: "室友", type: "word" },
+                { eng: "coordinate", cht: "協調/搭配", type: "word" },
+                { eng: "caterer", cht: "餐飲服務商", type: "word" },
+                { eng: "dietary", cht: "飲食的", type: "word" },
+                { eng: "restriction", cht: "限制", type: "word" },
+                { eng: "utilize", cht: "利用", type: "word" },
+                { eng: "hand in", cht: "提交", type: "phrase" },
+                { eng: "campaign", cht: "行銷活動", type: "word" },
+                { eng: "questionnaire", cht: "問卷", type: "word" },
+                
+                { eng: "branch", cht: "分公司", type: "word" },
+                { eng: "demand", cht: "要求", type: "word" },
+                { eng: "potential", cht: "潛在的", type: "word" },
+                { eng: "relocate", cht: "搬遷", type: "word" },
+                { eng: "downtown", cht: "市中心", type: "word" },
+                { eng: "current", cht: "當前的", type: "word" },
+                { eng: "executive", cht: "行政長官", type: "word" },
+                { eng: "merchandise", cht: "商品", type: "word" },
+                { eng: "remote", cht: "遠距的", type: "word" },
+                { eng: "appropriately", cht: "適當地", type: "word" },
+                { eng: "reasonable", cht: "合理的", type: "word" },
+                { eng: "misplace", cht: "遺失", type: "word" },
+                { eng: "security office", cht: "警衛室", type: "phrase" },
+                { eng: "safe", cht: "保險箱", type: "word" },
+                { eng: "hardware", cht: "五金行", type: "word" },
+                { eng: "locksmith", cht: "鎖匠", type: "word" },
+                { eng: "manage", cht: "設法應付", type: "word" },
+                { eng: "distributor", cht: "經銷商", type: "word" },
+                { eng: "shipment", cht: "運輸", type: "word" },
+                { eng: "courier", cht: "快遞員", type: "word" },
+                { eng: "distribute", cht: "分發", type: "word" },
+                { eng: "handout", cht: "印刷品", type: "word" },
+                { eng: "last-minute", cht: "最後的", type: "word" },
+                { eng: "printout", cht: "印出的資料", type: "word" },
+                { eng: "outfit", cht: "服裝", type: "word" },
+                
+                { eng: "banquet", cht: "宴會", type: "word" },
+                { eng: "bouquet", cht: "花束", type: "word" },
+                { eng: "venue", cht: "發生地點", type: "word" },
+                { eng: "tax filing", cht: "報稅", type: "phrase" },
+                { eng: "worth", cht: "值得", type: "word" },
+                { eng: "investment", cht: "投資", type: "word" },
+                { eng: "specialist", cht: "專家", type: "word" },
+                { eng: "inaccurate", cht: "不準確的", type: "word" },
+                { eng: "return", cht: "收益/利潤", type: "word" },
+                { eng: "quote", cht: "報價", type: "word" },
+                { eng: "recommend", cht: "建議", type: "word" },
+                { eng: "dental", cht: "牙齒的", type: "word" },
+                { eng: "comfortably", cht: "舒適地", type: "word" },
+                { eng: "complimentary", cht: "免費的", type: "word" },
+                { eng: "shipping", cht: "運輸", type: "word" },
+                { eng: "trial", cht: "試用", type: "word" },
+                { eng: "catalogue", cht: "目錄/紀錄/一連串的", type: "word" },
+                { eng: "matter", cht: "事情", type: "word" },
+                { eng: "aisle", cht: "走道", type: "word" },
+                { eng: "suitcase", cht: "行李箱", type: "word" },
+                { eng: "plane", cht: "飛機", type: "word" },
+                { eng: "step down", cht: "辭職", type: "phrase" },
+                { eng: "promotion", cht: "晉升", type: "word" },
+                { eng: "adequate", cht: "足夠的", type: "word" },
+                { eng: "retailer", cht: "零售商", type: "word" },
+                
+                { eng: "virtual", cht: "虛擬的", type: "word" },
+                { eng: "architect", cht: "建築師", type: "word" },
+                { eng: "basement", cht: "地下室", type: "word" },
+                { eng: "partially", cht: "部分地", type: "word" },
+                { eng: "navigate", cht: "導航/瀏覽", type: "word" },
+                { eng: "attempt", cht: "企圖/嘗試", type: "word" },
+                { eng: "plan", cht: "圖紙/計畫", type: "word" },
+                { eng: "natural disaster", cht: "自然災害", type: "phrase" },
+                { eng: "resume", cht: "重新開始/履歷", type: "word" },
+                { eng: "certificate", cht: "結業證書", type: "word" },
+                { eng: "prescription", cht: "處方箋", type: "word" },
+                { eng: "packet", cht: "行程表", type: "word" },
+                { eng: "injure", cht: "受傷", type: "word" },
+                { eng: "ill", cht: "生病", type: "word" },
+                { eng: "volunteer", cht: "自願者", type: "word" },
+                { eng: "job fair", cht: "就業博覽會", type: "phrase" },
+                { eng: "severe", cht: "嚴重的", type: "word" },
+                { eng: "approximate", cht: "大約的", type: "word" },
+                { eng: "voucher", cht: "票券", type: "word" },
+                { eng: "establishment", cht: "企業/機構", type: "word" },
+                { eng: "postponement", cht: "延遲", type: "word" },
+                { eng: "modification", cht: "修改", type: "word" },
+                { eng: "fasten", cht: "繫緊", type: "word" },
+                { eng: "aircraft", cht: "飛機", type: "word" },
+                { eng: "malfunction", cht: "故障", type: "word" },
+                
+                { eng: "disrupt", cht: "干擾", type: "word" },
+                { eng: "redeem", cht: "補救", type: "word" },
+                { eng: "glimpse", cht: "一瞥", type: "word" },
+                { eng: "attendee", cht: "出席者", type: "word" },
+                { eng: "appear", cht: "出現", type: "word" },
+                { eng: "transfer", cht: "調任", type: "word" },
+                { eng: "lounge", cht: "休息室", type: "word" },
+                { eng: "raffle", cht: "抽獎/獎品", type: "word" },
+                { eng: "guide", cht: "引導", type: "word" },
+                { eng: "mission", cht: "任務", type: "word" },
+                { eng: "emission", cht: "排放", type: "word" },
+                { eng: "chemical-free", cht: "無化學成分的", type: "word" },
+                { eng: "commitment", cht: "承諾", type: "word" },
+                { eng: "biodegradable", cht: "可生物分解的", type: "word" },
+                { eng: "emphasize", cht: "強調", type: "word" },
+                { eng: "distribute", cht: "分配", type: "word" },
+                { eng: "commence", cht: "開始", type: "word" },
+                { eng: "reveal", cht: "公開", type: "word" },
+                { eng: "agricultural supplies", cht: "農業用品", type: "phrase" },
+                { eng: "admission", cht: "入場券", type: "word" },
+                { eng: "workout", cht: "運動", type: "word" },
+                { eng: "improve", cht: "提升", type: "word" },
+                { eng: "fitness", cht: "健康", type: "word" },
+                { eng: "concert", cht: "演唱會", type: "word" },
+                { eng: "obligation", cht: "義務/責任", type: "word" },
+                { eng: "fulfill", cht: "履行", type: "word" },
+                
+                { eng: "layer", cht: "層", type: "word" },
+                { eng: "multiple layer", cht: "千層", type: "phrase" },
+                { eng: "lettering", cht: "寫字", type: "word" },
+                { eng: "fundraising", cht: "募款", type: "word" },
+                { eng: "gala", cht: "盛會", type: "word" },
+                { eng: "personalization", cht: "個人化", type: "word" },
+                { eng: "generally", cht: "通常", type: "word" },
+                { eng: "complimentary", cht: "免費的", type: "word" },
+                { eng: "bathing suit", cht: "泳裝", type: "phrase" },
+                { eng: "non-slip", cht: "防滑的", type: "word" },
+                { eng: "appropriate", cht: "合適的", type: "word" },
+                { eng: "inquiry", cht: "詢問", type: "word" },
+                { eng: "crew", cht: "一組工作人員", type: "word" },
+                { eng: "dispatch", cht: "派遣/發送", type: "word" },
+                { eng: "official", cht: "官員", type: "word" },
+                { eng: "electrician", cht: "電工", type: "word" },
+                { eng: "overdue", cht: "過期的", type: "word" },
+                { eng: "utility fee", cht: "水電費", type: "phrase" }
+            ]
+        }    ];
+
+    let newMigrated = 0;
+    groupedWords.forEach(group => {
+        group.words.forEach(nw => {
+            const normalized = nw.eng.toLowerCase().trim();
+            const exists = vocabApp_v2.words.find(w => w.normalizedWord === normalized);
+            let expectedTags = group.tag.includes("易混淆") ? ["易混淆", (nw.type || (nw.eng.includes(' ') ? "phrase" : "word")) === "phrase" ? "片語" : "單字"] : [(nw.type || (nw.eng.includes(' ') ? "phrase" : "word")) === "phrase" ? "片語" : "單字"];
+            
+            if (!exists) {
+                vocabApp_v2.words.push({
+                    id: 'v2-img-' + Math.random().toString(36).substr(2, 9),
+                    word: nw.eng,
+                    normalizedWord: normalized,
+                    type: nw.type || (nw.eng.includes(' ') ? "phrase" : "word"),
+                    meaning: nw.cht,
+                    alternativeMeanings: [],
+                    category: "folder-handwritten",
+                    tags: expectedTags,
+                    mastery: 0,
+                    streak: 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    lastReviewedAt: null,
+                    lastWrongAt: null,
+                    priority: "normal",
+                    ignored: false,
+                    notes: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                });
+                newMigrated++;
+            } else {
+                // If it already exists, ensure it has the expected tags (especially "易混淆")
+                if (!exists.tags) exists.tags = [];
+                let tagsChanged = false;
+                expectedTags.forEach(t => {
+                    if (!exists.tags.includes(t)) {
+                        exists.tags.push(t);
+                        tagsChanged = true;
+                    }
+                });
+                
+                // Also remove any legacy "TOEIC " tags just in case
+                let oldLen = exists.tags.length;
+                exists.tags = exists.tags.filter(t => !t.startsWith("TOEIC "));
+                if (exists.tags.length !== oldLen) tagsChanged = true;
+
+                if (tagsChanged) {
+                    newMigrated++;
+                }
+            }
+        });
+    });
+
+    if (newMigrated > 0) {
+        migratedCount += newMigrated;
+    }
+
+    if (migratedCount > 0) {
+        localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
+        console.log("Migrated " + migratedCount + " handwritten words.");
+    }
+}
+
+
+
 // 2. BUILD COMPUTED VIEW `folders` FOR BACKWARD COMPATIBLE UI
 function rebuildFoldersView() {
     let folderMap = {};
@@ -2508,6 +2948,7 @@ function exportJSONBackup() {
     } catch (e) {
         alert('匯出失敗：' + e.message);
     }
+}
 
 function importJSONBackup(mode) {
     const fileInput = document.getElementById('import-json-file');
@@ -2620,5 +3061,3 @@ renderSidebar();
 renderMainContent();
 
 
-
-}

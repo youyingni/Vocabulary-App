@@ -1433,9 +1433,7 @@ function renderSidebar() {
             li.className = `unit-item ${unit.id === currentView.unitId ? 'active' : ''}`;
             li.innerHTML = `
                 <span>${unit.name}</span>
-                <button class="delete-unit" title="刪除回數" onclick="deleteUnit('${folder.id}','${unit.id}',event)">
-                    <span class="material-symbols-outlined">delete</span>
-                </button>
+                
             `;
             li.addEventListener('click', (e) => {
                 if (e.target.closest('.delete-unit')) return;
@@ -1886,10 +1884,7 @@ function createWordCard(word, showBadge = false) {
             <button class="icon-btn star-btn" title="${isStarred ? '取消星號' : '加星號'}" onclick="toggleStar('${word.id}', event)">
                 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' ${isStarred ? 1 : 0}">star</span>
             </button>
-            ${currentView.type !== 'starred' ? `
-            <button class="icon-btn delete-btn" title="刪除單字" onclick="deleteWord('${word.id}', event)">
-                <span class="material-symbols-outlined">close</span>
-            </button>` : ''}
+            
         </div>
     `;
     return card;

@@ -1555,6 +1555,7 @@ function selectStats() {
 
 function renderMainContent() {
     wordSectionEl.classList.add('hidden');
+    if (typeof customStudySection !== 'undefined' && customStudySection) customStudySection.classList.add('hidden');
     if (dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
     if (importSectionEl) importSectionEl.classList.add('hidden');
     if (confusionSectionEl) confusionSectionEl.classList.add('hidden');
@@ -1879,8 +1880,8 @@ function speakWord(text, event, btn) {
     window.speechSynthesis.cancel();
     if (btn) btn.classList.add('playing');
     
-    let activeAccents = AVAILABLE_ACCENTS.filter(a => userSettings.accents.includes(a.lang));
-    if (activeAccents.length === 0) activeAccents = [AVAILABLE_ACCENTS[0]];
+    // Always use all available accents as requested by user
+    let activeAccents = AVAILABLE_ACCENTS;
 
     if (window.speechSynthesis.getVoices().length === 0) {
         window.speechSynthesis.addEventListener('voiceschanged', () => {
@@ -2587,7 +2588,13 @@ addWordFormEl.addEventListener('submit', e => {
     }
 });
 
-toggleTestModeBtn.addEventListener('click', openFlashcardMode);
+toggleTestModeBtn.addEventListener('click', () => openFlashcardMode(false, false));
+
+const toggleBrowseModeBtn = document.getElementById('toggle-browse-mode');
+if (toggleBrowseModeBtn) {
+    toggleBrowseModeBtn.addEventListener('click', () => openFlashcardMode(false, true));
+}
+
 
 // =====================================================
 // IMPORT METHODS

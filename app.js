@@ -1328,6 +1328,35 @@ function generateId() {
 // =====================================================
 // DOM REFERENCES
 // =====================================================
+
+const menuCustomStudyEl  = document.getElementById('menu-custom-study');
+const customStudySection = document.getElementById('custom-study-section');
+const customStudyTree    = document.getElementById('custom-study-tree');
+const startBrowseBtn     = document.getElementById('start-browse-btn');
+const startQuizBtn       = document.getElementById('start-quiz-btn');
+
+const settingsBtn        = document.getElementById('settings-btn');
+const settingsOverlay    = document.getElementById('settings-overlay');
+const settingsCloseBtn   = document.getElementById('settings-close-x');
+const settingsSaveBtn    = document.getElementById('settings-save-btn');
+
+let userSettings = { accents: ['en-US', 'en-GB'] };
+let isBrowseMode = false;
+
+function loadSettings() {
+    try {
+        const saved = localStorage.getItem('vocabApp_settings');
+        if (saved) {
+            userSettings = JSON.parse(saved);
+        }
+    } catch(e) {}
+}
+
+function saveSettings() {
+    localStorage.setItem('vocabApp_settings', JSON.stringify(userSettings));
+}
+loadSettings();
+
 const folderListEl       = document.getElementById('folder-list');
 const starredCountEl     = document.getElementById('starred-count');
 const starredNavEl       = document.getElementById('starred-nav');
@@ -1541,7 +1570,11 @@ function renderMainContent() {
         renderImportView();
     } else if (currentView.type === 'confusion') {
         renderConfusionView();
+    
+    } else if (currentView.type === 'custom-study') {
+        renderCustomStudyView();
     } else if (currentView.type === 'stats') {
+
         renderStatsView();
     } else if (currentView.type === 'unit' && currentView.unitId) {
         wordSectionEl.classList.remove('hidden');
@@ -1833,9 +1866,11 @@ function speakSequential(text, accents, idx, btn) {
     window.speechSynthesis.speak(utter);
 }
 
-const ACCENTS = [
+const AVAILABLE_ACCENTS = [
     { lang: 'en-US', label: '🇺🇸' },
     { lang: 'en-GB', label: '🇬🇧' },
+    { lang: 'en-AU', label: '🇦🇺' },
+    { lang: 'en-CA', label: '🇨🇦' },
 ];
 
 function speakWord(text, event, btn) {
@@ -1843,13 +1878,16 @@ function speakWord(text, event, btn) {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     if (btn) btn.classList.add('playing');
-    // Voices might not be ready; wait a tick
+    
+    let activeAccents = AVAILABLE_ACCENTS.filter(a => userSettings.accents.includes(a.lang));
+    if (activeAccents.length === 0) activeAccents = [AVAILABLE_ACCENTS[0]];
+
     if (window.speechSynthesis.getVoices().length === 0) {
         window.speechSynthesis.addEventListener('voiceschanged', () => {
-            speakSequential(text, ACCENTS, 0, btn);
+            speakSequential(text, activeAccents, 0, btn);
         }, { once: true });
     } else {
-        speakSequential(text, ACCENTS, 0, btn);
+        speakSequential(text, activeAccents, 0, btn);
     }
 }
 
@@ -2053,8 +2091,21 @@ const fcRememberBtn = document.getElementById('fc-remember-btn');
 const fcForgetBtn   = document.getElementById('fc-forget-btn');
 const fcExitBtn     = document.getElementById('fc-exit');
 
-function openFlashcardMode(isReviewWrong = false) {
-    if (!isReviewWrong) {
+function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords = null) {
+    isBrowseMode = isBrowse;
+    
+    if (isBrowseMode) {
+        if (fcForgetBtn) { fcForgetBtn.innerHTML = '<span class="material-symbols-outlined">arrow_back</span> 上一個'; fcForgetBtn.title = "上一個 (左滑)"; }
+        if (fcRememberBtn) { fcRememberBtn.innerHTML = '下一個 <span class="material-symbols-outlined">arrow_forward</span>'; fcRememberBtn.title = "下一個 (右滑)"; }
+    } else {
+        if (fcForgetBtn) { fcForgetBtn.innerHTML = '<span class="material-symbols-outlined">close</span>'; fcForgetBtn.title = "忘記 (左滑)"; }
+        if (fcRememberBtn) { fcRememberBtn.innerHTML = '<span class="material-symbols-outlined">check</span>'; fcRememberBtn.title = "記得 (右滑)"; }
+    }
+
+    if (customWords) {
+        fcWords = [...customWords];
+        if (!isBrowseMode) fcWords.sort(() => Math.random() - 0.5);
+    } else if (!isReviewWrong) {
         // Collect words for current view
         if (currentView.type === 'today') {
             const today = new Date();
@@ -2159,8 +2210,12 @@ function openFlashcardMode(isReviewWrong = false) {
 
 function showFcCard() {
     if (fcIndex >= fcWords.length) {
-        showFcDone();
-        return;
+        if (isBrowseMode && fcWords.length > 0) {
+            fcIndex = 0;
+        } else {
+            showFcDone();
+            return;
+        }
     }
     const word = fcWords[fcIndex];
     const directionEl = document.getElementById('fc-direction-select');
@@ -2286,21 +2341,21 @@ function fcRemember() {
 
         
         let prevMastery = word.mastery || 0;
-        if (!fcSession.masteryIncreasedWordIds.has(word.id)) {
+        if (!isBrowseMode && !fcSession.masteryIncreasedWordIds.has(word.id)) {
             word.mastery = Math.min(prevMastery + 1, 5);
             fcSession.masteryIncreasedWordIds.add(word.id);
             if (prevMastery === 3 && word.mastery === 4) {
                 fcSession.newlyMasteredIds.add(word.id);
             }
         }
-        fcSession.answeredWordIds.add(word.id);
-        fcSession.correctWordIds.add(word.id);
+        if (!isBrowseMode) { fcSession.answeredWordIds.add(word.id); }
+        if (!isBrowseMode) { fcSession.correctWordIds.add(word.id); }
 
-        word.correctCount = (word.correctCount || 0) + 1;
-        word.streak = (word.streak || 0) + 1;
-        word.lastReviewedAt = new Date().toISOString();
-        word.nextReviewAt = getNextReviewDate(word.mastery);
-        save();
+        if (!isBrowseMode) { word.correctCount = (word.correctCount || 0) + 1; }
+        if (!isBrowseMode) { word.streak = (word.streak || 0) + 1; }
+        if (!isBrowseMode) { word.lastReviewedAt = new Date().toISOString(); }
+        if (!isBrowseMode) { word.nextReviewAt = getNextReviewDate(word.mastery); }
+        if (!isBrowseMode) save();
     }
     if (fcRememberBtn) fcRememberBtn.classList.add('active');
     setTimeout(() => {
@@ -2311,6 +2366,17 @@ function fcRemember() {
 }
 
 function fcForget() {
+    if (isBrowseMode) {
+        if (fcIndex > 0) {
+            if (fcForgetBtn) fcForgetBtn.classList.add('active');
+            setTimeout(() => {
+                if (fcForgetBtn) fcForgetBtn.classList.remove('active');
+                fcIndex--;
+                showFcCard();
+            }, 150);
+        }
+        return;
+    }
     const word = fcWords[fcIndex];
     if (word) {
         previousWordState = {
@@ -2323,20 +2389,22 @@ function fcForget() {
             lastReviewedAt: word.lastReviewedAt,
             nextReviewAt: word.nextReviewAt
         };
-        showUndoToast('忘記');
+        if (!isBrowseMode) showUndoToast('忘記');
 
-        word.mastery = Math.max((word.mastery || 0) - 1, 0);
-        word.wrongCount = (word.wrongCount || 0) + 1;
-        word.streak = 0;
-        word.lastReviewedAt = new Date().toISOString();
-        word.lastWrongAt = new Date().toISOString();
+        if (!isBrowseMode) { word.mastery = Math.max((word.mastery || 0) - 1, 0); }
+        if (!isBrowseMode) { word.wrongCount = (word.wrongCount || 0) + 1; }
+        if (!isBrowseMode) { word.streak = 0; }
+        if (!isBrowseMode) { word.lastReviewedAt = new Date().toISOString(); }
+        if (!isBrowseMode) { word.lastWrongAt = new Date().toISOString(); }
         
-        let tomorrow = new Date();
-        tomorrow.setHours(0, 0, 0, 0);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        word.nextReviewAt = tomorrow.toISOString();
+        if (!isBrowseMode) {
+            let tomorrow = new Date();
+            tomorrow.setHours(0, 0, 0, 0);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            word.nextReviewAt = tomorrow.toISOString();
+        }
         
-        save();
+        if (!isBrowseMode) save();
     }
     if (fcForgetBtn) fcForgetBtn.classList.add('active');
     setTimeout(() => {
@@ -3056,3 +3124,156 @@ renderSidebar();
 renderMainContent();
 
 
+
+// =====================================================
+// NEW FEATURES: CUSTOM STUDY & SETTINGS
+// =====================================================
+if (menuCustomStudyEl) {
+    menuCustomStudyEl.addEventListener('click', () => {
+        currentView = { type: 'custom-study' };
+        save();
+        renderSidebar();
+        renderMainContent();
+        if (window.innerWidth <= 768) closeMobileSidebar();
+    });
+}
+
+function renderCustomStudyView() {
+    wordSectionEl.classList.add('hidden');
+    if (dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
+    if (typeof importSectionEl !== 'undefined' && importSectionEl) importSectionEl.classList.add('hidden');
+    if (typeof confusionSectionEl !== 'undefined' && confusionSectionEl) confusionSectionEl.classList.add('hidden');
+    if (typeof statsSectionEl !== 'undefined' && statsSectionEl) statsSectionEl.classList.add('hidden');
+    if (typeof customStudySection !== 'undefined' && customStudySection) customStudySection.classList.add('hidden');
+    
+    if (customStudySection) customStudySection.classList.remove('hidden');
+    setFormattedTitle('🎓 自訂學習與測驗');
+    
+    if (customStudyTree) {
+        customStudyTree.innerHTML = '';
+        folders.forEach(folder => {
+            if (folder.units.length === 0) return;
+            
+            const folderDiv = document.createElement('div');
+            folderDiv.style.marginBottom = '16px';
+            
+            const folderHeader = document.createElement('div');
+            folderHeader.style.fontWeight = 'bold';
+            folderHeader.style.marginBottom = '8px';
+            folderHeader.style.fontSize = '1.1rem';
+            folderHeader.innerHTML = `
+                <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" class="folder-cb" data-folder-id="${folder.id}" style="width:16px; height:16px;" checked>
+                    ${folder.name}
+                </label>
+            `;
+            folderDiv.appendChild(folderHeader);
+            
+            const unitsContainer = document.createElement('div');
+            unitsContainer.style.paddingLeft = '24px';
+            unitsContainer.style.display = 'flex';
+            unitsContainer.style.flexDirection = 'column';
+            unitsContainer.style.gap = '8px';
+            
+            folder.units.forEach(unit => {
+                const unitLabel = document.createElement('label');
+                unitLabel.style.cursor = 'pointer';
+                unitLabel.style.display = 'flex';
+                unitLabel.style.alignItems = 'center';
+                unitLabel.style.gap = '8px';
+                unitLabel.innerHTML = `
+                    <input type="checkbox" class="unit-cb" data-folder-id="${folder.id}" data-unit-id="${unit.id}" style="width:16px; height:16px;" checked>
+                    ${unit.name} <span style="color:var(--text-secondary); font-size:0.9rem;">(${unit.words.length})</span>
+                `;
+                unitsContainer.appendChild(unitLabel);
+            });
+            
+            const folderCb = folderHeader.querySelector('.folder-cb');
+            const unitCbs = unitsContainer.querySelectorAll('.unit-cb');
+            
+            folderCb.addEventListener('change', (e) => {
+                unitCbs.forEach(cb => cb.checked = e.target.checked);
+            });
+            
+            unitCbs.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const allChecked = Array.from(unitCbs).every(c => c.checked);
+                    const someChecked = Array.from(unitCbs).some(c => c.checked);
+                    folderCb.checked = allChecked;
+                    folderCb.indeterminate = someChecked && !allChecked;
+                });
+            });
+            
+            folderDiv.appendChild(unitsContainer);
+            customStudyTree.appendChild(folderDiv);
+        });
+    }
+}
+
+function getSelectedUnitsWords() {
+    if (!customStudyTree) return [];
+    const checked = Array.from(customStudyTree.querySelectorAll('.unit-cb:checked'));
+    if (checked.length === 0) return [];
+    
+    let words = [];
+    checked.forEach(cb => {
+        const folderId = cb.dataset.folderId;
+        const unitId = cb.dataset.unitId;
+        const folder = folders.find(f => f.id === folderId);
+        if (folder) {
+            const unit = folder.units.find(u => u.id === unitId);
+            if (unit) words = words.concat(unit.words);
+        }
+    });
+    return words;
+}
+
+if (startBrowseBtn) {
+    startBrowseBtn.addEventListener('click', () => {
+        const words = getSelectedUnitsWords();
+        if (words.length === 0) return alert('請至少勾選一個單元！');
+        openFlashcardMode(false, true, words);
+    });
+}
+
+if (startQuizBtn) {
+    startQuizBtn.addEventListener('click', () => {
+        const words = getSelectedUnitsWords();
+        if (words.length === 0) return alert('請至少勾選一個單元！');
+        openFlashcardMode(false, false, words);
+    });
+}
+
+// Settings Modal Events
+if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+        ['us', 'gb', 'au', 'ca'].forEach(lang => {
+            const cb = document.getElementById(`accent-${lang}`);
+            if (cb) cb.checked = userSettings.accents.includes(`en-${lang.toUpperCase()}`);
+        });
+        if (settingsOverlay) settingsOverlay.classList.remove('hidden');
+    });
+}
+
+if (settingsCloseBtn) {
+    settingsCloseBtn.addEventListener('click', () => {
+        if (settingsOverlay) settingsOverlay.classList.add('hidden');
+    });
+}
+
+if (settingsSaveBtn) {
+    settingsSaveBtn.addEventListener('click', () => {
+        let newAccents = [];
+        ['us', 'gb', 'au', 'ca'].forEach(lang => {
+            const cb = document.getElementById(`accent-${lang}`);
+            if (cb && cb.checked) newAccents.push(`en-${lang.toUpperCase()}`);
+        });
+        if (newAccents.length === 0) {
+            alert('請至少選擇一種口音！');
+            return;
+        }
+        userSettings.accents = newAccents;
+        saveSettings();
+        if (settingsOverlay) settingsOverlay.classList.add('hidden');
+    });
+}

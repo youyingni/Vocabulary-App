@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <link rel="stylesheet" href="styles.css?v=20260906_11">
+    <link rel="stylesheet" href="styles.css?v=20260906_12">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -360,7 +360,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260906_11"></script>
+    <script src="app.js?v=20260906_12"></script>
 
     <!-- Register Service Worker -->
     <script>
@@ -377,6 +377,38 @@
     <div id="undo-toast" class="undo-toast">
         <span>已標記為「<span id="undo-action-name"></span>」</span>
         <button onclick="undoLastAction()">復原</button>
+    </div>
+<!-- Settings Modal -->
+    <div class="modal-overlay hidden" id="settings-overlay">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="font-size: 1.5rem;">⚙️ 設定</h2>
+                <button class="icon-btn" id="settings-close-x" style="color: var(--text-secondary);"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--primary-color);">發音口音選擇</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px; font-size: 1.05rem;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="accent-us" value="en-US" style="width: 18px; height: 18px;"> 🇺🇸 美式 (US)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="accent-gb" value="en-GB" style="width: 18px; height: 18px;"> 🇬🇧 英式 (GB)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="accent-au" value="en-AU" style="width: 18px; height: 18px;"> 🇦🇺 澳洲 (AU)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="accent-ca" value="en-CA" style="width: 18px; height: 18px;"> 🇨🇦 加拿大 (CA)
+                    </label>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 16px; line-height: 1.4;">
+                    注意：部分口音需視您的裝置（iOS/Android/Windows）與瀏覽器是否支援。若未支援，將會使用預設發音。
+                </p>
+            </div>
+            <div class="modal-actions" style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="btn btn-primary" id="settings-save-btn">儲存設定</button>
+            </div>
+        </div>
     </div>
 </body>
 </html>

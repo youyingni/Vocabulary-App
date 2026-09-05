@@ -2590,10 +2590,7 @@ addWordFormEl.addEventListener('submit', e => {
 
 toggleTestModeBtn.addEventListener('click', () => openFlashcardMode(false, false));
 
-const toggleBrowseModeBtn = document.getElementById('toggle-browse-mode');
-if (toggleBrowseModeBtn) {
-    toggleBrowseModeBtn.addEventListener('click', () => openFlashcardMode(false, true));
-}
+
 
 
 // =====================================================
@@ -3235,13 +3232,7 @@ function getSelectedUnitsWords() {
     return words;
 }
 
-if (startBrowseBtn) {
-    startBrowseBtn.addEventListener('click', () => {
-        const words = getSelectedUnitsWords();
-        if (words.length === 0) return alert('請至少勾選一個單元！');
-        openFlashcardMode(false, true, words);
-    });
-}
+
 
 if (startQuizBtn) {
     startQuizBtn.addEventListener('click', () => {

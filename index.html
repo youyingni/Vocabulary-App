@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <link rel="stylesheet" href="styles.css?v=20260906_14">
+    <link rel="stylesheet" href="styles.css?v=20260906_15">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
@@ -120,11 +120,9 @@
                         <option value="en2ch">🇬🇧 英 → 🇹🇼 中</option>
                         <option value="ch2en">🇹🇼 中 → 🇬🇧 英</option>
                     </select>
-                    <div style="display: flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color);">
-                        <button id="toggle-browse-mode" class="btn btn-secondary" style="border: none; border-radius: 0; padding: 6px 10px; background: rgba(59, 130, 246, 0.1); color: #60a5fa;" title="卡片瀏覽">
-                            <span class="material-symbols-outlined" style="margin-right: 4px;">style</span>瀏覽
-                        </button>
-                        <div style="width: 1px; background: var(--border-color);"></div>
+                    <button id="toggle-test-mode" class="btn btn-secondary" title="開啟卡片模式">
+                        <span class="material-symbols-outlined" style="margin-right: 4px;">style</span>卡片模式
+                    </button>
                         <button id="toggle-test-mode" class="btn btn-secondary" style="border: none; border-radius: 0; padding: 6px 10px; background: rgba(239, 68, 68, 0.1); color: #f87171;" title="記憶測驗">
                             <span class="material-symbols-outlined" style="margin-right: 4px;">psychology</span>測驗
                         </button>
@@ -195,11 +193,8 @@
                     </div>
 
                     <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-                        <button id="start-browse-btn" class="btn" style="background: var(--primary-color); color: white; display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined">style</span>開始卡片瀏覽
-                        </button>
-                        <button id="start-quiz-btn" class="btn" style="background: var(--danger-color); color: white; display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined">psychology</span>開始記憶測驗
+                        <button id="start-quiz-btn" class="btn" style="background: var(--primary-color); color: white; display: flex; align-items: center; gap: 8px; font-size: 1.1rem; padding: 12px 24px;">
+                            <span class="material-symbols-outlined">style</span>開始卡片模式
                         </button>
                     </div>
                 </div>
@@ -397,7 +392,7 @@
         </div>
     </div>
 
-    <script src="app.js?v=20260906_14"></script>
+    <script src="app.js?v=20260906_15"></script>
 
     <!-- Register Service Worker -->
     <script>

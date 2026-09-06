@@ -1899,10 +1899,30 @@ function speakWord(text, event, btn) {
 // =====================================================
 // WORD CARD (list view)
 // =====================================================
+function getWordDuplicateCount(engText) {
+    if (!engText) return 1;
+    const searchEng = engText.trim().toLowerCase();
+    let count = 0;
+    folders.forEach(f => {
+        f.units.forEach(u => {
+            u.words.forEach(w => {
+                if (w.eng && w.eng.trim().toLowerCase() === searchEng) {
+                    count++;
+                }
+            });
+        });
+    });
+    return count;
+}
+
 function createWordCard(word, showBadge = false) {
     const isStarred = starredIds.includes(word.id);
     const mastery = word.mastery || 0;
     const isMastered = mastery >= 4;
+    const dupCount = getWordDuplicateCount(word.eng);
+    const dupBadgeHtml = dupCount > 1 
+        ? `<span style="display:inline-block; margin-left:8px; font-size:0.55em; padding:2px 6px; background:rgba(239,68,68,0.15); color:#ef4444; border-radius:12px; border:1px solid rgba(239,68,68,0.3); vertical-align: middle;" title="此單字在所有字庫中共出現 ${dupCount} 次">⚠️ 重複手抄 (${dupCount})</span>` 
+        : '';
     
     // Generate stars
     let starsHtml = '';
@@ -1916,7 +1936,7 @@ function createWordCard(word, showBadge = false) {
 
     const safeEng = word.eng.replace(/'/g, "\\'");
     card.innerHTML = `
-        <div class="word-eng">${word.eng} ${isMastered ? '<span title="已熟練" style="font-size: 0.85em;">🔥</span>' : ''}</div>
+        <div class="word-eng">${word.eng} ${isMastered ? '<span title="已熟練" style="font-size: 0.85em;">🔥</span>' : ''}${dupBadgeHtml}</div>
         <div class="word-cht">${word.cht}</div>
         <div class="word-mastery-stars" title="熟練度: ${mastery}/5">${starsHtml} <span style="font-size: 0.7em; opacity: 0.7; margin-left: 4px;">(${mastery}/5)</span></div>
         ${showBadge ? `<div class="word-unit-badge">${word._unitName || ''}</div>` : ''}

@@ -759,15 +759,197 @@ const defaultFolders = [
 // STATE (V2 Architecture)
 // =====================================================
 const DATA_VERSION = 8; // Bump this to force-refresh default unit content
+const APP_VERSION = "2.1.0";
+const SCHEMA_VERSION = 9;
+
+// =====================================================
+// WORD NORMALIZATION & PROGRESS HELPERS
+// =====================================================
+function normalizeWord(eng) {
+    return (eng || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function createDefaultProgress(normalizedEng) {
+    const now = new Date().toISOString();
+    return {
+        normalizedEng,
+        mastery: 0,
+        streak: 0,
+        correctCount: 0,
+        wrongCount: 0,
+        starred: false,
+        ignored: false,
+        lastReviewedAt: null,
+        lastWrongAt: null,
+        nextReviewAt: null,
+        createdAt: now,
+        updatedAt: now
+    };
+}
+
+// Global reference - will be populated after data load
+let appData = null; // alias for vocabApp_v2 after migration
+
+function getWordProgress(word) {
+    if (!appData || !appData.progressByWord) return createDefaultProgress(normalizeWord(word.eng || word.word || ""));
+    const key = word.normalizedEng || word.normalizedWord || normalizeWord(word.eng || word.word || "");
+    if (!appData.progressByWord[key]) {
+        appData.progressByWord[key] = createDefaultProgress(key);
+    }
+    return appData.progressByWord[key];
+}
+
+function updateWordProgress(word, updates) {
+    const progress = getWordProgress(word);
+    Object.assign(progress, updates, { updatedAt: new Date().toISOString() });
+    return progress;
+}
+
+function getEncounterCount(normalizedEng) {
+    if (!appData || !appData.words) return 1;
+    const key = normalizedEng || "";
+    let count = 0;
+    appData.words.forEach(w => {
+        if (normalizeWord(w.word || w.eng || "") === key) count++;
+    });
+    return count;
+}
+
+function getEncounterSources(normalizedEng) {
+    if (!appData || !appData.words) return [];
+    const key = normalizedEng || "";
+    const sources = [];
+    const CATEGORY_META_LOCAL = {
+        "folder-toeic-career": "TOEIC 商業、辦公與職涯",
+        "folder-toeic-daily": "TOEIC 日常、生活與雜項",
+        "folder-toeic-similar": "TOEIC 易混淆與相近字群",
+        "folder-parker": "Parker",
+        "folder-toeic": "新制多益 New TOEIC",
+        "folder-handwritten": "📝 手寫筆記單字",
+        "folder-toeic-phrases": "TOEIC 常用片語與句型",
+        "folder-toeic-business": "TOEIC 商業、辦公與職涯"
+    };
+    appData.words.forEach(w => {
+        if (normalizeWord(w.word || w.eng || "") === key) {
+            const folderName = CATEGORY_META_LOCAL[w.category] || w.category;
+            const unitName = (w.tags && w.tags.length > 0) ? w.tags[0] : "Default";
+            sources.push({ folder: folderName, unit: unitName });
+        }
+    });
+    return sources;
+}
 
 // V2 Data Schema
 let vocabApp_v2 = JSON.parse(localStorage.getItem('vocabApp_v2')) || null;
 let starredIds = JSON.parse(localStorage.getItem('starredIds')) || [];
 let currentView = JSON.parse(localStorage.getItem('currentView')) || { type: 'unit', folderId: null, unitId: null };
 let isTestMode = false;
+let currentWrongFilter = 'recent';
 
-// We still maintain `folders` in memory as a computed view to keep UI intact during Phase 0
-let folders = []; 
+// We still maintain `folders` in memory as a computed view to keep UI intact
+let folders = [];
+
+// =====================================================
+// SCHEMA V9 MIGRATION
+// =====================================================
+function migrateToV9(data) {
+    console.log("[Migration] Starting V8 → V9 migration...");
+    
+    // 1. Backup before migration
+    try {
+        localStorage.setItem("vocabApp_backup_pre_v9", JSON.stringify(data));
+        console.log("[Migration] Backup saved as vocabApp_backup_pre_v9");
+    } catch(e) {
+        console.warn("[Migration] Could not save backup:", e.message);
+    }
+    
+    // 2. Build progressByWord from all words
+    const progressByWord = {};
+    const oldStarredIds = JSON.parse(localStorage.getItem('starredIds')) || [];
+    
+    if (data.words && Array.isArray(data.words)) {
+        data.words.forEach(w => {
+            const nEng = normalizeWord(w.word || w.eng || "");
+            if (!nEng) return; // skip empty
+            
+            // Add normalizedEng to word (for future reference)
+            w.normalizedEng = nEng;
+            // Also keep normalizedWord for backward compat
+            w.normalizedWord = nEng;
+            
+            const isStarred = oldStarredIds.includes(w.id);
+            
+            if (!progressByWord[nEng]) {
+                // First occurrence - create from this word's data
+                progressByWord[nEng] = {
+                    normalizedEng: nEng,
+                    mastery: w.mastery || 0,
+                    streak: w.streak || 0,
+                    correctCount: w.correctCount || 0,
+                    wrongCount: w.wrongCount || 0,
+                    starred: isStarred,
+                    ignored: w.ignored || false,
+                    lastReviewedAt: w.lastReviewedAt || null,
+                    lastWrongAt: w.lastWrongAt || null,
+                    nextReviewAt: w.nextReviewAt || null,
+                    createdAt: w.createdAt || new Date().toISOString(),
+                    updatedAt: w.updatedAt || new Date().toISOString()
+                };
+            } else {
+                // Merge: apply §15 rules
+                const existing = progressByWord[nEng];
+                existing.mastery = Math.max(existing.mastery, w.mastery || 0);
+                existing.wrongCount = (existing.wrongCount || 0) + (w.wrongCount || 0);
+                existing.correctCount = (existing.correctCount || 0) + (w.correctCount || 0);
+                if (isStarred) existing.starred = true;
+                if (w.ignored) existing.ignored = true;
+                // streak: keep max
+                existing.streak = Math.max(existing.streak || 0, w.streak || 0);
+                // lastReviewedAt: latest
+                if (w.lastReviewedAt && (!existing.lastReviewedAt || new Date(w.lastReviewedAt) > new Date(existing.lastReviewedAt))) {
+                    existing.lastReviewedAt = w.lastReviewedAt;
+                }
+                // lastWrongAt: latest
+                if (w.lastWrongAt && (!existing.lastWrongAt || new Date(w.lastWrongAt) > new Date(existing.lastWrongAt))) {
+                    existing.lastWrongAt = w.lastWrongAt;
+                }
+                // nextReviewAt: earliest not-yet-expired
+                if (w.nextReviewAt) {
+                    if (!existing.nextReviewAt || new Date(w.nextReviewAt) < new Date(existing.nextReviewAt)) {
+                        existing.nextReviewAt = w.nextReviewAt;
+                    }
+                }
+            }
+        });
+    }
+    
+    // 3. Update schema
+    data.schemaVersion = SCHEMA_VERSION;
+    data.progressByWord = progressByWord;
+    if (!data.imports) data.imports = [];
+    if (!data.settings) data.settings = {};
+    
+    const uniqueWords = Object.keys(progressByWord).length;
+    const totalAppearances = data.words ? data.words.length : 0;
+    console.log(`[Migration] Complete: ${totalAppearances} appearances → ${uniqueWords} unique words with shared progress`);
+    
+    return data;
+}
+
+// Run migration if needed
+if (vocabApp_v2 && (!vocabApp_v2.schemaVersion || vocabApp_v2.schemaVersion < SCHEMA_VERSION)) {
+    try {
+        vocabApp_v2 = migrateToV9(vocabApp_v2);
+        localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
+        console.log("[Migration] V9 data saved successfully");
+    } catch(e) {
+        console.error("[Migration] FAILED:", e);
+        alert("資料升級失敗：" + e.message + "\n\n您的原始資料已備份在 vocabApp_backup_pre_v9。");
+    }
+}
+
+// Set global appData reference
+appData = vocabApp_v2; 
 
 const CATEGORY_META = {
     "folder-toeic-career": { name: "TOEIC 商業、辦公與職涯", icon: "work", cssClass: "folder-yellow" },
@@ -1315,9 +1497,22 @@ rebuildFoldersView();
 // PERSISTENCE
 // =====================================================
 function save() {
-    localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
-    localStorage.setItem('starredIds',  JSON.stringify(starredIds));
-    localStorage.setItem('currentView', JSON.stringify(currentView));
+    saveAppData();
+}
+
+function saveAppData() {
+    try {
+        localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
+        // starredIds kept for backward compat but progress.starred is authoritative
+        localStorage.setItem('starredIds',  JSON.stringify(starredIds));
+        localStorage.setItem('currentView', JSON.stringify(currentView));
+    } catch(e) {
+        if (e.name === 'QuotaExceededError' || e.code === 22) {
+            alert('本機儲存空間不足。\n\n請先匯出 JSON 備份後清理部分資料。');
+        } else {
+            console.error('Save failed:', e);
+        }
+    }
 }
 
 
@@ -1560,6 +1755,8 @@ function hideAllSections() {
     if (typeof importSectionEl !== 'undefined' && importSectionEl) importSectionEl.classList.add('hidden');
     if (typeof confusionSectionEl !== 'undefined' && confusionSectionEl) confusionSectionEl.classList.add('hidden');
     if (typeof statsSectionEl !== 'undefined' && statsSectionEl) statsSectionEl.classList.add('hidden');
+    const filterSelect = document.getElementById('wrong-filter-select');
+    if (filterSelect) filterSelect.classList.add('hidden');
 }
 
 function renderMainContent() {
@@ -1624,29 +1821,29 @@ function showDashboard() {
     const today = new Date();
     today.setHours(0,0,0,0);
     
-    folders.forEach(folder => {
-        folder.units.forEach(unit => {
-            unit.words.forEach(word => {
-                // Due
-                if (word.nextReviewAt) {
-                    const reviewDate = new Date(word.nextReviewAt);
-                    if (reviewDate <= today) dueCount++;
-                } else if (word.mastery > 0 && word.mastery < 5) {
-                    // Fallback if no nextReviewAt but not mastered and not new
-                    dueCount++;
-                }
-                
-                // Wrong
-                if (word.wrongCount > 0) wrongCount++;
-                
-                // New
-                if ((!word.mastery || word.mastery === 0) && !word.lastReviewedAt) newCount++;
-                
-                // Mastered
-                if (word.mastery >= 5) masteredCount++;
-            });
+    // Use progressByWord for dashboard stats (deduplicated by normalizedEng)
+    if (appData && appData.progressByWord) {
+        Object.values(appData.progressByWord).forEach(progress => {
+            if (progress.ignored) return;
+            if (progress.nextReviewAt && new Date(progress.nextReviewAt) <= today) dueCount++;
+            else if (progress.mastery > 0 && progress.mastery < 5) dueCount++; // Fallback
+            
+            if (progress.wrongCount && progress.wrongCount > 0 && progress.mastery < 4) wrongCount++;
+            if (progress.mastery >= 4) masteredCount++;
         });
-    });
+        // Count new (never reviewed)
+        const reviewedKeys = new Set(Object.keys(appData.progressByWord).filter(k => appData.progressByWord[k].lastReviewedAt));
+        const allKeys = new Set();
+        if (appData.words) {
+            appData.words.forEach(w => {
+                const nEng = normalizeWord(w.word || w.eng || "");
+                if (nEng) allKeys.add(nEng);
+            });
+        }
+        allKeys.forEach(k => {
+            if (!reviewedKeys.has(k)) newCount++;
+        });
+    }
     
     if (dashDueEl) dashDueEl.textContent = dueCount;
     if (dashWrongEl) dashWrongEl.textContent = wrongCount;
@@ -1746,26 +1943,67 @@ function renderWrongWordsView() {
     wordSectionEl.classList.remove('hidden');
     headerActions.classList.remove('hidden');
     addWordAreaEl.classList.add('hidden');
+    
+    const filterSelect = document.getElementById('wrong-filter-select');
+    if (filterSelect) {
+        filterSelect.classList.remove('hidden');
+        filterSelect.onchange = (e) => {
+            currentWrongFilter = e.target.value;
+            renderWrongWordsView(); // Re-render
+        };
+    }
 
     const wrongWords = [];
+    let wrongSeen = new Set();
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
     folders.forEach(folder => {
         folder.units.forEach(unit => {
             unit.words.forEach(word => {
-                if (word.wrongCount && word.wrongCount > 0) {
+                const nEng = word.normalizedEng || word.normalizedWord || normalizeWord(word.eng || word.word || "");
+                if (wrongSeen.has(nEng)) return;
+                
+                const progress = getWordProgress(word);
+                let shouldInclude = false;
+                
+                if (currentWrongFilter === 'recent') {
+                    shouldInclude = progress.wrongCount > 0 && progress.mastery < 4;
+                } else if (currentWrongFilter === 'today') {
+                    shouldInclude = progress.lastWrongAt && new Date(progress.lastWrongAt) >= today;
+                } else if (currentWrongFilter === '7days') {
+                    shouldInclude = progress.lastWrongAt && new Date(progress.lastWrongAt) >= sevenDaysAgo;
+                } else if (currentWrongFilter === 'never') {
+                    shouldInclude = progress.wrongCount > 0 && progress.correctCount === 0;
+                }
+                
+                if (shouldInclude) {
+                    wrongSeen.add(nEng);
                     wrongWords.push({ ...word, _unitName: unit.name });
                 }
             });
         });
     });
 
-    wrongWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
+    if (currentWrongFilter === 'recent' || currentWrongFilter === 'today' || currentWrongFilter === '7days') {
+        wrongWords.sort((a, b) => {
+            const pA = getWordProgress(a), pB = getWordProgress(b);
+            return new Date(pB.lastWrongAt || 0) - new Date(pA.lastWrongAt || 0);
+        });
+    } else {
+        wrongWords.sort((a, b) => {
+            const pA = getWordProgress(a), pB = getWordProgress(b);
+            return (pB.wrongCount || 0) - (pA.wrongCount || 0);
+        });
+    }
 
     wordCountEl.textContent = wrongWords.length;
     wordListEl.innerHTML = '';
 
     if (wrongWords.length === 0) {
-        wordListEl.innerHTML = '<p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:20px;">太棒了！目前沒有任何錯題紀錄。</p>';
-        headerActions.classList.add('hidden');
+        wordListEl.innerHTML = '<p style="color:var(--text-secondary);grid-column:1/-1;text-align:center;padding:20px;">這個條件下沒有任何錯題紀錄喔！</p>';
         return;
     }
 
@@ -1811,18 +2049,17 @@ function renderStatsView() {
     
     let total = 0, m0 = 0, m12 = 0, m34 = 0, m5 = 0;
     
-    folders.forEach(folder => {
-        folder.units.forEach(unit => {
-            unit.words.forEach(word => {
-                total++;
-                const m = word.mastery || 0;
-                if (m === 0) m0++;
-                else if (m === 1 || m === 2) m12++;
-                else if (m === 3 || m === 4) m34++;
-                else if (m >= 5) m5++;
-            });
+    // Use progressByWord for stats (deduplicated by normalizedEng)
+    if (appData && appData.progressByWord) {
+        Object.values(appData.progressByWord).forEach(progress => {
+            total++;
+            const m = progress.mastery || 0;
+            if (m === 0) m0++;
+            else if (m === 1 || m === 2) m12++;
+            else if (m === 3 || m === 4) m34++;
+            else if (m >= 5) m5++;
         });
-    });
+    }
     
     if (statTotalEl) statTotalEl.textContent = total;
     if (statM0El) statM0El.textContent = m0;
@@ -1850,7 +2087,7 @@ function getVoiceFor(lang) {
         || null;
 }
 
-function speakSequential(text, accents, idx, btn) {
+function speakSequential(text, accents, idx, btn, usedVoices = new Set()) {
     if (idx >= accents.length) {
         if (btn) { btn.classList.remove('playing'); }
         return;
@@ -1861,12 +2098,27 @@ function speakSequential(text, accents, idx, btn) {
     utter.rate  = 0.88;
     utter.pitch = 1;
     const voice = getVoiceFor(lang);
-    if (voice) utter.voice = voice;
+    
+    // Prevent repeating the same fallback voice if the specific accent isn't available
+    if (voice) {
+        if (usedVoices.has(voice.name)) {
+            // We already used this exact voice (probably as a fallback for another missing accent)
+            // Skip this one to avoid sounding repetitive
+            speakSequential(text, accents, idx + 1, btn, usedVoices);
+            return;
+        }
+        utter.voice = voice;
+        usedVoices.add(voice.name);
+    } else {
+        // If no voice at all (rare, but maybe on some systems), just rely on system default
+        // We'll skip adding to usedVoices since we can't identify it
+    }
+    
     utter.onend = () => {
-        setTimeout(() => speakSequential(text, accents, idx + 1, btn), 600);
+        setTimeout(() => speakSequential(text, accents, idx + 1, btn, usedVoices), 600);
     };
     utter.onerror = () => {
-        speakSequential(text, accents, idx + 1, btn);
+        speakSequential(text, accents, idx + 1, btn, usedVoices);
     };
     window.speechSynthesis.speak(utter);
 }
@@ -1901,18 +2153,8 @@ function speakWord(text, event, btn) {
 // =====================================================
 function getWordDuplicateCount(engText) {
     if (!engText) return 1;
-    const searchEng = engText.trim().toLowerCase();
-    let count = 0;
-    folders.forEach(f => {
-        f.units.forEach(u => {
-            u.words.forEach(w => {
-                if (w.eng && w.eng.trim().toLowerCase() === searchEng) {
-                    count++;
-                }
-            });
-        });
-    });
-    return count;
+    const key = normalizeWord(engText);
+    return getEncounterCount(key);
 }
 
 function createWordCard(word, showBadge = false) {
@@ -1958,12 +2200,31 @@ function createWordCard(word, showBadge = false) {
 // =====================================================
 function toggleStar(wordId, event) {
     if (event) event.stopPropagation();
-    const idx = starredIds.indexOf(wordId);
-    if (idx === -1) {
-        starredIds.push(wordId);
-    } else {
+    // Find the word to get its normalizedEng
+    let targetWord = null;
+    if (appData && appData.words) {
+        targetWord = appData.words.find(w => w.id === wordId);
+    }
+    if (!targetWord) {
+        // Fallback: search in folders
+        folders.forEach(f => f.units.forEach(u => u.words.forEach(w => {
+            if (w.id === wordId) targetWord = w;
+        })));
+    }
+    if (!targetWord) return;
+    
+    const progress = getWordProgress(targetWord);
+    if (progress.starred) {
         if (!confirm('確定要移除此單字的星號嗎？')) return;
-        starredIds.splice(idx, 1);
+        progress.starred = false;
+        progress.updatedAt = new Date().toISOString();
+        // Also update starredIds for backward compat
+        starredIds = starredIds.filter(id => id !== wordId);
+    } else {
+        progress.starred = true;
+        progress.updatedAt = new Date().toISOString();
+        // Also update starredIds for backward compat
+        if (!starredIds.includes(wordId)) starredIds.push(wordId);
     }
     save();
     renderSidebar();
@@ -2047,7 +2308,8 @@ function undoLastAction() {
     let word = vocabApp_v2.words.find(w => w.id === previousWordState.id);
     if (word) {
         // Restore state
-        word.mastery = previousWordState.mastery;
+        const undoProgress = getWordProgress(word);
+        undoProgress.mastery = previousWordState.mastery;
         word.streak = previousWordState.streak;
         word.correctCount = previousWordState.correctCount;
         word.wrongCount = previousWordState.wrongCount;
@@ -2085,20 +2347,32 @@ let fcFlipped = false;
 let fcSession = {
     id: null,
     startedAt: null,
-    wordIds: [],
-    answeredWordIds: new Set(),
-    masteryIncreasedWordIds: new Set(),
-    correctWordIds: new Set(),
-    wrongWordIds: new Set(),
-    newlyMasteredIds: new Set()
+    wordKeys: [],        // normalizedEng keys
+    answeredKeys: new Set(),
+    masteryIncreasedKeys: new Set(),
+    correctKeys: new Set(),
+    wrongKeys: new Set(),
+    newlyMasteredKeys: new Set()
 };
 
 function getNextReviewDate(mastery) {
+    // §25: Fixed SRS intervals based on mastery level
     const d = new Date();
     d.setHours(0, 0, 0, 0);
-    const daysToAdd = { 0: 0, 1: 1, 2: 3, 3: 7, 4: 14, 5: 30 }[Math.min(mastery || 0, 5)];
-    d.setDate(d.getDate() + daysToAdd);
+    // Use next calendar day as base (§27)
+    d.setDate(d.getDate() + getReviewIntervalDays(mastery));
     return d.toISOString();
+}
+
+function getReviewIntervalDays(mastery) {
+    switch (Math.min(mastery || 0, 5)) {
+        case 0: case 1: return 1;
+        case 2: return 3;
+        case 3: return 7;
+        case 4: return 14;
+        case 5: return 30;
+        default: return 1;
+    }
 }
 
 const fcOverlay  = document.getElementById('flashcard-overlay');
@@ -2135,21 +2409,61 @@ function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords 
         if (currentView.type === 'today') {
             const today = new Date();
             today.setHours(0,0,0,0);
-            let candidates = [];
+            const dailyLimit = (appData && appData.settings && appData.settings.dailyReviewCount) || 20;
+            
+            // §29-§31: Build candidates from all words, deduplicate by normalizedEng
+            let seenKeys = new Set();
+            let catA = []; // Recent wrong + due
+            let catB = []; // Due
+            let catC = []; // Never reviewed
+            let catD = []; // Other low mastery
+            
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
-                        if (w.mastery >= 5) return; // Skip mastered
-                        let score = 0;
-                        if (w.wrongCount > 0) score += 100; // Prioritize wrong
-                        if (w.nextReviewAt && new Date(w.nextReviewAt) <= today) score += 50; // Due
-                        if (!w.lastReviewedAt) score += 10; // New
-                        if (score > 0) candidates.push({ word: w, score });
+                        const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        if (!nEng || seenKeys.has(nEng)) return;
+                        seenKeys.add(nEng);
+                        
+                        const progress = getWordProgress(w);
+                        if (progress.ignored) return; // §29: exclude ignored
+                        if (progress.mastery >= 4) return; // Skip mastered unless due
+                        
+                        const isDue = progress.nextReviewAt && new Date(progress.nextReviewAt) <= today;
+                        const recentWrong = progress.lastWrongAt != null;
+                        const neverReviewed = progress.lastReviewedAt == null;
+                        const encounterCount = getEncounterCount(nEng);
+                        
+                        // Also include mastered words that are due
+                        if (progress.mastery >= 4 && !isDue) return;
+                        
+                        if (recentWrong && isDue) {
+                            catA.push({ word: w, progress, encounterCount });
+                        } else if (isDue) {
+                            catB.push({ word: w, progress, encounterCount });
+                        } else if (neverReviewed) {
+                            catC.push({ word: w, progress, encounterCount });
+                        } else if (progress.mastery < 4) {
+                            catD.push({ word: w, progress, encounterCount });
+                        }
                     });
                 });
             });
-            candidates.sort((a, b) => b.score - a.score);
-            fcWords = candidates.slice(0, 20).map(c => c.word); // Max 20
+            
+            // §31: Sort each category
+            catA.sort((a, b) => (b.progress.wrongCount - a.progress.wrongCount) || 
+                new Date(b.progress.lastWrongAt || 0) - new Date(a.progress.lastWrongAt || 0) ||
+                (b.encounterCount - a.encounterCount));
+            catB.sort((a, b) => new Date(a.progress.nextReviewAt || 0) - new Date(b.progress.nextReviewAt || 0) || 
+                (a.progress.mastery - b.progress.mastery) ||
+                (b.encounterCount - a.encounterCount));
+            catC.sort(() => Math.random() - 0.5);
+            catD.sort((a, b) => (a.progress.mastery - b.progress.mastery) || 
+                new Date(a.progress.lastReviewedAt || 0) - new Date(b.progress.lastReviewedAt || 0) ||
+                (b.encounterCount - a.encounterCount));
+            
+            let allCandidates = [...catA, ...catB, ...catC, ...catD];
+            fcWords = allCandidates.slice(0, dailyLimit).map(c => c.word);
         } else if (currentView.type === 'search') {
             const query = (currentView.query || '').trim().toLowerCase();
             fcWords = [];
@@ -2166,30 +2480,51 @@ function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords 
             }
         } else if (currentView.type === 'starred') {
             fcWords = [];
+            let starredSeen = new Set();
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
-                        if (starredIds.includes(w.id)) fcWords.push(w);
+                        const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        const progress = getWordProgress(w);
+                        if (progress.starred && !starredSeen.has(nEng)) {
+                            starredSeen.add(nEng);
+                            fcWords.push(w);
+                        }
                     });
                 });
             });
         } else if (currentView.type === 'wrong') {
             fcWords = [];
+            let wrongSeen = new Set();
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
-                        if (w.wrongCount && w.wrongCount > 0) fcWords.push(w);
+                        const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        const progress = getWordProgress(w);
+                        // §36: Current wrong = wrongCount > 0 && mastery < 4
+                        if (progress.wrongCount > 0 && progress.mastery < 4 && !wrongSeen.has(nEng)) {
+                            wrongSeen.add(nEng);
+                            fcWords.push(w);
+                        }
                     });
                 });
             });
-            fcWords.sort((a, b) => (b.wrongCount || 0) - (a.wrongCount || 0));
+            fcWords.sort((a, b) => {
+                const pA = getWordProgress(a), pB = getWordProgress(b);
+                return (pB.wrongCount || 0) - (pA.wrongCount || 0);
+            });
         } else if (currentView.type === 'stats_review') {
             const level = currentView.level;
             let candidates = [];
+            let statsSeen = new Set();
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
-                        const m = w.mastery || 0;
+                        const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        if (statsSeen.has(nEng)) return;
+                        statsSeen.add(nEng);
+                        const progress = getWordProgress(w);
+                        const m = progress.mastery || 0;
                         if (level === -1) {
                             candidates.push(w);
                         } else if (level === 0 && m === 0) {
@@ -2220,12 +2555,12 @@ function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords 
     fcSession = {
         id: 'session-' + Math.random().toString(36).substr(2, 9),
         startedAt: new Date().toISOString(),
-        wordIds: fcWords.map(w => w.id),
-        answeredWordIds: new Set(),
-        masteryIncreasedWordIds: new Set(),
-        correctWordIds: new Set(),
-        wrongWordIds: new Set(),
-        newlyMasteredIds: new Set()
+        wordKeys: fcWords.map(w => w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "")),
+        answeredKeys: new Set(),
+        masteryIncreasedKeys: new Set(),
+        correctKeys: new Set(),
+        wrongKeys: new Set(),
+        newlyMasteredKeys: new Set()
     };
     fcIndex   = 0;
     fcFlipped = false;
@@ -2352,35 +2687,45 @@ function fcFlipCard() {
 function fcRemember() {
     const word = fcWords[fcIndex];
     if (word) {
+        const progress = getWordProgress(word);
+        const nEng = word.normalizedEng || word.normalizedWord || normalizeWord(word.eng || word.word || "");
+        
         previousWordState = {
             id: word.id,
-            mastery: word.mastery,
-            streak: word.streak,
-            correctCount: word.correctCount,
-            wrongCount: word.wrongCount,
-            lastWrongAt: word.lastWrongAt,
-            lastReviewedAt: word.lastReviewedAt,
-            nextReviewAt: word.nextReviewAt
+            normalizedEng: nEng,
+            mastery: progress.mastery,
+            streak: progress.streak,
+            correctCount: progress.correctCount,
+            wrongCount: progress.wrongCount,
+            lastWrongAt: progress.lastWrongAt,
+            lastReviewedAt: progress.lastReviewedAt,
+            nextReviewAt: progress.nextReviewAt
         };
         showUndoToast('記得');
 
-        
-        let prevMastery = word.mastery || 0;
-        if (!isBrowseMode && !fcSession.masteryIncreasedWordIds.has(word.id)) {
-            word.mastery = Math.min(prevMastery + 1, 5);
-            fcSession.masteryIncreasedWordIds.add(word.id);
-            if (prevMastery === 3 && word.mastery === 4) {
-                fcSession.newlyMasteredIds.add(word.id);
+        if (!isBrowseMode) {
+            const now = new Date().toISOString();
+            progress.correctCount = (progress.correctCount || 0) + 1;
+            progress.streak = (progress.streak || 0) + 1;
+            progress.lastReviewedAt = now;
+            progress.updatedAt = now;
+            
+            // Session mastery limit: same normalizedEng max +1 per session
+            if (!fcSession.masteryIncreasedKeys.has(nEng)) {
+                let prevMastery = progress.mastery || 0;
+                progress.mastery = Math.min(prevMastery + 1, 5);
+                fcSession.masteryIncreasedKeys.add(nEng);
+                if (prevMastery === 3 && progress.mastery === 4) {
+                    fcSession.newlyMasteredKeys.add(nEng);
+                }
             }
+            
+            fcSession.answeredKeys.add(nEng);
+            fcSession.correctKeys.add(nEng);
+            
+            progress.nextReviewAt = getNextReviewDate(progress.mastery);
+            save();
         }
-        if (!isBrowseMode) { fcSession.answeredWordIds.add(word.id); }
-        if (!isBrowseMode) { fcSession.correctWordIds.add(word.id); }
-
-        if (!isBrowseMode) { word.correctCount = (word.correctCount || 0) + 1; }
-        if (!isBrowseMode) { word.streak = (word.streak || 0) + 1; }
-        if (!isBrowseMode) { word.lastReviewedAt = new Date().toISOString(); }
-        if (!isBrowseMode) { word.nextReviewAt = getNextReviewDate(word.mastery); }
-        if (!isBrowseMode) save();
     }
     if (fcRememberBtn) fcRememberBtn.classList.add('active');
     setTimeout(() => {
@@ -2404,32 +2749,41 @@ function fcForget() {
     }
     const word = fcWords[fcIndex];
     if (word) {
+        const progress = getWordProgress(word);
+        const nEng = word.normalizedEng || word.normalizedWord || normalizeWord(word.eng || word.word || "");
+        
         previousWordState = {
             id: word.id,
-            mastery: word.mastery,
-            streak: word.streak,
-            correctCount: word.correctCount,
-            wrongCount: word.wrongCount,
-            lastWrongAt: word.lastWrongAt,
-            lastReviewedAt: word.lastReviewedAt,
-            nextReviewAt: word.nextReviewAt
+            normalizedEng: nEng,
+            mastery: progress.mastery,
+            streak: progress.streak,
+            correctCount: progress.correctCount,
+            wrongCount: progress.wrongCount,
+            lastWrongAt: progress.lastWrongAt,
+            lastReviewedAt: progress.lastReviewedAt,
+            nextReviewAt: progress.nextReviewAt
         };
         if (!isBrowseMode) showUndoToast('忘記');
 
-        if (!isBrowseMode) { word.mastery = Math.max((word.mastery || 0) - 1, 0); }
-        if (!isBrowseMode) { word.wrongCount = (word.wrongCount || 0) + 1; }
-        if (!isBrowseMode) { word.streak = 0; }
-        if (!isBrowseMode) { word.lastReviewedAt = new Date().toISOString(); }
-        if (!isBrowseMode) { word.lastWrongAt = new Date().toISOString(); }
-        
         if (!isBrowseMode) {
+            const now = new Date().toISOString();
+            progress.mastery = Math.max((progress.mastery || 0) - 1, 0);
+            progress.wrongCount = (progress.wrongCount || 0) + 1;
+            progress.streak = 0;
+            progress.lastReviewedAt = now;
+            progress.lastWrongAt = now;
+            progress.updatedAt = now;
+            
             let tomorrow = new Date();
             tomorrow.setHours(0, 0, 0, 0);
             tomorrow.setDate(tomorrow.getDate() + 1);
-            word.nextReviewAt = tomorrow.toISOString();
+            progress.nextReviewAt = tomorrow.toISOString();
+            
+            fcSession.answeredKeys.add(nEng);
+            fcSession.wrongKeys.add(nEng);
+            
+            save();
         }
-        
-        if (!isBrowseMode) save();
     }
     if (fcForgetBtn) fcForgetBtn.classList.add('active');
     setTimeout(() => {
@@ -2646,7 +3000,8 @@ if (analyzeImportBtn) {
             else if (content.startsWith('↔')) { isConfusion = true; content = content.substring(1).trim(); }
             else if (content.startsWith('P ')) { isPhrase = true; content = content.substring(2).trim(); }
             
-            let match = content.match(/^([a-zA-Z0-9\s\-\']+)(?:\s*=\s*|\s+)([\u4e00-\u9fff].*)$/);
+            // Allow =, -, :, or just spaces as delimiter before Chinese
+            let match = content.match(/^([a-zA-Z0-9\s\-\']+)(?:\s*=\s*|\s*-\s*|\s*:\s*|\s+)([\u4e00-\u9fff].*)$/);
             
             if (match) {
                 currentImportCandidates.push({
@@ -2686,13 +3041,26 @@ if (analyzeImportBtn) {
         } else {
             confirmImportBtn.disabled = false;
             currentImportCandidates.forEach((cand, idx) => {
+                const nEng = normalizeWord(cand.eng);
+                const isExisting = getEncounterCount(nEng) > 0;
+                const badge = isExisting 
+                    ? '<span style="font-size:0.7em; padding:2px 6px; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:4px; margin-left:8px;">已存在庫中</span>' 
+                    : '<span style="font-size:0.7em; padding:2px 6px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.3); border-radius:4px; margin-left:8px;">新單字</span>';
+                
                 const row = document.createElement('div');
                 row.style.cssText = 'display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);';
                 row.innerHTML = `
                     <input type="checkbox" id="import-cb-${idx}" checked style="width: 20px; height: 20px; cursor: pointer;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; font-size: 1.1rem; color: var(--accent-color);">${cand.eng} ${cand.isImportant ? '<span style="font-size:0.8rem; color:var(--star-color);">★</span>' : ''} ${cand.isNotFamiliar ? '<span style="font-size:0.8rem; color:var(--danger-color);">?</span>' : ''}</div>
-                        <div style="font-size: 0.9rem; color: var(--text-secondary);">${cand.cht}</div>
+                    <div style="flex: 1; display:flex; flex-direction:column; gap:6px;">
+                        <div style="display:flex; align-items:center;">
+                            <input type="text" id="import-eng-${idx}" value="${cand.eng}" style="background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--accent-color); font-weight:600; font-size:1.1rem; flex:1; outline:none;" />
+                            ${badge}
+                            ${cand.isImportant ? '<span style="font-size:0.8rem; color:var(--star-color); margin-left:4px;">★</span>' : ''}
+                            ${cand.isNotFamiliar ? '<span style="font-size:0.8rem; color:var(--danger-color); margin-left:4px;">?</span>' : ''}
+                        </div>
+                        <div>
+                            <input type="text" id="import-cht-${idx}" value="${cand.cht}" style="background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-secondary); font-size:0.9rem; width:100%; outline:none;" />
+                        </div>
                     </div>
                 `;
                 importPreviewList.appendChild(row);
@@ -2726,37 +3094,44 @@ if (confirmImportBtn) {
         currentImportCandidates.forEach((cand, idx) => {
             const cb = document.getElementById(`import-cb-${idx}`);
             if (cb && cb.checked) {
-                // Find existing word globally in vocabApp_v2.words
-                let existingWord = vocabApp_v2.words.find(w => w.normalizedWord === cand.eng.toLowerCase().trim());
+                // Read from inputs if user edited them
+                const engInput = document.getElementById(`import-eng-${idx}`);
+                const chtInput = document.getElementById(`import-cht-${idx}`);
+                const finalEng = engInput ? engInput.value.trim() : cand.eng;
+                const finalCht = chtInput ? chtInput.value.trim() : cand.cht;
+                const nEng = normalizeWord(finalEng);
+                
+                // Find existing word globally by normalizedEng
+                let existingWord = appData && appData.words ? appData.words.find(w => (w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "")) === nEng) : null;
+                const progress = getWordProgress({eng: finalEng}); // Gets or creates progress
                 
                 if (existingWord) {
-                    if (cand.cht && existingWord.meaning !== cand.cht && !existingWord.meaning.includes(cand.cht)) {
+                    if (finalCht && existingWord.meaning !== finalCht && !existingWord.meaning.includes(finalCht)) {
                         if (!existingWord.notes) existingWord.notes = [];
-                        if (!existingWord.notes.includes(`新解釋: ${cand.cht}`)) {
-                            existingWord.notes.push(`新解釋: ${cand.cht}`);
+                        if (!existingWord.notes.includes(`新解釋: ${finalCht}`)) {
+                            existingWord.notes.push(`新解釋: ${finalCht}`);
                         }
                     }
                     if (cand.isImportant) {
                         existingWord.priority = 'high';
-                        if (!starredIds.includes(existingWord.id)) starredIds.push(existingWord.id);
+                        progress.starred = true;
                     }
                     if (cand.isNotFamiliar) {
-                        existingWord.mastery = 0;
-                        existingWord.streak = 0;
-                        existingWord.lastReviewedAt = new Date().toISOString();
-                        existingWord.lastWrongAt = new Date().toISOString();
+                        progress.mastery = 0;
+                        progress.streak = 0;
+                        progress.lastReviewedAt = new Date().toISOString();
+                        progress.lastWrongAt = new Date().toISOString();
                         
                         let tomorrow = new Date();
                         tomorrow.setHours(0, 0, 0, 0);
                         tomorrow.setDate(tomorrow.getDate() + 1);
-                        existingWord.nextReviewAt = tomorrow.toISOString();
+                        progress.nextReviewAt = tomorrow.toISOString();
                     }
                     if (cand.confusionGroup) {
                         existingWord.confusionGroup = cand.confusionGroup;
                     }
                     // Tag it to the new unit if not already there
                     if (existingWord.category !== targetFolderId) {
-                        // Word already exists in another category. Just append tag.
                         if (!existingWord.tags) existingWord.tags = [];
                         if (!existingWord.tags.includes(unitName)) {
                             existingWord.tags.push(unitName);
@@ -2774,22 +3149,15 @@ if (confirmImportBtn) {
                     const newId = 'v2-' + Math.random().toString(36).substr(2, 9);
                     const newWord = {
                         id: newId,
-                        word: cand.eng,
-                        normalizedWord: cand.eng.toLowerCase().trim(),
+                        word: finalEng,
+                        normalizedEng: nEng,
+                        normalizedWord: nEng,
                         type: cand.isPhrase ? "phrase" : "word",
-                        meaning: cand.cht,
+                        meaning: finalCht,
                         alternativeMeanings: [],
                         category: targetFolderId,
                         tags: [unitName],
-                        mastery: 0,
-                        correctCount: 0,
-                        wrongCount: cand.isNotFamiliar ? 1 : 0,
-                        streak: 0,
-                        lastReviewedAt: null,
-                        lastWrongAt: null,
-                        nextReviewAt: null,
                         priority: cand.isImportant ? 'high' : 'normal',
-                        ignored: false,
                         confusionGroup: cand.confusionGroup || null,
                         notes: [],
                         examples: [],
@@ -2798,13 +3166,34 @@ if (confirmImportBtn) {
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString()
                     };
-                    vocabApp_v2.words.push(newWord);
+                    
                     if (cand.isImportant) {
-                        starredIds.push(newId);
+                        progress.starred = true;
+                    }
+                    if (cand.isNotFamiliar) {
+                        progress.wrongCount = 1;
+                    }
+                    
+                    if (appData && appData.words) {
+                        appData.words.push(newWord);
+                    } else if (vocabApp_v2 && vocabApp_v2.words) {
+                        vocabApp_v2.words.push(newWord);
                     }
                     addedCount++;
                 }
             }
+        });
+        
+        // §59: Record this import
+        if (!appData.imports) appData.imports = [];
+        appData.imports.push({
+            id: 'imp-' + Date.now(),
+            timestamp: new Date().toISOString(),
+            targetFolder: targetFolderId,
+            targetUnit: targetUnitId,
+            addedCount,
+            mergedCount,
+            rawText: text
         });
         
         save();
@@ -2837,6 +3226,29 @@ if (importDeselectAllBtn) {
 // =====================================================
 // CONFUSION QUIZ METHODS
 // =====================================================
+function levenshteinDistance(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1)
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
 let cqQuestions = [];
 let cqIndex = 0;
 
@@ -2848,7 +3260,8 @@ if (startConfusionBtn) {
                 unit.words.forEach(w => {
                     if (w.confusionGroup) {
                         if (!cGroups[w.confusionGroup]) cGroups[w.confusionGroup] = [];
-                        if (!cGroups[w.confusionGroup].find(e => e.eng === w.eng)) {
+                        const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        if (!cGroups[w.confusionGroup].find(e => (e.normalizedEng || e.normalizedWord || normalizeWord(e.eng || e.word || "")) === nEng)) {
                             cGroups[w.confusionGroup].push(w);
                         }
                     }
@@ -2858,9 +3271,16 @@ if (startConfusionBtn) {
         
         cqQuestions = [];
         let allWords = [];
+        let allWordsSeen = new Set();
         folders.forEach(folder => {
             folder.units.forEach(unit => {
-                allWords.push(...unit.words);
+                unit.words.forEach(w => {
+                    const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                    if (!allWordsSeen.has(nEng)) {
+                        allWordsSeen.add(nEng);
+                        allWords.push(w);
+                    }
+                });
             });
         });
 
@@ -2869,15 +3289,29 @@ if (startConfusionBtn) {
             if (groupWords.length < 2) return;
             groupWords.forEach(correctWord => {
                 const options = [...groupWords];
-                // Pad to exactly 4 options
-                let attempts = 0;
-                while (options.length < 4 && attempts < 100) {
-                    const randomWord = allWords[Math.floor(Math.random() * allWords.length)];
-                    if (!options.find(o => o.id === randomWord.id)) {
-                        options.push(randomWord);
+                
+                // Pad to exactly 4 options using Levenshtein distance
+                if (options.length < 4) {
+                    // Calculate distances for all words
+                    const candidates = allWords
+                        .filter(w => !options.find(o => o.id === w.id))
+                        .map(w => ({
+                            word: w,
+                            dist: levenshteinDistance(
+                                (w.eng || w.word || "").toLowerCase(), 
+                                (correctWord.eng || correctWord.word || "").toLowerCase()
+                            )
+                        }));
+                    
+                    // Sort by distance (closest first)
+                    candidates.sort((a, b) => a.dist - b.dist);
+                    
+                    // Take top candidates to pad to 4
+                    for (let i = 0; options.length < 4 && i < candidates.length; i++) {
+                        options.push(candidates[i].word);
                     }
-                    attempts++;
                 }
+                
                 // If there are somehow more than 4 (e.g. group has 5), slice it (keep correct one)
                 if (options.length > 4) {
                     const others = options.filter(o => o.id !== correctWord.id).sort(() => Math.random() - 0.5);
@@ -2936,8 +3370,12 @@ function renderCqQuestion() {
                 icon.textContent = 'check_circle';
                 icon.style.color = 'var(--success-color)';
                 
-                q.correctWord.mastery = Math.min((q.correctWord.mastery || 0) + 1, 5);
-                q.correctWord.correctCount = (q.correctWord.correctCount || 0) + 1;
+                const cqProgress = getWordProgress(q.correctWord);
+                cqProgress.mastery = Math.min((cqProgress.mastery || 0) + 1, 5);
+                cqProgress.correctCount = (cqProgress.correctCount || 0) + 1;
+                cqProgress.lastReviewedAt = new Date().toISOString();
+                cqProgress.updatedAt = new Date().toISOString();
+                cqProgress.nextReviewAt = getNextReviewDate(cqProgress.mastery);
                 save();
                 
                 setTimeout(() => {
@@ -2950,8 +3388,15 @@ function renderCqQuestion() {
                 icon.textContent = 'cancel';
                 icon.style.color = 'var(--danger-color)';
                 
-                q.correctWord.mastery = Math.max((q.correctWord.mastery || 0) - 1, 0);
-                q.correctWord.wrongCount = (q.correctWord.wrongCount || 0) + 1;
+                const cqWrongProgress = getWordProgress(q.correctWord);
+                cqWrongProgress.mastery = Math.max((cqWrongProgress.mastery || 0) - 1, 0);
+                cqWrongProgress.wrongCount = (cqWrongProgress.wrongCount || 0) + 1;
+                cqWrongProgress.lastWrongAt = new Date().toISOString();
+                cqWrongProgress.lastReviewedAt = new Date().toISOString();
+                cqWrongProgress.updatedAt = new Date().toISOString();
+                // §26: Wrong → nextReviewAt = tomorrow
+                let cqTomorrow = new Date(); cqTomorrow.setHours(0,0,0,0); cqTomorrow.setDate(cqTomorrow.getDate() + 1);
+                cqWrongProgress.nextReviewAt = cqTomorrow.toISOString();
                 save();
                 
                 Array.from(cqOptions.children).forEach(child => {
@@ -3008,12 +3453,15 @@ function closeBackupModal() {
 function exportJSONBackup() {
     try {
         const backupObj = {
-            schemaVersion: vocabApp_v2.schemaVersion,
+            schemaVersion: vocabApp_v2.schemaVersion || SCHEMA_VERSION,
             words: vocabApp_v2.words,
-            settings: vocabApp_v2.settings,
+            progressByWord: vocabApp_v2.progressByWord || {},
+            imports: vocabApp_v2.imports || [],
+            settings: vocabApp_v2.settings || {},
             metadata: {
                 ...vocabApp_v2.metadata,
-                lastExportedAt: new Date().toISOString()
+                lastExportedAt: new Date().toISOString(),
+                appVersion: APP_VERSION
             }
         };
         
@@ -3054,8 +3502,54 @@ function importJSONBackup(mode) {
         try {
             const importedData = JSON.parse(e.target.result);
             
+            // Allow importing V9 schema format
+            if (importedData.schemaVersion === 9 && importedData.words) {
+                if (mode === 'overwrite') {
+                    if (!confirm('您選擇了「完全覆蓋」，這將會清除您目前所有的單字與進度，並替換為備份檔的內容。確定要繼續嗎？')) return;
+                    vocabApp_v2.words = importedData.words;
+                    vocabApp_v2.progressByWord = importedData.progressByWord || {};
+                    vocabApp_v2.imports = importedData.imports || [];
+                    vocabApp_v2.settings = importedData.settings || {};
+                    appData = vocabApp_v2; // Ensure alias is updated
+                } else if (mode === 'merge') {
+                    let currentWords = vocabApp_v2.words;
+                    importedData.words.forEach(importedWord => {
+                        let existingWord = currentWords.find(w => w.id === importedWord.id || w.normalizedWord === importedWord.normalizedWord);
+                        if (!existingWord) {
+                            currentWords.push(importedWord);
+                        }
+                    });
+                    
+                    // Merge progressByWord
+                    if (importedData.progressByWord) {
+                        if (!vocabApp_v2.progressByWord) vocabApp_v2.progressByWord = {};
+                        Object.keys(importedData.progressByWord).forEach(nEng => {
+                            const impProg = importedData.progressByWord[nEng];
+                            if (!vocabApp_v2.progressByWord[nEng]) {
+                                vocabApp_v2.progressByWord[nEng] = impProg;
+                            } else {
+                                const exProg = vocabApp_v2.progressByWord[nEng];
+                                exProg.mastery = Math.max(exProg.mastery || 0, impProg.mastery || 0);
+                                exProg.correctCount = (exProg.correctCount || 0) + (impProg.correctCount || 0);
+                                exProg.wrongCount = (exProg.wrongCount || 0) + (impProg.wrongCount || 0);
+                                if (impProg.starred) exProg.starred = true;
+                                if (impProg.nextReviewAt) {
+                                    if (!exProg.nextReviewAt || new Date(impProg.nextReviewAt) > new Date(exProg.nextReviewAt)) {
+                                        exProg.nextReviewAt = impProg.nextReviewAt;
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    if (importedData.imports) {
+                        if (!vocabApp_v2.imports) vocabApp_v2.imports = [];
+                        vocabApp_v2.imports.push(...importedData.imports);
+                    }
+                }
+            }
             // Allow importing V2 schema format
-            if (importedData.schemaVersion === 2 && importedData.words) {
+            else if (importedData.schemaVersion === 2 && importedData.words) {
                 if (mode === 'overwrite') {
                     if (!confirm('您選擇了「完全覆蓋」，這將會清除您目前所有的單字與進度，並替換為備份檔的內容。確定要繼續嗎？')) return;
                     vocabApp_v2.words = importedData.words;
@@ -3068,13 +3562,17 @@ function importJSONBackup(mode) {
                         if (!existingWord) {
                             currentWords.push(importedWord);
                         } else {
-                            // Merge progress (keep highest mastery)
+                            // Merge progress (legacy to legacy, migration will handle it later)
                             existingWord.mastery = Math.max(existingWord.mastery || 0, importedWord.mastery || 0);
                             existingWord.correctCount = (existingWord.correctCount || 0) + (importedWord.correctCount || 0);
                             existingWord.wrongCount = (existingWord.wrongCount || 0) + (importedWord.wrongCount || 0);
                         }
                     });
                 }
+                
+                // Trigger migration to V9 after loading V2 data
+                vocabApp_v2.schemaVersion = 2; // Force migration
+                migrateToV9(); // migrate immediately
             } else if (importedData.folders && importedData.version === 'V2') {
                 // Backward compatibility for old V1/V2 folders format
                 if (mode === 'overwrite') {
@@ -3135,6 +3633,44 @@ function importJSONBackup(mode) {
         }
     };
     reader.readAsText(file);
+}
+
+// =====================================================
+// ENCOUNTER DETAIL MODAL
+// =====================================================
+function showEncounterDetail(normalizedEng, event) {
+    if (event) event.stopPropagation();
+    const sources = getEncounterSources(normalizedEng);
+    if (sources.length === 0) return;
+    
+    let sourceHtml = sources.map(s => 
+        `<div style="padding:8px 12px; background:rgba(255,255,255,0.05); border-radius:8px; margin-bottom:6px;">
+            <div style="font-weight:600; color:var(--text-primary);">${s.folder}</div>
+            <div style="font-size:0.9rem; color:var(--text-secondary);">${s.unit}</div>
+        </div>`
+    ).join('');
+    
+    // Create modal overlay
+    let modal = document.getElementById('encounter-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'encounter-modal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `<div class="modal-content" style="max-width:400px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h2 id="encounter-modal-title" style="font-size:1.3rem;"></h2>
+                <button class="icon-btn" onclick="document.getElementById('encounter-modal').classList.add('hidden')" style="color:var(--text-secondary);"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <p style="color:var(--text-secondary); margin-bottom:12px;">你在以下位置遇過這個單字：</p>
+            <div id="encounter-modal-sources"></div>
+        </div>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
+    }
+    
+    document.getElementById('encounter-modal-title').textContent = normalizedEng;
+    document.getElementById('encounter-modal-sources').innerHTML = sourceHtml;
+    modal.classList.remove('hidden');
 }
 
 // =====================================================

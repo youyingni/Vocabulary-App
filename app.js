@@ -1330,7 +1330,7 @@ function generateId() {
 // =====================================================
 
 const menuCustomStudyEl  = document.getElementById('menu-custom-study');
-const customStudySection = document.getElementById('custom-study-section');
+let customStudySection = document.getElementById('custom-study-section');
 const customStudyTree    = document.getElementById('custom-study-tree');
 const startBrowseBtn     = document.getElementById('start-browse-btn');
 const startQuizBtn       = document.getElementById('start-quiz-btn');
@@ -1553,13 +1553,17 @@ function selectStats() {
     closeMobileSidebar();
 }
 
-function renderMainContent() {
-    wordSectionEl.classList.add('hidden');
+function hideAllSections() {
+    if (wordSectionEl) wordSectionEl.classList.add('hidden');
     if (typeof customStudySection !== 'undefined' && customStudySection) customStudySection.classList.add('hidden');
-    if (dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
-    if (importSectionEl) importSectionEl.classList.add('hidden');
-    if (confusionSectionEl) confusionSectionEl.classList.add('hidden');
-    if (statsSectionEl) statsSectionEl.classList.add('hidden');
+    if (typeof dashboardSectionEl !== 'undefined' && dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
+    if (typeof importSectionEl !== 'undefined' && importSectionEl) importSectionEl.classList.add('hidden');
+    if (typeof confusionSectionEl !== 'undefined' && confusionSectionEl) confusionSectionEl.classList.add('hidden');
+    if (typeof statsSectionEl !== 'undefined' && statsSectionEl) statsSectionEl.classList.add('hidden');
+}
+
+function renderMainContent() {
+    hideAllSections();
 
     if (currentView.type === 'search') {
         renderSearchView();
@@ -3143,12 +3147,7 @@ if (menuCustomStudyEl) {
 }
 
 function renderCustomStudyView() {
-    wordSectionEl.classList.add('hidden');
-    if (dashboardSectionEl) dashboardSectionEl.classList.add('hidden');
-    if (typeof importSectionEl !== 'undefined' && importSectionEl) importSectionEl.classList.add('hidden');
-    if (typeof confusionSectionEl !== 'undefined' && confusionSectionEl) confusionSectionEl.classList.add('hidden');
-    if (typeof statsSectionEl !== 'undefined' && statsSectionEl) statsSectionEl.classList.add('hidden');
-    if (typeof customStudySection !== 'undefined' && customStudySection) customStudySection.classList.add('hidden');
+    hideAllSections();
     
     if (customStudySection) customStudySection.classList.remove('hidden');
     setFormattedTitle('🎓 自訂學習與測驗');

@@ -1967,16 +1967,20 @@ function renderWrongWordsView() {
                 if (wrongSeen.has(nEng)) return;
                 
                 const progress = getWordProgress(word);
+                // §15: exclude mastery >= 4 from wrong words entirely
+                if (progress.mastery >= 4) return;
+                if (progress.wrongCount <= 0) return;
+                
                 let shouldInclude = false;
                 
-                if (currentWrongFilter === 'recent') {
-                    shouldInclude = progress.wrongCount > 0 && progress.mastery < 4;
+                if (currentWrongFilter === 'recent' || currentWrongFilter === 'most') {
+                    shouldInclude = true;
                 } else if (currentWrongFilter === 'today') {
                     shouldInclude = progress.lastWrongAt && new Date(progress.lastWrongAt) >= today;
                 } else if (currentWrongFilter === '7days') {
                     shouldInclude = progress.lastWrongAt && new Date(progress.lastWrongAt) >= sevenDaysAgo;
                 } else if (currentWrongFilter === 'never') {
-                    shouldInclude = progress.wrongCount > 0 && progress.correctCount === 0;
+                    shouldInclude = progress.correctCount === 0;
                 }
                 
                 if (shouldInclude) {
@@ -1987,15 +1991,15 @@ function renderWrongWordsView() {
         });
     });
 
-    if (currentWrongFilter === 'recent' || currentWrongFilter === 'today' || currentWrongFilter === '7days') {
+    if (currentWrongFilter === 'most' || currentWrongFilter === 'never') {
         wrongWords.sort((a, b) => {
             const pA = getWordProgress(a), pB = getWordProgress(b);
-            return new Date(pB.lastWrongAt || 0) - new Date(pA.lastWrongAt || 0);
+            return (pB.wrongCount || 0) - (pA.wrongCount || 0);
         });
     } else {
         wrongWords.sort((a, b) => {
             const pA = getWordProgress(a), pB = getWordProgress(b);
-            return (pB.wrongCount || 0) - (pA.wrongCount || 0);
+            return new Date(pB.lastWrongAt || 0) - new Date(pA.lastWrongAt || 0);
         });
     }
 
@@ -2048,6 +2052,7 @@ function renderStatsView() {
     statsSectionEl.classList.remove('hidden');
     
     let total = 0, m0 = 0, m12 = 0, m34 = 0, m5 = 0;
+    let appearances = appData && appData.words ? appData.words.length : 0;
     
     // Use progressByWord for stats (deduplicated by normalizedEng)
     if (appData && appData.progressByWord) {
@@ -2062,6 +2067,8 @@ function renderStatsView() {
     }
     
     if (statTotalEl) statTotalEl.textContent = total;
+    const statAppEl = document.getElementById('stat-appearances');
+    if (statAppEl) statAppEl.textContent = `(總收錄: ${appearances})`;
     if (statM0El) statM0El.textContent = m0;
     if (statM12El) statM12El.textContent = m12;
     if (statM34El) statM34El.textContent = m34;
@@ -2161,11 +2168,11 @@ function createWordCard(word, showBadge = false) {
     const isStarred = starredIds.includes(word.id);
     const mastery = word.mastery || 0;
     const isMastered = mastery >= 4;
-    const dupCount = getWordDuplicateCount(word.eng);
+    const nEng = getWordProgress(word).normalizedEng;
+    const dupCount = getEncounterCount(nEng);
     const dupBadgeHtml = dupCount > 1 
-        ? `<span style="display:inline-block; margin-left:8px; font-size:0.55em; padding:2px 6px; background:rgba(239,68,68,0.15); color:#ef4444; border-radius:12px; border:1px solid rgba(239,68,68,0.3); vertical-align: middle;" title="此單字在所有字庫中共出現 ${dupCount} 次">⚠️ 重複手抄 (${dupCount})</span>` 
+        ? `<span style="display:inline-block; margin-left:8px; font-size:0.6em; padding:2px 8px; background:rgba(59,130,246,0.15); color:#3b82f6; border-radius:12px; border:1px solid rgba(59,130,246,0.3); vertical-align: middle; cursor:pointer;" title="點擊查看你遇過這個單字幾次" onclick="showEncounterDetail('${nEng}', event)">📝 遇過 ${dupCount} 次</span>` 
         : '';
-    
     // Generate stars
     let starsHtml = '';
     for (let i = 1; i <= 5; i++) {
@@ -2355,14 +2362,7 @@ let fcSession = {
     newlyMasteredKeys: new Set()
 };
 
-function getNextReviewDate(mastery) {
-    // §25: Fixed SRS intervals based on mastery level
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    // Use next calendar day as base (§27)
-    d.setDate(d.getDate() + getReviewIntervalDays(mastery));
-    return d.toISOString();
-}
+
 
 function getReviewIntervalDays(mastery) {
     switch (Math.min(mastery || 0, 5)) {
@@ -2411,59 +2411,83 @@ function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords 
             today.setHours(0,0,0,0);
             const dailyLimit = (appData && appData.settings && appData.settings.dailyReviewCount) || 20;
             
-            // §29-§31: Build candidates from all words, deduplicate by normalizedEng
             let seenKeys = new Set();
-            let catA = []; // Recent wrong + due
-            let catB = []; // Due
-            let catC = []; // Never reviewed
-            let catD = []; // Other low mastery
+            let cat1 = []; // Due + wrong history
+            let cat2 = []; // Due
+            let cat3 = []; // Never reviewed (new)
+            let cat4 = []; // Low mastery
             
             folders.forEach(folder => {
                 folder.units.forEach(unit => {
                     unit.words.forEach(w => {
                         const nEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
                         if (!nEng || seenKeys.has(nEng)) return;
-                        seenKeys.add(nEng);
                         
                         const progress = getWordProgress(w);
-                        if (progress.ignored) return; // §29: exclude ignored
-                        if (progress.mastery >= 4) return; // Skip mastered unless due
+                        if (progress.ignored) return; // §13 Exclude ignored
                         
-                        const isDue = progress.nextReviewAt && new Date(progress.nextReviewAt) <= today;
-                        const recentWrong = progress.lastWrongAt != null;
-                        const neverReviewed = progress.lastReviewedAt == null;
+                        seenKeys.add(nEng);
                         const encounterCount = getEncounterCount(nEng);
                         
-                        // Also include mastered words that are due
-                        if (progress.mastery >= 4 && !isDue) return;
+                        const isDue = progress.nextReviewAt && new Date(progress.nextReviewAt) <= today;
+                        const hasWrongHistory = progress.lastWrongAt != null;
+                        const neverReviewed = progress.lastReviewedAt == null;
                         
-                        if (recentWrong && isDue) {
-                            catA.push({ word: w, progress, encounterCount });
+                        if (isDue && hasWrongHistory) {
+                            cat1.push({ word: w, progress, encounterCount });
                         } else if (isDue) {
-                            catB.push({ word: w, progress, encounterCount });
+                            cat2.push({ word: w, progress, encounterCount });
                         } else if (neverReviewed) {
-                            catC.push({ word: w, progress, encounterCount });
+                            cat3.push({ word: w, progress, encounterCount });
                         } else if (progress.mastery < 4) {
-                            catD.push({ word: w, progress, encounterCount });
+                            cat4.push({ word: w, progress, encounterCount });
                         }
                     });
                 });
             });
             
-            // §31: Sort each category
-            catA.sort((a, b) => (b.progress.wrongCount - a.progress.wrongCount) || 
-                new Date(b.progress.lastWrongAt || 0) - new Date(a.progress.lastWrongAt || 0) ||
-                (b.encounterCount - a.encounterCount));
-            catB.sort((a, b) => new Date(a.progress.nextReviewAt || 0) - new Date(b.progress.nextReviewAt || 0) || 
-                (a.progress.mastery - b.progress.mastery) ||
-                (b.encounterCount - a.encounterCount));
-            catC.sort(() => Math.random() - 0.5);
-            catD.sort((a, b) => (a.progress.mastery - b.progress.mastery) || 
-                new Date(a.progress.lastReviewedAt || 0) - new Date(b.progress.lastReviewedAt || 0) ||
-                (b.encounterCount - a.encounterCount));
+            // Sort categories
+            // §7: wrongCount DESC, then nextReviewAt ASC, then tie-breakers
+            cat1.sort((a, b) => 
+                (b.progress.wrongCount - a.progress.wrongCount) || 
+                new Date(a.progress.nextReviewAt || 0) - new Date(b.progress.nextReviewAt || 0) ||
+                (b.progress.starred === a.progress.starred ? 0 : b.progress.starred ? 1 : -1) ||
+                (b.encounterCount - a.encounterCount)
+            );
             
-            let allCandidates = [...catA, ...catB, ...catC, ...catD];
-            fcWords = allCandidates.slice(0, dailyLimit).map(c => c.word);
+            // §8: nextReviewAt ASC, then mastery ASC, then tie-breakers
+            cat2.sort((a, b) => 
+                new Date(a.progress.nextReviewAt || 0) - new Date(b.progress.nextReviewAt || 0) || 
+                (a.progress.mastery - b.progress.mastery) ||
+                (b.progress.starred === a.progress.starred ? 0 : b.progress.starred ? 1 : -1) ||
+                (b.encounterCount - a.encounterCount)
+            );
+            
+            // §9: New words random
+            cat3.sort(() => Math.random() - 0.5);
+            
+            // §10: mastery ASC, lastReviewedAt ASC, then tie-breakers
+            cat4.sort((a, b) => 
+                (a.progress.mastery - b.progress.mastery) || 
+                new Date(a.progress.lastReviewedAt || 0) - new Date(b.progress.lastReviewedAt || 0) ||
+                (b.progress.starred === a.progress.starred ? 0 : b.progress.starred ? 1 : -1) ||
+                (b.encounterCount - a.encounterCount)
+            );
+            
+            let allCandidates = [];
+            
+            // Add cat1, cat2, cat3 up to limit. Then cat4 if still under limit.
+            for (const cat of [cat1, cat2, cat3, cat4]) {
+                for (const item of cat) {
+                    if (allCandidates.length < dailyLimit) {
+                        allCandidates.push(item);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            fcWords = allCandidates.map(c => c.word);
         } else if (currentView.type === 'search') {
             const query = (currentView.query || '').trim().toLowerCase();
             fcWords = [];
@@ -2552,6 +2576,7 @@ function openFlashcardMode(isReviewWrong = false, isBrowse = false, customWords 
 
     if (fcWords.length === 0) { alert('沒有單字可以進行測驗！'); return; }
 
+    startNewSession();
     fcSession = {
         id: 'session-' + Math.random().toString(36).substr(2, 9),
         startedAt: new Date().toISOString(),
@@ -2704,27 +2729,19 @@ function fcRemember() {
         showUndoToast('記得');
 
         if (!isBrowseMode) {
-            const now = new Date().toISOString();
-            progress.correctCount = (progress.correctCount || 0) + 1;
-            progress.streak = (progress.streak || 0) + 1;
-            progress.lastReviewedAt = now;
-            progress.updatedAt = now;
-            
-            // Session mastery limit: same normalizedEng max +1 per session
-            if (!fcSession.masteryIncreasedKeys.has(nEng)) {
-                let prevMastery = progress.mastery || 0;
-                progress.mastery = Math.min(prevMastery + 1, 5);
-                fcSession.masteryIncreasedKeys.add(nEng);
-                if (prevMastery === 3 && progress.mastery === 4) {
+            const updatedProgress = updateSharedProgress(nEng, true);
+            if (updatedProgress) {
+                updatedProgress.lastReviewedAt = new Date().toISOString();
+                updatedProgress.nextReviewAt = getNextReviewDate(updatedProgress.mastery);
+                
+                // Track for session summary
+                fcSession.answeredKeys.add(nEng);
+                fcSession.correctKeys.add(nEng);
+                if (previousWordState.mastery === 3 && updatedProgress.mastery === 4) {
                     fcSession.newlyMasteredKeys.add(nEng);
                 }
+                save();
             }
-            
-            fcSession.answeredKeys.add(nEng);
-            fcSession.correctKeys.add(nEng);
-            
-            progress.nextReviewAt = getNextReviewDate(progress.mastery);
-            save();
         }
     }
     if (fcRememberBtn) fcRememberBtn.classList.add('active');
@@ -2766,18 +2783,7 @@ function fcForget() {
         if (!isBrowseMode) showUndoToast('忘記');
 
         if (!isBrowseMode) {
-            const now = new Date().toISOString();
-            progress.mastery = Math.max((progress.mastery || 0) - 1, 0);
-            progress.wrongCount = (progress.wrongCount || 0) + 1;
-            progress.streak = 0;
-            progress.lastReviewedAt = now;
-            progress.lastWrongAt = now;
-            progress.updatedAt = now;
-            
-            let tomorrow = new Date();
-            tomorrow.setHours(0, 0, 0, 0);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            progress.nextReviewAt = tomorrow.toISOString();
+            updateSharedProgress(nEng, false);
             
             fcSession.answeredKeys.add(nEng);
             fcSession.wrongKeys.add(nEng);
@@ -2978,6 +2984,14 @@ let currentImportCandidates = [];
 
 if (analyzeImportBtn) {
     analyzeImportBtn.addEventListener('click', () => {
+        const val = importFolderSelect.value;
+        if (!val) return alert('請先選擇要匯入的目標資料夾與回數！以便準確判定是否已存在於該單元。');
+        
+        const [targetFolderId, targetUnitId] = val.split('|');
+        const folder = folders.find(f => f.id === targetFolderId);
+        const unit = folder?.units.find(u => u.id === targetUnitId);
+        if (!unit) return alert('找不到目標回數');
+        
         const text = importTextarea.value.trim();
         if (!text) return alert('請貼上筆記內容！');
         
@@ -3000,8 +3014,7 @@ if (analyzeImportBtn) {
             else if (content.startsWith('↔')) { isConfusion = true; content = content.substring(1).trim(); }
             else if (content.startsWith('P ')) { isPhrase = true; content = content.substring(2).trim(); }
             
-            // Allow =, -, :, or just spaces as delimiter before Chinese
-            let match = content.match(/^([a-zA-Z0-9\s\-\']+)(?:\s*=\s*|\s*-\s*|\s*:\s*|\s+)([\u4e00-\u9fff].*)$/);
+            let match = content.match(/^([a-zA-Z0-9\s\-\'\.]+)(?:\s*=\s*|\s*-\s*|\s*:\s*|\s+)([\u4e00-\u9fff].*)$/);
             
             if (match) {
                 currentImportCandidates.push({
@@ -3042,15 +3055,39 @@ if (analyzeImportBtn) {
             confirmImportBtn.disabled = false;
             currentImportCandidates.forEach((cand, idx) => {
                 const nEng = normalizeWord(cand.eng);
-                const isExisting = getEncounterCount(nEng) > 0;
-                const badge = isExisting 
-                    ? '<span style="font-size:0.7em; padding:2px 6px; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:4px; margin-left:8px;">已存在庫中</span>' 
-                    : '<span style="font-size:0.7em; padding:2px 6px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.3); border-radius:4px; margin-left:8px;">新單字</span>';
+                
+                // Determine existence logic
+                let isExistingInSameUnit = false;
+                let existingAppearances = 0;
+                
+                if (appData && appData.words) {
+                    appData.words.forEach(w => {
+                        const wnEng = w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "");
+                        if (wnEng === nEng) {
+                            existingAppearances++;
+                            if (w.category === targetFolderId && w.tags && w.tags.includes(unit.name)) {
+                                isExistingInSameUnit = true;
+                            }
+                        }
+                    });
+                }
+                
+                let badge = '';
+                let defaultChecked = true;
+                
+                if (isExistingInSameUnit) {
+                    badge = '<span style="font-size:0.7em; padding:2px 6px; background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; margin-left:8px;">⚠ 已存在於目前單元</span>';
+                    defaultChecked = false;
+                } else if (existingAppearances > 0) {
+                    badge = `<span style="font-size:0.7em; padding:2px 6px; background:rgba(59,130,246,0.2); color:#60a5fa; border:1px solid rgba(59,130,246,0.3); border-radius:4px; margin-left:8px;">📝 已在其他單元出現 (遇過 ${existingAppearances} 次)</span>`;
+                } else {
+                    badge = '<span style="font-size:0.7em; padding:2px 6px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.3); border-radius:4px; margin-left:8px;">🆕 新單字</span>';
+                }
                 
                 const row = document.createElement('div');
                 row.style.cssText = 'display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);';
                 row.innerHTML = `
-                    <input type="checkbox" id="import-cb-${idx}" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    <input type="checkbox" id="import-cb-${idx}" ${defaultChecked ? 'checked' : ''} style="width: 20px; height: 20px; cursor: pointer;">
                     <div style="flex: 1; display:flex; flex-direction:column; gap:6px;">
                         <div style="display:flex; align-items:center;">
                             <input type="text" id="import-eng-${idx}" value="${cand.eng}" style="background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--accent-color); font-weight:600; font-size:1.1rem; flex:1; outline:none;" />
@@ -3089,126 +3126,79 @@ if (confirmImportBtn) {
         const unitName = unit.name;
         
         let addedCount = 0;
-        let mergedCount = 0;
+        let importedIds = [];
         
         currentImportCandidates.forEach((cand, idx) => {
             const cb = document.getElementById(`import-cb-${idx}`);
             if (cb && cb.checked) {
-                // Read from inputs if user edited them
                 const engInput = document.getElementById(`import-eng-${idx}`);
                 const chtInput = document.getElementById(`import-cht-${idx}`);
                 const finalEng = engInput ? engInput.value.trim() : cand.eng;
                 const finalCht = chtInput ? chtInput.value.trim() : cand.cht;
                 const nEng = normalizeWord(finalEng);
                 
-                // Find existing word globally by normalizedEng
-                let existingWord = appData && appData.words ? appData.words.find(w => (w.normalizedEng || w.normalizedWord || normalizeWord(w.eng || w.word || "")) === nEng) : null;
-                const progress = getWordProgress({eng: finalEng}); // Gets or creates progress
+                const progress = getWordProgress({eng: finalEng});
                 
-                if (existingWord) {
-                    if (finalCht && existingWord.meaning !== finalCht && !existingWord.meaning.includes(finalCht)) {
-                        if (!existingWord.notes) existingWord.notes = [];
-                        if (!existingWord.notes.includes(`新解釋: ${finalCht}`)) {
-                            existingWord.notes.push(`新解釋: ${finalCht}`);
-                        }
-                    }
-                    if (cand.isImportant) {
-                        existingWord.priority = 'high';
-                        progress.starred = true;
-                    }
-                    if (cand.isNotFamiliar) {
-                        progress.mastery = 0;
-                        progress.streak = 0;
-                        progress.lastReviewedAt = new Date().toISOString();
-                        progress.lastWrongAt = new Date().toISOString();
-                        
-                        let tomorrow = new Date();
-                        tomorrow.setHours(0, 0, 0, 0);
-                        tomorrow.setDate(tomorrow.getDate() + 1);
-                        progress.nextReviewAt = tomorrow.toISOString();
-                    }
-                    if (cand.confusionGroup) {
-                        existingWord.confusionGroup = cand.confusionGroup;
-                    }
-                    // Tag it to the new unit if not already there
-                    if (existingWord.category !== targetFolderId) {
-                        if (!existingWord.tags) existingWord.tags = [];
-                        if (!existingWord.tags.includes(unitName)) {
-                            existingWord.tags.push(unitName);
-                        }
-                    } else {
-                        if (!existingWord.tags) existingWord.tags = [];
-                        if (!existingWord.tags.includes(unitName)) {
-                            existingWord.tags.push(unitName);
-                        }
-                    }
-                    
-                    existingWord.sourceCount = (existingWord.sourceCount || 1) + 1;
-                    mergedCount++;
-                } else {
-                    const newId = 'v2-' + Math.random().toString(36).substr(2, 9);
-                    const newWord = {
-                        id: newId,
-                        word: finalEng,
-                        normalizedEng: nEng,
-                        normalizedWord: nEng,
-                        type: cand.isPhrase ? "phrase" : "word",
-                        meaning: finalCht,
-                        alternativeMeanings: [],
-                        category: targetFolderId,
-                        tags: [unitName],
-                        priority: cand.isImportant ? 'high' : 'normal',
-                        confusionGroup: cand.confusionGroup || null,
-                        notes: [],
-                        examples: [],
-                        encounters: [],
-                        sourceCount: 1,
-                        createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
-                    };
-                    
-                    if (cand.isImportant) {
-                        progress.starred = true;
-                    }
-                    if (cand.isNotFamiliar) {
-                        progress.wrongCount = 1;
-                    }
-                    
-                    if (appData && appData.words) {
-                        appData.words.push(newWord);
-                    } else if (vocabApp_v2 && vocabApp_v2.words) {
-                        vocabApp_v2.words.push(newWord);
-                    }
-                    addedCount++;
+                // Create new appearance in all cases since it was selected
+                const newId = 'v2-' + Math.random().toString(36).substr(2, 9);
+                const newWord = {
+                    id: newId,
+                    word: finalEng,
+                    normalizedEng: nEng,
+                    normalizedWord: nEng,
+                    type: cand.isPhrase ? "phrase" : "word",
+                    meaning: finalCht,
+                    alternativeMeanings: [],
+                    category: targetFolderId,
+                    tags: [unitName],
+                    priority: cand.isImportant ? 'high' : 'normal',
+                    confusionGroup: cand.confusionGroup || null,
+                    notes: [],
+                    examples: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (cand.isImportant) {
+                    progress.starred = true;
                 }
+                
+                if (cand.isNotFamiliar) {
+                    progress.mastery = 0;
+                    progress.streak = 0;
+                    progress.lastReviewedAt = new Date().toISOString();
+                    progress.lastWrongAt = new Date().toISOString();
+                    progress.nextReviewAt = getLocalEndOfDay(1);
+                }
+                
+                if (appData && appData.words) {
+                    appData.words.push(newWord);
+                }
+                importedIds.push(newId);
+                addedCount++;
             }
         });
         
-        // §59: Record this import
-        if (!appData.imports) appData.imports = [];
-        appData.imports.push({
-            id: 'imp-' + Date.now(),
-            timestamp: new Date().toISOString(),
-            targetFolder: targetFolderId,
-            targetUnit: targetUnitId,
-            addedCount,
-            mergedCount,
-            rawText: text
-        });
-        
-        save();
-        rebuildFoldersView();
-        renderSidebar();
-        renderMainContent();
-        
-        alert(`匯入完成！新增 ${addedCount} 個單字，合併 ${mergedCount} 個既有單字。`);
-        // Navigate to the unit where words were imported
-        currentView = { type: 'unit', folderId: targetFolderId, unitId: targetUnitId };
-        
-        // Hide import UI
-        importPreviewContainer.classList.add('hidden');
-        importTextarea.value = '';
-        renderMainContent();
+        if (addedCount > 0) {
+            // Save import record
+            if (!appData.imports) appData.imports = [];
+            appData.imports.push({
+                id: 'import-' + Math.random().toString(36).substr(2, 9),
+                sourceText: importTextarea.value,
+                folderId: targetFolderId,
+                unitId: targetUnitId,
+                importedWordIds: importedIds,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveAppData();
+            alert(`✅ 成功匯入 ${addedCount} 個單字到「${folder.name} > ${unit.name}」！`);
+            importTextarea.value = '';
+            importPreviewContainer.classList.add('hidden');
+            rebuildFoldersView();
+        } else {
+            alert('沒有匯入任何單字。');
+        }
     });
 }
 
@@ -3506,6 +3496,10 @@ function importJSONBackup(mode) {
             if (importedData.schemaVersion === 9 && importedData.words) {
                 if (mode === 'overwrite') {
                     if (!confirm('您選擇了「完全覆蓋」，這將會清除您目前所有的單字與進度，並替換為備份檔的內容。確定要繼續嗎？')) return;
+                    try {
+                        localStorage.setItem('vocabApp_backup_before_restore', JSON.stringify(vocabApp_v2));
+                        console.log("Saved backup before restore.");
+                    } catch(e) {}
                     vocabApp_v2.words = importedData.words;
                     vocabApp_v2.progressByWord = importedData.progressByWord || {};
                     vocabApp_v2.imports = importedData.imports || [];
@@ -3530,8 +3524,8 @@ function importJSONBackup(mode) {
                             } else {
                                 const exProg = vocabApp_v2.progressByWord[nEng];
                                 exProg.mastery = Math.max(exProg.mastery || 0, impProg.mastery || 0);
-                                exProg.correctCount = (exProg.correctCount || 0) + (impProg.correctCount || 0);
-                                exProg.wrongCount = (exProg.wrongCount || 0) + (impProg.wrongCount || 0);
+                                exProg.correctCount = Math.max(exProg.correctCount || 0, impProg.correctCount || 0);
+                                exProg.wrongCount = Math.max(exProg.wrongCount || 0, impProg.wrongCount || 0);
                                 if (impProg.starred) exProg.starred = true;
                                 if (impProg.nextReviewAt) {
                                     if (!exProg.nextReviewAt || new Date(impProg.nextReviewAt) > new Date(exProg.nextReviewAt)) {
@@ -3829,4 +3823,30 @@ if (settingsSaveBtn) {
         saveSettings();
         if (settingsOverlay) settingsOverlay.classList.add('hidden');
     });
+}
+
+
+// =====================================================
+// SETTINGS UI
+// =====================================================
+function openSettingsModal() {
+    const dailyLimit = (appData && appData.settings && appData.settings.dailyReviewCount) || 20;
+    const select = document.getElementById('settings-daily-limit');
+    if (select) select.value = dailyLimit;
+    document.getElementById('settings-modal-overlay').classList.remove('hidden');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal-overlay').classList.add('hidden');
+}
+
+function saveSettings() {
+    if (!appData.settings) appData.settings = {};
+    const select = document.getElementById('settings-daily-limit');
+    if (select) {
+        appData.settings.dailyReviewCount = parseInt(select.value, 10);
+        saveAppData();
+        showToast('設定已儲存');
+    }
+    closeSettingsModal();
 }

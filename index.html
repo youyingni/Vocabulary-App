@@ -94,6 +94,10 @@
             <!-- Sidebar Footer with Backup & Restore -->
             <div class="sidebar-footer">
                 
+                <button class="sidebar-footer-btn" onclick="openSettingsModal()" title="系統設定">
+                    <span class="material-symbols-outlined" style="color: var(--primary-color);">settings</span>
+                    <span>系統設定</span>
+                </button>
 
                 <button class="sidebar-footer-btn" id="backup-nav-btn" onclick="openBackupModal()" title="資料備份與轉移">
                     <span class="material-symbols-outlined" style="color: #34d399;">settings_backup_restore</span>
@@ -119,6 +123,7 @@
                         <option value="recent">🕒 最近答錯</option>
                         <option value="today">📅 今天答錯</option>
                         <option value="7days">🗓️ 最近 7 天</option>
+                        <option value="most">📈 最常答錯</option>
                         <option value="never">💔 從未答對</option>
                     </select>
                     <select id="fc-direction-select" class="btn btn-secondary" style="margin-right: 8px; padding: 6px 12px; cursor: pointer; border-radius: 8px;">
@@ -248,8 +253,7 @@
                     <span class="material-symbols-outlined" style="font-size: 4rem; color: #f59e0b; margin-bottom: 16px;">shuffle</span>
                     <h2 style="margin-bottom: 12px;">易混淆挑戰</h2>
                     <p style="color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">
-                        系統將自動從您的單字庫中收集標記為「易混淆」的群組，<br>
-                        進入選擇題模式測試您是否能精準分辨它們的差異！
+                        這個模式會自動為您挑選易混淆字，若不足會使用「智慧干擾選項 / 相似字干擾演算法」從全庫中挑選最相近的單字作為選項。
                     </p>
                     <button id="start-confusion-btn" class="btn btn-primary" style="font-size: 1.1rem; padding: 12px 32px; background: #f59e0b;">▶ 開始挑戰</button>
                 </div>
@@ -266,7 +270,7 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
                         <div class="stat-card" onclick="startStatsReview(-1)" style="cursor: pointer; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 20px; text-align: center;">
                             <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-color);" id="stat-total">0</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">總單字數</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">不重複單字數 <br><span style="font-size: 0.75rem; opacity: 0.7;" id="stat-appearances">(總收錄: 0)</span></div>
                         </div>
                         <div class="stat-card" onclick="startStatsReview(0)" style="cursor: pointer; background: rgba(107, 114, 128, 0.1); border: 1px solid rgba(107, 114, 128, 0.3); border-radius: 12px; padding: 20px; text-align: center;">
                             <div style="font-size: 2.5rem; font-weight: 700; color: #9ca3af;" id="stat-m0">0</div>
@@ -417,5 +421,35 @@
         <button onclick="undoLastAction()">復原</button>
     </div>
 
+<!-- Settings Modal -->
+    <div id="settings-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-container card-glass" style="width: 400px;">
+            <div class="modal-header">
+                <h2>系統設定</h2>
+                <button class="modal-close-btn" onclick="closeSettingsModal()">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="modal-content" style="padding-top: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <div style="font-weight: 500;">每日複習數量</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">今日複習時抽取的單字上限</div>
+                    </div>
+                    <select id="settings-daily-limit" class="btn btn-secondary" style="padding: 6px 12px;">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+                <div style="text-align: right;">
+                    <button class="btn btn-primary" onclick="saveSettings()">儲存設定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast-container"></div>
 </body>
 </html>

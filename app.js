@@ -1503,24 +1503,26 @@ function rebuildFoldersView() {
         }
         let folder = folderMap[w.category];
         
-        let unitName = (w.tags && w.tags.length > 0) ? w.tags[0] : "Default Unit";
-        // Create unit id based on unitName for consistency
-        let unitId = "unit-" + unitName.replace(/\s+/g, '-');
-        
-        let unit = folder.units.find(u => u.name === unitName);
-        if (!unit) {
-            unit = { id: unitId, name: unitName, words: [] };
-            folder.units.push(unit);
+        let tagsToUse = (w.tags && w.tags.length > 0) ? w.tags : ["Default Unit"];
+        // Ensure properties exist for UI compatibility
+        if (!w.hasOwnProperty('eng')) {
+            Object.defineProperty(w, 'eng', { get: function() { return this.word; }, set: function(val) { this.word = val; }});
         }
-        
-        // Push a proxy-like object or mapped object so UI bindings work?
-        // Wait, UI uses `word.eng` and `word.cht`! We must map v2 keys back to v1 keys for the UI to read them, 
-        // OR we just use getters/setters so updates write back to v2.
-        // Easiest is to add properties to the v2 object directly so UI can read `.eng` and it returns `.word`.
-        Object.defineProperty(w, 'eng', { get: function() { return this.word; }, set: function(val) { this.word = val; }});
-        Object.defineProperty(w, 'cht', { get: function() { return this.meaning; }, set: function(val) { this.meaning = val; }});
-        
-        unit.words.push(w);
+        if (!w.hasOwnProperty('cht')) {
+            Object.defineProperty(w, 'cht', { get: function() { return this.meaning; }, set: function(val) { this.meaning = val; }});
+        }
+
+        tagsToUse.forEach(unitName => {
+            let unitId = "unit-" + unitName.replace(/\s+/g, '-');
+            
+            let unit = folder.units.find(u => u.name === unitName);
+            if (!unit) {
+                unit = { id: unitId, name: unitName, words: [] };
+                folder.units.push(unit);
+            }
+            
+            unit.words.push(w);
+        });
     });
     
     // Convert map to sorted array (try to preserve original order if possible, here just values)

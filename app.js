@@ -1443,6 +1443,42 @@ if (typeof vocabApp_v2 !== 'undefined' && vocabApp_v2 && vocabApp_v2.words) {
         migratedCount += newMigrated;
     }
 
+
+    if (vocabApp_v2.words) {
+        let uniqueMap = new Map();
+        let mergedWords = [];
+        let duplicatesFound = false;
+        
+        vocabApp_v2.words.forEach(w => {
+            let nEng = w.normalizedWord || normalizeWord(w.word || w.eng || "");
+            if (!uniqueMap.has(nEng)) {
+                uniqueMap.set(nEng, w);
+                mergedWords.push(w);
+            } else {
+                duplicatesFound = true;
+                let existing = uniqueMap.get(nEng);
+                if (w.tags) {
+                    if (!existing.tags) existing.tags = [];
+                    w.tags.forEach(t => {
+                        if (!existing.tags.includes(t)) existing.tags.push(t);
+                    });
+                }
+                if (w.notes) {
+                    if (!existing.notes) existing.notes = [];
+                    w.notes.forEach(n => {
+                        if (!existing.notes.some(ex => ex.text === n.text)) existing.notes.push(n);
+                    });
+                }
+            }
+        });
+        
+        if (duplicatesFound) {
+            vocabApp_v2.words = mergedWords;
+            migratedCount++; // Force save
+            console.log("v2.1: Deduplicated words in vocabApp_v2");
+        }
+    }
+
     if (migratedCount > 0) {
         localStorage.setItem('vocabApp_v2', JSON.stringify(vocabApp_v2));
         console.log("Migrated " + migratedCount + " handwritten words.");
@@ -2143,8 +2179,12 @@ function speakWord(text, event, btn) {
     window.speechSynthesis.cancel();
     if (btn) btn.classList.add('playing');
     
-    // Always use all available accents as requested by user
-    let activeAccents = AVAILABLE_ACCENTS;
+    // Load preferred accents from settings
+    let preferred = appData && appData.settings && appData.settings.accents ? appData.settings.accents : ['en-US', 'en-GB', 'en-AU', 'en-CA'];
+    if (preferred.length === 0) preferred = ['en-US']; // Fallback
+    
+    let activeAccents = AVAILABLE_ACCENTS.filter(a => preferred.includes(a.lang));
+    if (activeAccents.length === 0) activeAccents = [{lang: 'en-US', label: '🇺🇸'}];
 
     if (window.speechSynthesis.getVoices().length === 0) {
         window.speechSynthesis.addEventListener('voiceschanged', () => {
@@ -3172,7 +3212,13 @@ if (confirmImportBtn) {
                 }
                 
                 if (appData && appData.words) {
-                    appData.words.push(newWord);
+                    let existing = appData.words.find(w => w.normalizedWord === nEng);
+                    if (existing) {
+                        if (!existing.tags) existing.tags = [];
+                        if (!existing.tags.includes(unitName)) existing.tags.push(unitName);
+                    } else {
+                        appData.words.push(newWord);
+                    }
                 }
                 importedIds.push(newId);
                 addedCount++;
@@ -3285,13 +3331,23 @@ if (startConfusionBtn) {
                     // Calculate distances for all words
                     const candidates = allWords
                         .filter(w => !options.find(o => o.id === w.id))
-                        .map(w => ({
-                            word: w,
-                            dist: levenshteinDistance(
+                        .map(w => {
+                            let dist = levenshteinDistance(
                                 (w.eng || w.word || "").toLowerCase(), 
                                 (correctWord.eng || correctWord.word || "").toLowerCase()
-                            )
-                        }));
+                            );
+                            
+                            // Boost if they share tags (subtract distance)
+                            if (w.tags && correctWord.tags) {
+                                let overlap = w.tags.filter(t => correctWord.tags.includes(t)).length;
+                                dist -= overlap * 2;
+                            }
+                            
+                            return {
+                                word: w,
+                                dist: dist
+                            };
+                        });
                     
                     // Sort by distance (closest first)
                     candidates.sort((a, b) => a.dist - b.dist);
